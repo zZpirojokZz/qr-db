@@ -31,12 +31,11 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
-    // Храним данные вошедшего пользователя
     var currentUser by remember { mutableStateOf<User?>(null) }
 
     NavHost(navController = navController, startDestination = "auth") {
         // Экран авторизации
-        composable("auth") {
+        composable(route = "auth") {
             AuthScreen(onLoginSuccess = { user, role ->
                 currentUser = user
                 // Переходим на нужный экран в зависимости от роли
@@ -49,17 +48,17 @@ fun AppNavigation() {
         }
 
         // Экран студента
-        composable("student") {
+        composable(route = "student") {
             currentUser?.let { StudentScreen(user = it) }
         }
 
         // Экран преподавателя
-        composable("teacher") {
+        composable(route = "teacher") {
             currentUser?.let { TeacherScreen(user = it) }
         }
 
         // Экран администратора
-        composable("admin") {
+        composable(route = "admin") {
             currentUser?.let { AdminScreen(user = it) }
         }
     }
