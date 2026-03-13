@@ -5,12 +5,13 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.example.qr_db.data.User
 import com.example.qr_db.ui.theme.QrdbTheme
 
 class MainActivity : ComponentActivity() {
@@ -19,30 +20,46 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             QrdbTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+                Surface(modifier = Modifier.fillMaxSize()) {
+                    AppNavigation()
                 }
             }
         }
     }
 }
 
-
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
+fun AppNavigation() {
+    val navController = rememberNavController()
+    var currentUser by remember { mutableStateOf<User?>(null) }
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    QrdbTheme {
-        Greeting("Android")
+    NavHost(navController = navController, startDestination = "auth") {
+        // Экран авторизации
+        composable(route = "auth") {
+            AuthScreen(onLoginSuccess = { user, role ->
+                currentUser = user
+                // Переходим на нужный экран в зависимости от роли
+                when (role) {
+                    "Студент" -> navController.navigate("student")
+                    "Преподаватель" -> navController.navigate("teacher")
+                    "Админ" -> navController.navigate("admin")
+                }
+            })
+        }
+
+        // Экран студента
+        composable(route = "student") {
+            currentUser?.let { StudentScreen(user = it) }
+        }
+
+        // Экран преподавателя
+        composable(route = "teacher") {
+            currentUser?.let { TeacherScreen(user = it) }
+        }
+
+        // Экран администратора
+        composable(route = "admin") {
+            currentUser?.let { AdminScreen(user = it) }
+        }
     }
 }
