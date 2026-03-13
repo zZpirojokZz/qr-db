@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct AdministracionFirstScreen: View {
+struct AdministracionTrirdScreen: View {
     var body: some View {
         VStack {
             Text("Администрация")
@@ -9,5 +9,5 @@ struct AdministracionFirstScreen: View {
 }
 
 #Preview {
-    AdministracionFirstScreen()
+    AdministracionTrirdScreen()
 }

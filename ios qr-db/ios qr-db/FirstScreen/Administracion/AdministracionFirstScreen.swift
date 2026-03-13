@@ -1,7 +1,13 @@
-//
-//  Untitled.swift
-//  ios qr-db
-//
-//  Created by Анатолий Пивнев on 13.03.2026.
-//
+import SwiftUI
 
+struct AdministracionFirstScreen: View {
+    var body: some View {
+        VStack {
+            Text("Администрация")
+        }
+    }
+}
+
+#Preview {
+    AdministracionFirstScreen()
+}

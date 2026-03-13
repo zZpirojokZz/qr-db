@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct ContentView: View {
+struct Authotization: View {
 
     @State private var email = ""
     @State private var password = ""
@@ -91,5 +91,5 @@ struct ContentView: View {
 }
 
 #Preview {
-    ContentView()
+    Authotization()
 }
