@@ -22,10 +22,15 @@ struct ContentView: View {
                     .padding(.top, 10)
 
                 TextField("Электронная почта...", text: $email)
+                    .autocapitalization(.none)
+                    .disableAutocorrection(true)
+                    .keyboardType(.emailAddress)
                     .padding()
                     .background(glassField)
 
                 SecureField("Пароль...", text: $password)
+                    .autocapitalization(.none)
+                    .disableAutocorrection(true)
                     .padding()
                     .background(glassField)
                 
