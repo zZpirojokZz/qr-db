@@ -52,8 +52,11 @@ dependencies {
     // Навигация
     implementation("androidx.navigation:navigation-compose:2.8.5")
 
-    // Gson для сериализации/десериализации JSON
+    // Gson
     implementation("com.google.code.gson:gson:2.10.1")
+
+    // QR Code Generation (ZXing)
+    implementation("com.google.zxing:core:3.5.3")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
