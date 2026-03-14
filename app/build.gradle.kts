@@ -6,9 +6,7 @@ plugins {
 
 android {
     namespace = "com.example.qr_db"
-    compileSdk {
-        version = release(36)
-    }
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.example.qr_db"
