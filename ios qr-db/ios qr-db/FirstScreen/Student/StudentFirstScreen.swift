@@ -3,66 +3,73 @@ import SwiftUI
 struct StudentFirstScreen: View {
     
     @State private var selectedPage: Int = 0
+    @State private var goToProfile: Bool = false
     
     var body: some View {
         
-        ZStack {
+        NavigationStack {
             
-            Image("background")
-                .resizable()
-                .scaledToFill()
-                .ignoresSafeArea()
-            
-            VStack {
+            ZStack {
                 
-                if selectedPage == 0 {
-                    HStack {
-                        
-                        VStack(alignment: .leading) {
-                            
-                            Text("Имя Фамилия")
-                                .font(.title2)
-                                .fontWeight(.semibold)
-                            
-                            Text("{group_name}")
-                                .font(.subheadline)
-                        }
-                        
-                        Spacer()
-                        
-                        Circle()
-                            .fill(Color.white)
-                            .frame(width: 45, height: 45)
-                    }
-                    .padding(.top, 60)
-                    .padding(.horizontal, 45)
-                }
+                Image("background")
+                    .resizable()
+                    .scaledToFill()
+                    .ignoresSafeArea()
                 
-                Spacer()
-                
-                Group {
+                VStack {
                     
-                    switch selectedPage {
-                        
-                    case 0:
-                        QRPage()
-                        
-                    case 1:
-                        StudentSecondScreen()
-                        
-                    case 2:
-                        StudentThirdScreen()
-                        
-                    default:
-                        QRPage()
+                    if selectedPage == 0 {
+                        HStack {
+                            
+                            VStack(alignment: .leading) {
+                                
+                                Text("Пивнев Игорь")
+                                    .font(.title2)
+                                    .fontWeight(.semibold)
+                                
+                                Text("ИС22-4Б")
+                                    .font(.subheadline)
+                            }
+                            
+                            Spacer()
+                            
+                            Button {
+                                goToProfile = true
+                            } label: {
+                                Circle()
+                                    .fill(Color.white)
+                                    .frame(width: 45, height: 45)
+                            }
+                        }
+                        .padding(.top, 60)
+                        .padding(.horizontal, 45)
                     }
+                    
+                    Spacer()
+                    
+                    Group {
+                        switch selectedPage {
+                        case 0:
+                            QRPage()
+                        case 1:
+                            StudentSecondScreen()
+                        case 2:
+                            StudentThirdScreen()
+                        default:
+                            QRPage()
+                        }
+                    }
+                    
+                    Spacer()
+                    
+                    BottomNavigation(selectedPage: $selectedPage)
+                        .padding(.bottom, 40)
                 }
-                
-                Spacer()
-                
-                BottomNavigation(selectedPage: $selectedPage)
-                    .padding(.bottom, 40)
-                
+                .animation(.easeInOut(duration: 0.2), value: selectedPage)
+            }
+            
+            .navigationDestination(isPresented: $goToProfile) {
+                ProfileStudent()
             }
         }
     }
