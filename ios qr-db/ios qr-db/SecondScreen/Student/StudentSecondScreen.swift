@@ -39,18 +39,18 @@ struct StudentSecondScreen: View {
                 Text("Скачать расписание")
                     .font(.system(size: 16, weight: .medium))
                     .foregroundColor(.blue)
-                    .frame(maxWidth: 260)
-                    .padding(.vertical, 14)
+                    .frame(maxWidth: 210)
+                    .padding(.vertical, 10)
                     .background(
                         ZStack {
-                            RoundedRectangle(cornerRadius: 25)
+                            RoundedRectangle(cornerRadius: 13)
                                 .fill(.ultraThinMaterial)
                                 .opacity(0.45)
                             
-                            RoundedRectangle(cornerRadius: 25)
+                            RoundedRectangle(cornerRadius: 13)
                                 .fill(Color.white.opacity(0.9))
                             
-                            RoundedRectangle(cornerRadius: 25)
+                            RoundedRectangle(cornerRadius: 13)
                                 .stroke(Color.black, lineWidth: 2)
                         }
                     )
@@ -84,14 +84,14 @@ struct LessonRow: View {
         .frame(height: 60)
         .background(
             ZStack {
-                RoundedRectangle(cornerRadius: 25)
+                RoundedRectangle(cornerRadius: 15)
                     .fill(.ultraThinMaterial)
                     .opacity(0.45)
                 
-                RoundedRectangle(cornerRadius: 25)
+                RoundedRectangle(cornerRadius: 15)
                     .fill(Color.white.opacity(0.7))
                 
-                RoundedRectangle(cornerRadius: 25)
+                RoundedRectangle(cornerRadius: 15)
                     .stroke(Color.black, lineWidth: 2)
             }
         )
