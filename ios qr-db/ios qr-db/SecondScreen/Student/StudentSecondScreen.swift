@@ -2,6 +2,7 @@ import SwiftUI
 
 struct StudentSecondScreen: View {
     
+    //После БД изменить
     let lessons = [
         ("Предмет, преподаватель", "104"),
         ("Предмет, преподаватель", "303"),
@@ -12,31 +13,16 @@ struct StudentSecondScreen: View {
     var body: some View {
         
         VStack(spacing: 25) {
-            
+            //После БД изменить
             VStack(spacing: 4) {
                 Text("дд.мм.гггг")
-                    .font(.title2)
-                    .fontWeight(.medium)
-                
+                    .font(.title)
+                    .fontWeight(.black)
+                //После БД изменить
                 Text("ИС22-4Б")
-                    .font(.subheadline)
-                    .foregroundColor(.gray)
+                    .font(.title3)
+                    .fontWeight(.heavy)
             }
-            .padding(.horizontal, 30)
-            .padding(.vertical, 10)
-            .background(
-                ZStack {
-                    RoundedRectangle(cornerRadius: 25)
-                        .fill(.ultraThinMaterial)
-                        .opacity(0.45)
-                    
-                    RoundedRectangle(cornerRadius: 25)
-                        .fill(Color.white.opacity(0.7))
-                    
-                    RoundedRectangle(cornerRadius: 25)
-                        .stroke(Color.black, lineWidth: 2)
-                }
-            )
             
             VStack(spacing: 17) {
                 ForEach(lessons.indices, id: \.self) { index in
@@ -47,7 +33,6 @@ struct StudentSecondScreen: View {
                 }
             }
             
-            // Кнопка
             Button {
                 
             } label: {
