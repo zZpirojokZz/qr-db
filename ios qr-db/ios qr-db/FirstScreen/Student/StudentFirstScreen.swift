@@ -22,11 +22,11 @@ struct StudentFirstScreen: View {
                         HStack {
                             
                             VStack(alignment: .leading) {
-                                
+                                //После БД изменить
                                 Text("Пивнев Игорь")
                                     .font(.title2)
                                     .fontWeight(.semibold)
-                                
+                                //После БД изменить
                                 Text("ИС22-4Б")
                                     .font(.subheadline)
                             }
@@ -147,7 +147,7 @@ struct QRPage: View {
     var body: some View {
         
         VStack {
-            
+            //После БД изменить
             Image("qr-code")
                 .resizable()
                 .scaledToFit()

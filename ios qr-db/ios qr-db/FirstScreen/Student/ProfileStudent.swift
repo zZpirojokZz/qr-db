@@ -24,7 +24,7 @@ struct ProfileStudent: View {
                         .frame(width: 90, height: 90)
                         .shadow(radius: 0.5)
                         .padding(.vertical, 20)
-                    
+                    //После БД изменить
                     Text("Пивнев Игорь")
                         .font(.title2)
                         .fontWeight(.semibold)
@@ -35,7 +35,7 @@ struct ProfileStudent: View {
                         .padding(.bottom, 10)
                     
                     Divider()
-                    
+                    //После БД изменить
                     Text("ИС22-4Б")
                         .font(.headline)
                         .padding(.bottom, 15)
@@ -61,10 +61,10 @@ struct ProfileStudent: View {
                 VStack() {
                     
                     VStack {
-                        Text("Сауле Бактыбаевна")
+                        Text("Сауле Бактыбаевна")//После БД изменить
                             .font(.title2)
                             .fontWeight(.semibold)
-                        Text("+7(777)777-77-77")
+                        Text("+7(777)777-77-77")//После БД изменить
                             .font(.title3)
                     }
                     .padding(.top, 25)
@@ -73,10 +73,10 @@ struct ProfileStudent: View {
                     Divider()
                     
                     VStack {
-                        Text("Молдыр Бекежановна")
+                        Text("Молдыр Бекежановна")//После БД изменить
                             .font(.title2)
                             .fontWeight(.semibold)
-                        Text("8(888)888-88-88")
+                        Text("8(888)888-88-88")//После БД изменить
                             .font(.title3)
                     }
                     .padding(.vertical, 20)

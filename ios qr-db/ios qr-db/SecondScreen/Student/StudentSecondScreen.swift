@@ -1,10 +1,100 @@
 import SwiftUI
 
 struct StudentSecondScreen: View {
+    
+    //После БД изменить
+    let lessons = [
+        ("Предмет, преподаватель", "104"),
+        ("Предмет, преподаватель", "303"),
+        ("Предмет, преподаватель", "400"),
+        ("Предмет, преподаватель", "123")
+    ]
+    
     var body: some View {
-        VStack {
-            Text("ghwpodjapwojfpw")
+        
+        VStack(spacing: 25) {
+            //После БД изменить
+            VStack(spacing: 4) {
+                Text("дд.мм.гггг")
+                    .font(.title)
+                    .fontWeight(.black)
+                //После БД изменить
+                Text("ИС22-4Б")
+                    .font(.title3)
+                    .fontWeight(.heavy)
+            }
+            
+            VStack(spacing: 17) {
+                ForEach(lessons.indices, id: \.self) { index in
+                    LessonRow(
+                        title: lessons[index].0,
+                        room: lessons[index].1
+                    )
+                }
+            }
+            
+            Button {
+                
+            } label: {
+                Text("Скачать расписание")
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundColor(.blue)
+                    .frame(maxWidth: 260)
+                    .padding(.vertical, 14)
+                    .background(
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 25)
+                                .fill(.ultraThinMaterial)
+                                .opacity(0.45)
+                            
+                            RoundedRectangle(cornerRadius: 25)
+                                .fill(Color.white.opacity(0.9))
+                            
+                            RoundedRectangle(cornerRadius: 25)
+                                .stroke(Color.black, lineWidth: 2)
+                        }
+                    )
+            }
         }
+        .padding(.horizontal, 24)
+    }
+}
+
+struct LessonRow: View {
+    
+    let title: String
+    let room: String
+    
+    var body: some View {
+        
+        HStack(spacing: 0) {
+            
+            Text(title)
+                .font(.system(size: 16))
+                .foregroundColor(.black)
+                .padding()
+                .frame(maxWidth: .infinity, alignment: .leading)
+            
+            Divider()
+            
+            Text(room)
+                .font(.system(size: 17, weight: .medium))
+                .frame(width: 70)
+        }
+        .frame(height: 60)
+        .background(
+            ZStack {
+                RoundedRectangle(cornerRadius: 25)
+                    .fill(.ultraThinMaterial)
+                    .opacity(0.45)
+                
+                RoundedRectangle(cornerRadius: 25)
+                    .fill(Color.white.opacity(0.7))
+                
+                RoundedRectangle(cornerRadius: 25)
+                    .stroke(Color.black, lineWidth: 2)
+            }
+        )
     }
 }
 
