@@ -26,7 +26,7 @@ struct StudentSecondScreen: View {
             
             VStack(spacing: 17) {
                 ForEach(lessons.indices, id: \.self) { index in
-                    LessonRow(
+                    LessonRowS(
                         title: lessons[index].0,
                         room: lessons[index].1
                     )
@@ -60,7 +60,7 @@ struct StudentSecondScreen: View {
     }
 }
 
-struct LessonRow: View {
+struct LessonRowS: View {
     
     let title: String
     let room: String
