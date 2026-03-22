@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct EducatorTrirdScreen: View {
+struct EducatorThirdScreen: View {
     var body: some View {
         VStack {
             Text("Преподаватель")
@@ -9,5 +9,5 @@ struct EducatorTrirdScreen: View {
 }
 
 #Preview {
-    EducatorTrirdScreen()
+    EducatorThirdScreen()
 }
