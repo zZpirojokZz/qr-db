@@ -12,6 +12,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.qr_db.data.User
+import com.example.qr_db.student.ProfileStudentScreen
+import com.example.qr_db.student.StudentScreen
 import com.example.qr_db.ui.theme.QrdbTheme
 
 class MainActivity : ComponentActivity() {
@@ -40,16 +42,41 @@ fun AppNavigation() {
                 currentUser = user
                 // Переходим на нужный экран в зависимости от роли
                 when (role) {
-                    "Студент" -> navController.navigate("student")
-                    "Преподаватель" -> navController.navigate("teacher")
-                    "Админ" -> navController.navigate("admin")
+                    "Студент" -> navController.navigate("student") {
+                        popUpTo("auth") { inclusive = true }
+                    }
+                    "Преподаватель" -> navController.navigate("teacher") {
+                        popUpTo("auth") { inclusive = true }
+                    }
+                    "Админ" -> navController.navigate("admin") {
+                        popUpTo("auth") { inclusive = true }
+                    }
                 }
             })
         }
 
         // Экран студента
         composable(route = "student") {
-            currentUser?.let { StudentScreen(user = it) }
+            currentUser?.let { StudentScreen(user = it, navController = navController) }
+        }
+
+        // Экран профиля студента
+        composable(route = "profile") {
+            currentUser?.let {
+                ProfileStudentScreen(
+                    user = it,
+                    onBack = {
+                        navController.navigate("student") {
+                            popUpTo("student") { inclusive = true }
+                        }
+                    },
+                    onLogout = {
+                        navController.navigate("auth") {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    }
+                )
+            }
         }
 
         // Экран преподавателя

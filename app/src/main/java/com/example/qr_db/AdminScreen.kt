@@ -20,7 +20,8 @@ import com.example.qr_db.data.User
 
 @Composable
 fun AdminScreen(user: User) {
-    Box(modifier = Modifier.fillMaxSize().background(Color(0xFFD0D0D0))) {
+    // Используем D9D9D9 для основного фона, если это предусмотрено дизайном
+    Box(modifier = Modifier.fillMaxSize().background(Color(0xFFD9D9D9))) {
         Image(
             painter = painterResource(id = R.drawable.wavy_background),
             contentDescription = null,
@@ -32,18 +33,26 @@ fun AdminScreen(user: User) {
             modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp, vertical = 48.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Шапка администратора
+            // Шапка администратора - 42% прозрачности белого
             Row(
-                modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp))
-                    .background(Color.White.copy(alpha = 0.4f)).padding(16.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(Color.White.copy(alpha = 0.42f))
+                    .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Column {
-                    Text(text = user.fullName, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                    Text(text = "Администратор", fontSize = 14.sp, color = Color.DarkGray)
+                    Text(text = user.fullName, fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color.Black)
+                    Text(text = "Администратор", fontSize = 14.sp, color = Color.Black.copy(alpha = 0.6f))
                 }
-                Surface(modifier = Modifier.size(40.dp), shape = CircleShape, color = Color.Gray) {}
+                // Аватар в цвете D9D9D9
+                Surface(
+                    modifier = Modifier.size(40.dp),
+                    shape = CircleShape,
+                    color = Color(0xFFD9D9D9)
+                ) {}
             }
 
             Spacer(modifier = Modifier.height(40.dp))
@@ -61,7 +70,7 @@ fun AdminScreen(user: User) {
 
             Spacer(modifier = Modifier.weight(1f))
 
-            Text(text = "Режим полного доступа", color = Color.White, fontSize = 14.sp)
+            Text(text = "Режим полного доступа", color = Color.Black.copy(alpha = 0.5f), fontSize = 14.sp)
         }
     }
 }
@@ -73,7 +82,7 @@ fun AdminActionButton(text: String) {
         modifier = Modifier.fillMaxWidth().height(56.dp),
         shape = RoundedCornerShape(16.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = Color.White.copy(alpha = 0.6f),
+            containerColor = Color.White.copy(alpha = 0.42f), // 42% прозрачности
             contentColor = Color.Black
         )
     ) {

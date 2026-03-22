@@ -10,5 +10,6 @@
         <option value="get_errors" />
       </set>
     </option>
+    <option name="showTokenDetails" value="false" />
   </component>
 </project>
