@@ -14,6 +14,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.qr_db.data.User
 import com.example.qr_db.student.ProfileStudentScreen
 import com.example.qr_db.student.StudentScreen
+import com.example.qr_db.teacher.ProfileTeacherScreen
 import com.example.qr_db.ui.theme.QrdbTheme
 
 class MainActivity : ComponentActivity() {
@@ -40,7 +41,6 @@ fun AppNavigation() {
         composable(route = "auth") {
             AuthScreen(onLoginSuccess = { user, role ->
                 currentUser = user
-                // Переходим на нужный экран в зависимости от роли
                 when (role) {
                     "Студент" -> navController.navigate("student") {
                         popUpTo("auth") { inclusive = true }
@@ -65,11 +65,7 @@ fun AppNavigation() {
             currentUser?.let {
                 ProfileStudentScreen(
                     user = it,
-                    onBack = {
-                        navController.navigate("student") {
-                            popUpTo("student") { inclusive = true }
-                        }
-                    },
+                    onBack = { navController.popBackStack() },
                     onLogout = {
                         navController.navigate("auth") {
                             popUpTo(0) { inclusive = true }
@@ -81,12 +77,22 @@ fun AppNavigation() {
 
         // Экран преподавателя
         composable(route = "teacher") {
-            currentUser?.let { TeacherScreen(user = it) }
+            currentUser?.let { TeacherScreen(user = it, navController = navController) }
         }
 
-        // Экран администратора
-        composable(route = "admin") {
-            currentUser?.let { AdminScreen(user = it) }
+        // Экран профиля преподавателя
+        composable(route = "profile_teacher") {
+            currentUser?.let {
+                ProfileTeacherScreen(
+                    user = it,
+                    onBack = { navController.popBackStack() },
+                    onLogout = {
+                        navController.navigate("auth") {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    }
+                )
+            }
         }
     }
 }
