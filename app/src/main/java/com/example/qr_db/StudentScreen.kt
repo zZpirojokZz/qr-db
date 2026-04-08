@@ -6,7 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -33,17 +33,15 @@ fun StudentScreen(user: User, navController: NavController) {
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFD0D0D0)) // Заменили Color.White на D0D0D0
+            .background(Color(0xFFD0D0D0))
     ) {
         val screenWidth = maxWidth
         val screenHeight = maxHeight
 
-        // Функции масштабирования
         fun getX(px: Float) = screenWidth * (px / 1080f)
         fun getY(px: Float) = screenHeight * (px / 2388f)
         val fontScale = (screenWidth.value / 360f).coerceIn(0.85f, 1.15f)
 
-        // Общий фон (картинка)
         Image(
             painter = painterResource(id = R.drawable.wavy_background),
             contentDescription = null,
@@ -51,7 +49,6 @@ fun StudentScreen(user: User, navController: NavController) {
             contentScale = ContentScale.FillBounds
         )
 
-        // Контент в зависимости от выбранной вкладки
         when (selectedTab) {
             0 -> StudentQrScreen(
                 user = user,
@@ -82,24 +79,25 @@ fun StudentScreen(user: User, navController: NavController) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            RoundNavButton(R.drawable.ic_scanner, isSelected = selectedTab == 0) { selectedTab = 0 }
-            RoundNavButton(R.drawable.ic_journal, isSelected = selectedTab == 1) { selectedTab = 1 }
-            RoundNavButton(R.drawable.ic_profile, isSelected = selectedTab == 2) { selectedTab = 2 }
+            NavButton(R.drawable.ic_scanner, isSelected = selectedTab == 0) { selectedTab = 0 }
+            NavButton(R.drawable.ic_journal, isSelected = selectedTab == 1) { selectedTab = 1 }
+            NavButton(R.drawable.ic_profile, isSelected = selectedTab == 2) { selectedTab = 2 }
         }
     }
 }
 
 @Composable
-fun RoundNavButton(@DrawableRes iconRes: Int, isSelected: Boolean, onClick: () -> Unit) {
+fun NavButton(@DrawableRes iconRes: Int, isSelected: Boolean, onClick: () -> Unit) {
+    val shape = RoundedCornerShape(24.dp)
     Box(
         modifier = Modifier
             .size(75.dp)
-            .clip(CircleShape)
-            .background(Color.White.copy(alpha = 0.42f))
+            .clip(shape)
+            .background(Color.White.copy(alpha = 0.35f))
             .border(
-                width = if (isSelected) 2.dp else 1.dp, 
-                color = if (isSelected) Color.Black else Color.Black.copy(alpha = 0.3f), 
-                shape = CircleShape
+                width = if (isSelected) 2.6.dp else 1.dp, 
+                color = if (isSelected) Color.Black.copy(alpha = 0.8f) else Color.Black.copy(alpha = 0.2f), 
+                shape = shape
             )
             .clickable { onClick() },
         contentAlignment = Alignment.Center
@@ -107,7 +105,7 @@ fun RoundNavButton(@DrawableRes iconRes: Int, isSelected: Boolean, onClick: () -
         Icon(
             painter = painterResource(id = iconRes), 
             contentDescription = null, 
-            modifier = Modifier.size(36.dp), 
+            modifier = Modifier.size(38.dp), 
             tint = Color.Black
         )
     }

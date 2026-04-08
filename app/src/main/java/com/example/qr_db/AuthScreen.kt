@@ -21,7 +21,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.qr_db.data.User
@@ -33,10 +32,11 @@ fun AuthScreen(onLoginSuccess: (User, String) -> Unit) {
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
+    // Обновленные моковые данные согласно новым моделям
     val mockRoles = listOf(
-        Role(1, "Студент", 1),
-        Role(2, "Преподаватель", 2),
-        Role(3, "Админ", 3)
+        Role(1, "Студент"),
+        Role(2, "Преподаватель"),
+        Role(3, "Админ")
     )
     val mockUsers = listOf(
         User(1, "савелий", "student@test.com", 1),
@@ -52,7 +52,6 @@ fun AuthScreen(onLoginSuccess: (User, String) -> Unit) {
         val screenWidth = maxWidth
         val screenHeight = maxHeight
 
-        // Коэффициенты масштабирования на основе макета 1080x2388
         val cardX = screenWidth * (143f / 1080f)
         val cardY = screenHeight * (665f / 2388f)
         val cardW = screenWidth * (793f / 1080f)
@@ -65,23 +64,21 @@ fun AuthScreen(onLoginSuccess: (User, String) -> Unit) {
             contentScale = ContentScale.Crop
         )
 
-        // Окно авторизации
         Box(
             modifier = Modifier
                 .offset(x = cardX, y = cardY)
                 .size(width = cardW, height = cardH)
                 .clip(RoundedCornerShape(20.dp))
-                .background(Color.White.copy(alpha = 0.3f)) // FFFFFF 30%
-                .border(1.dp, Color.Black.copy(alpha = 0.42f), RoundedCornerShape(20.dp)) // 000000 42%
+                .background(Color.White.copy(alpha = 0.3f))
+                .border(1.dp, Color.Black.copy(alpha = 0.42f), RoundedCornerShape(20.dp))
         ) {
             Column(
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Заголовок "Войдите в аккаунт" (Y: 800 -> 135px от верха карточки)
                 Text(
                     text = "Войдите в аккаунт",
-                    fontSize = 14.sp, // 40px
+                    fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.Black,
                     modifier = Modifier.padding(top = cardH * (135f / 1013f))
@@ -89,7 +86,6 @@ fun AuthScreen(onLoginSuccess: (User, String) -> Unit) {
 
                 Spacer(modifier = Modifier.height(cardH * 0.1f))
 
-                // Поля ввода
                 AuthTextField(
                     value = email,
                     onValueChange = { email = it; errorMessage = null },
@@ -122,7 +118,6 @@ fun AuthScreen(onLoginSuccess: (User, String) -> Unit) {
 
                 Spacer(modifier = Modifier.weight(1f))
 
-                // Кнопка Войти
                 Button(
                     onClick = {
                         val foundUser = mockUsers.find { it.email == email }
@@ -179,7 +174,6 @@ fun AuthTextField(
                 interactionSource = interactionSource,
                 placeholder = { Text(placeholder, color = Color.Black, fontSize = 14.sp) },
                 container = {
-                    // D9D9D9 65%
                     Box(Modifier.background(Color(0xFFD9D9D9).copy(alpha = 0.65f)))
                 },
                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
