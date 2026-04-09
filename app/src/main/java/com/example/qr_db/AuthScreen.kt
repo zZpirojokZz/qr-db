@@ -4,6 +4,7 @@ package com.example.qr_db
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -20,7 +21,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.qr_db.data.User
@@ -32,16 +32,16 @@ fun AuthScreen(onLoginSuccess: (User, String) -> Unit) {
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
-    // Имитация базы данных (позже заменим на запрос к БД)
+    // Обновленные моковые данные согласно новым моделям
     val mockRoles = listOf(
-        Role(1, "Студент", 1),
-        Role(2, "Преподаватель", 2),
-        Role(3, "Админ", 3)
+        Role(1, "Студент"),
+        Role(2, "Преподаватель"),
+        Role(3, "Админ")
     )
     val mockUsers = listOf(
-        User(1, "игоорь", "student@test.com", 1),
-        User(2, "савелиййй", "teacher@test.com", 2),
-        User(3, "данилл", "admin@test.com", 3)
+        User(1, "савелий", "student@test.com", 1),
+        User(2, "игорь", "teacher@test.com", 2),
+        User(3, "данил", "admin@test.com", 3)
     )
 
     BoxWithConstraints(
@@ -51,7 +51,11 @@ fun AuthScreen(onLoginSuccess: (User, String) -> Unit) {
     ) {
         val screenWidth = maxWidth
         val screenHeight = maxHeight
-        val scaleX = screenWidth / 360f
+
+        val cardX = screenWidth * (143f / 1080f)
+        val cardY = screenHeight * (665f / 2388f)
+        val cardW = screenWidth * (793f / 1080f)
+        val cardH = screenHeight * (1013f / 2388f)
 
         Image(
             painter = painterResource(id = R.drawable.wavy_background),
@@ -60,88 +64,83 @@ fun AuthScreen(onLoginSuccess: (User, String) -> Unit) {
             contentScale = ContentScale.Crop
         )
 
-        // Окно авторизации
-        Column(
-            modifier = Modifier
-                .offset(x = screenWidth * 0.132f, y = screenHeight * 0.278f)
-                .size(width = screenWidth * 0.734f, height = screenHeight * 0.424f)
-                .clip(RoundedCornerShape(30.dp))
-                .background(Color.White.copy(alpha = 0.3f)),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = "Войдите в аккаунт",
-                fontSize = (14 * scaleX.value.coerceIn(0.8f, 1.2f)).sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black,
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .padding(top = screenHeight * 0.056f)
-                    .fillMaxWidth()
-            )
-        }
-
-        // Поле Электронная почта
-        AuthTextField(
-            value = email,
-            onValueChange = { email = it; errorMessage = null },
-            placeholder = "Электронная почта...",
-            modifier = Modifier
-                .offset(x = screenWidth * 0.251f, y = screenHeight * 0.389f)
-                .width(screenWidth * 0.500f)
-                .height(screenHeight * 0.052f)
-        )
-
-        // Поле Пароль
-        AuthTextField(
-            value = password,
-            onValueChange = { password = it; errorMessage = null },
-            placeholder = "Пароль...",
-            visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier
-                .offset(x = screenWidth * 0.251f, y = screenHeight * 0.464f)
-                .width(screenWidth * 0.500f)
-                .height(screenHeight * 0.052f)
-        )
-
-        // Вывод ошибки
-        if (errorMessage != null) {
-            Text(
-                text = errorMessage!!,
-                color = Color.Red,
-                fontSize = 12.sp,
-                modifier = Modifier
-                    .offset(x = screenWidth * 0.251f, y = screenHeight * 0.52f)
-            )
-        }
-
-        // Кнопка Войти
         Box(
             modifier = Modifier
-                .offset(x = screenWidth * 0.315f, y = screenHeight * 0.604f)
-                .width(screenWidth * 0.370f)
-                .height(screenHeight * 0.052f)
+                .offset(x = cardX, y = cardY)
+                .size(width = cardW, height = cardH)
+                .clip(RoundedCornerShape(20.dp))
+                .background(Color.White.copy(alpha = 0.3f))
+                .border(1.dp, Color.Black.copy(alpha = 0.42f), RoundedCornerShape(20.dp))
         ) {
-            Button(
-                onClick = {
-                    // Логика проверки данных по нашей структуре
-                    val foundUser = mockUsers.find { it.email == email }
-                    if (foundUser != null) {
-                        val roleName = mockRoles.find { it.roleId == foundUser.roleId }?.roleName ?: "Неизвестно"
-                        onLoginSuccess(foundUser, roleName)
-                    } else {
-                        errorMessage = "Пользователь не найден"
-                    }
-                },
+            Column(
                 modifier = Modifier.fillMaxSize(),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.LightGray.copy(alpha = 0.8f),
-                    contentColor = Color.Black
-                ),
-                contentPadding = PaddingValues(0.dp)
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(text = "Войти", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Text(
+                    text = "Войдите в аккаунт",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black,
+                    modifier = Modifier.padding(top = cardH * (135f / 1013f))
+                )
+
+                Spacer(modifier = Modifier.height(cardH * 0.1f))
+
+                AuthTextField(
+                    value = email,
+                    onValueChange = { email = it; errorMessage = null },
+                    placeholder = "Электронная почта...",
+                    modifier = Modifier
+                        .fillMaxWidth(0.8f)
+                        .height(cardH * 0.15f)
+                )
+
+                Spacer(modifier = Modifier.height(cardH * 0.05f))
+
+                AuthTextField(
+                    value = password,
+                    onValueChange = { password = it; errorMessage = null },
+                    placeholder = "Пароль...",
+                    visualTransformation = PasswordVisualTransformation(),
+                    modifier = Modifier
+                        .fillMaxWidth(0.8f)
+                        .height(cardH * 0.15f)
+                )
+
+                if (errorMessage != null) {
+                    Text(
+                        text = errorMessage!!,
+                        color = Color.Red,
+                        fontSize = 10.sp,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                Button(
+                    onClick = {
+                        val foundUser = mockUsers.find { it.email == email }
+                        if (foundUser != null) {
+                            val roleName = mockRoles.find { it.roleId == foundUser.roleId }?.roleName ?: "Неизвестно"
+                            onLoginSuccess(foundUser, roleName)
+                        } else {
+                            errorMessage = "Пользователь не найден"
+                        }
+                    },
+                    modifier = Modifier
+                        .padding(bottom = 24.dp)
+                        .fillMaxWidth(0.6f)
+                        .height(40.dp),
+                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.LightGray.copy(alpha = 0.8f),
+                        contentColor = Color.Black
+                    ),
+                    contentPadding = PaddingValues(0.dp)
+                ) {
+                    Text(text = "Войти", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                }
             }
         }
     }
@@ -160,7 +159,7 @@ fun AuthTextField(
     BasicTextField(
         value = value,
         onValueChange = onValueChange,
-        modifier = modifier.clip(RoundedCornerShape(12.dp)),
+        modifier = modifier.clip(RoundedCornerShape(10.dp)),
         visualTransformation = visualTransformation,
         singleLine = true,
         interactionSource = interactionSource,
@@ -175,7 +174,7 @@ fun AuthTextField(
                 interactionSource = interactionSource,
                 placeholder = { Text(placeholder, color = Color.Black, fontSize = 14.sp) },
                 container = {
-                    Box(Modifier.background(Color.White.copy(alpha = 0.5f)))
+                    Box(Modifier.background(Color(0xFFD9D9D9).copy(alpha = 0.65f)))
                 },
                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
                 colors = TextFieldDefaults.colors(
