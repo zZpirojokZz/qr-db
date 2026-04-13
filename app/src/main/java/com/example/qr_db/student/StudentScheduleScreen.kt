@@ -47,44 +47,23 @@ fun StudentScheduleScreen(
             ScheduleTableComponent(getX(1000f), getY(1032f), fontScale)
         }
 
-        // ВЕРТИКАЛЬНЫЕ КНОПКИ (ВНИЗ / ВВЕРХ)
+        // КНОПКИ УПРАВЛЕНИЯ
         Row(
             modifier = Modifier.offset(x = getX(390f), y = getY(1510f)).width(getX(300f)),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Box(
-                modifier = Modifier.size(getX(130f), getY(200f)).clip(RoundedCornerShape(50.dp)).background(Color.White.copy(alpha = 0.6f)).border(1.dp, Color.Black.copy(alpha = 0.3f), RoundedCornerShape(50.dp)).clickable {},
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(Icons.Default.PlayArrow, null, modifier = Modifier.size(30.dp).rotate(90f), tint = Color.White)
-            }
-            Box(
-                modifier = Modifier.size(getX(130f), getY(200f)).clip(RoundedCornerShape(50.dp)).background(Color.White.copy(alpha = 0.6f)).border(1.dp, Color.Black.copy(alpha = 0.3f), RoundedCornerShape(50.dp)).clickable {},
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(Icons.Default.PlayArrow, null, modifier = Modifier.size(30.dp).rotate(-90f), tint = Color.White)
-            }
+            ControlButton(Icons.Default.PlayArrow, rotate = 90f)
+            ControlButton(Icons.Default.PlayArrow, rotate = -90f)
         }
 
-        // ГОРИЗОНТАЛЬНЫЕ КНОПКИ (ВЛЕВО / ПОИСК / ВПРАВО)
         Row(
             modifier = Modifier.offset(x = getX(150f), y = getY(1780f)).width(getX(780f)),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(modifier = Modifier.size(getX(180f), getY(100f)).clip(RoundedCornerShape(15.dp)).background(Color.White.copy(alpha = 0.6f)).border(1.dp, Color.Black.copy(alpha = 0.2f), RoundedCornerShape(15.dp)).clickable {}, contentAlignment = Alignment.Center) {
-                Icon(Icons.Default.PlayArrow, null, modifier = Modifier.size(24.dp).rotate(180f), tint = Color.White)
-            }
-            Box(modifier = Modifier.size(getX(350f), getY(100f)).clip(RoundedCornerShape(15.dp)).background(Color.White.copy(alpha = 0.6f)).border(1.dp, Color.Black.copy(alpha = 0.2f), RoundedCornerShape(15.dp)).clickable {}, contentAlignment = Alignment.Center) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("Поиск даты", color = Color.Black, fontSize = (14 * fontScale).sp, fontWeight = FontWeight.Bold)
-                    Spacer(Modifier.width(4.dp))
-                    Icon(Icons.Default.Search, null, modifier = Modifier.size(20.dp), tint = Color.Black)
-                }
-            }
-            Box(modifier = Modifier.size(getX(180f), getY(100f)).clip(RoundedCornerShape(15.dp)).background(Color.White.copy(alpha = 0.6f)).border(1.dp, Color.Black.copy(alpha = 0.2f), RoundedCornerShape(15.dp)).clickable {}, contentAlignment = Alignment.Center) {
-                Icon(Icons.Default.PlayArrow, null, modifier = Modifier.size(24.dp), tint = Color.White)
-            }
+            ControlButton(Icons.Default.PlayArrow, rotate = 180f, width = getX(180f))
+            SearchButton(getX(350f), fontScale)
+            ControlButton(Icons.Default.PlayArrow, rotate = 0f, width = getX(180f))
         }
     }
 }
@@ -112,6 +91,27 @@ fun ScheduleTableComponent(width: androidx.compose.ui.unit.Dp, height: androidx.
                     Box(modifier = Modifier.weight(1f).fillMaxHeight().border(1.dp, Color.Black))
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun ControlButton(icon: androidx.compose.ui.graphics.vector.ImageVector, rotate: Float, width: androidx.compose.ui.unit.Dp = 60.dp) {
+    Box(
+        modifier = Modifier.size(width, 45.dp).clip(RoundedCornerShape(15.dp)).background(Color.White.copy(alpha = 0.6f)).border(1.dp, Color.Black.copy(alpha = 0.2f), RoundedCornerShape(15.dp)).clickable {},
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(icon, null, modifier = Modifier.size(24.dp).rotate(rotate), tint = Color.Black)
+    }
+}
+
+@Composable
+fun SearchButton(width: androidx.compose.ui.unit.Dp, fontScale: Float) {
+    Box(modifier = Modifier.size(width, 45.dp).clip(RoundedCornerShape(15.dp)).background(Color.White.copy(alpha = 0.6f)).border(1.dp, Color.Black.copy(alpha = 0.2f), RoundedCornerShape(15.dp)).clickable {}, contentAlignment = Alignment.Center) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text("Поиск даты", color = Color.Black, fontSize = (14 * fontScale).sp, fontWeight = FontWeight.Bold)
+            Spacer(Modifier.width(4.dp))
+            Icon(Icons.Default.Search, null, modifier = Modifier.size(20.dp), tint = Color.Black)
         }
     }
 }

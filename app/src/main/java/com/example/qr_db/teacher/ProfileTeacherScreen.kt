@@ -60,21 +60,24 @@ fun ProfileTeacherScreen(user: User, onBack: () -> Unit, onLogout: () -> Unit) {
                 tint = Color.Black
             )
 
-            // --- КАРТОЧКА ПРЕПОДАВАТЕЛЯ ---
+            // --- ПЕРВАЯ КАРТОЧКА ---
             Box(
                 modifier = Modifier
                     .offset(x = getX(155f), y = getY(185f))
                     .size(width = getX(770f), height = getY(646f))
                     .clip(RoundedCornerShape(30.dp))
                     .background(Color.White.copy(alpha = 0.42f))
-                    .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(30.dp))
+                    .border(
+                        width = 1.dp,
+                        color = Color.White.copy(alpha = 0.3f),
+                        shape = RoundedCornerShape(30.dp)
+                    )
             ) {
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Spacer(modifier = Modifier.height(getY(56f)))
-                    // АВАТАР
                     Surface(
                         modifier = Modifier.size(getX(253f)),
                         shape = CircleShape,
@@ -84,37 +87,81 @@ fun ProfileTeacherScreen(user: User, onBack: () -> Unit, onLogout: () -> Unit) {
                     Spacer(modifier = Modifier.height(getY(40f)))
                     Text(
                         text = user.fullName,
-                        style = TextStyle(fontSize = getSp(63f), fontWeight = FontWeight.SemiBold, color = Color.Black)
-                    )
-                    Text(
-                        text = "(преподаватель)",
-                        style = TextStyle(fontSize = getSp(45f), color = Color.Black.copy(alpha = 0.7f))
+                        style = TextStyle(
+                            fontSize = getSp(63f),
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color.Black,
+                            textAlign = TextAlign.Center
+                        )
                     )
                     
                     Spacer(modifier = Modifier.weight(1f))
+                    
                     Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(Color.Black.copy(alpha = 0.1f)))
-                    Box(modifier = Modifier.fillMaxWidth().height(getY(140f)), contentAlignment = Alignment.Center) {
-                        Text(text = "Кафедра ИТ", style = TextStyle(fontSize = getSp(54f), fontWeight = FontWeight.Medium, color = Color.Black))
+                    
+                    Box(
+                        modifier = Modifier.fillMaxWidth().height(getY(140f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Курируемая группа",
+                            style = TextStyle(fontSize = getSp(45f), color = Color.Black.copy(alpha = 0.7f))
+                        )
                     }
                 }
             }
 
-            // ВТОРАЯ КАРТОЧКА (ВЫХОД)
+            // ВТОРАЯ КАРТОЧКА
+            val card2Height = getY(1048f)
             Box(
                 modifier = Modifier
                     .offset(x = getX(155f), y = getY(931f))
-                    .size(width = getX(770f), height = getY(350f))
+                    .size(width = getX(770f), height = card2Height)
                     .clip(RoundedCornerShape(30.dp))
                     .background(Color.White.copy(alpha = 0.42f))
-                    .border(1.dp, Color.White.copy(alpha = 0.3f), RoundedCornerShape(30.dp)),
-                contentAlignment = Alignment.Center
+                    .border(
+                        width = 1.dp,
+                        color = Color.White.copy(alpha = 0.3f),
+                        shape = RoundedCornerShape(30.dp)
+                    )
             ) {
-                Text(
-                    text = "Выйти из профиля",
-                    color = Color(0xFFB71B1B),
-                    modifier = Modifier.clickable { onLogout() },
-                    style = TextStyle(fontSize = getSp(50f), fontWeight = FontWeight.Bold)
-                )
+                Column(modifier = Modifier.fillMaxSize()) {
+                    val sectionHeight = card2Height / 3
+                    
+                    // СЕКЦИЯ СТАРОСТЫ
+                    Column(
+                        modifier = Modifier.fillMaxWidth().height(sectionHeight),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Text(text = "ФИО старосты", style = TextStyle(fontSize = getSp(45f) * 1.1f, fontWeight = FontWeight.SemiBold, color = Color.Black))
+                        Text(text = "Номер", style = TextStyle(fontSize = getSp(45f), color = Color.Black.copy(alpha = 0.7f)))
+                    }
+                    
+                    Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(Color.Black.copy(alpha = 0.1f)))
+                    
+                    // СЕКЦИЯ ЗАВ. ОТДЕЛЕНИЯ
+                    Column(
+                        modifier = Modifier.fillMaxWidth().height(sectionHeight),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Text(text = "ФИО зав. отделения", style = TextStyle(fontSize = getSp(45f) * 1.1f, fontWeight = FontWeight.SemiBold, color = Color.Black))
+                        Text(text = "Номер", style = TextStyle(fontSize = getSp(45f), color = Color.Black.copy(alpha = 0.7f)))
+                    }
+                    
+                    Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(Color.Black.copy(alpha = 0.1f)))
+                    
+                    // КНОПКА ВЫХОДА
+                    Box(modifier = Modifier.fillMaxWidth().height(sectionHeight), contentAlignment = Alignment.Center) {
+                        Text(
+                            text = "Выйти из профиля",
+                            color = Color(0xFFB71B1B),
+                            modifier = Modifier.clip(RoundedCornerShape(10.dp)).clickable { onLogout() }.padding(8.dp),
+                            style = TextStyle(fontSize = getSp(50f), fontWeight = FontWeight.Bold)
+                        )
+                    }
+                }
             }
 
             // КНОПКА НАЗАД
@@ -124,24 +171,16 @@ fun ProfileTeacherScreen(user: User, onBack: () -> Unit, onLogout: () -> Unit) {
                     .size(width = getX(620f), height = getY(160f))
                     .clip(RoundedCornerShape(30.dp))
                     .background(Color(0xFFD9D9D9).copy(alpha = 0.5f))
-                    .border(1.dp, Color.White.copy(alpha = 0.2f), RoundedCornerShape(30.dp))
+                    .border(width = 1.dp, color = Color.White.copy(alpha = 0.2f), shape = RoundedCornerShape(30.dp))
                     .clickable { onBack() },
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = "Назад", color = Color.Black, style = TextStyle(fontSize = getSp(50f), fontWeight = FontWeight.Bold))
+                Text(
+                    text = "Назад",
+                    color = Color.Black,
+                    style = TextStyle(fontSize = getSp(50f), fontWeight = FontWeight.Bold)
+                )
             }
         }
-    }
-}
-
-@Composable
-fun InfoSectionScaled(title: String, subtitle: String, width: androidx.compose.ui.unit.Dp, height: androidx.compose.ui.unit.Dp, fontSize: androidx.compose.ui.unit.TextUnit) {
-    Column(
-        modifier = Modifier.size(width, height),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text(text = title, style = TextStyle(fontSize = fontSize * 1.1f, fontWeight = FontWeight.SemiBold, color = Color.Black), textAlign = TextAlign.Center)
-        Text(text = subtitle, style = TextStyle(fontSize = fontSize, color = Color.Black.copy(alpha = 0.7f)), textAlign = TextAlign.Center)
     }
 }
