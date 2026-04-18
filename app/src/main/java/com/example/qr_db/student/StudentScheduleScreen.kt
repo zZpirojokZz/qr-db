@@ -47,23 +47,35 @@ fun StudentScheduleScreen(
             ScheduleTableComponent(getX(1000f), getY(1032f), fontScale)
         }
 
-        // КНОПКИ УПРАВЛЕНИЯ
+        // --- ВЕРТИКАЛЬНЫЕ КНОПКИ (X: 390, Y: 1564, W: 300, H: 200) ---
         Row(
-            modifier = Modifier.offset(x = getX(390f), y = getY(1510f)).width(getX(300f)),
+            modifier = Modifier.offset(x = getX(390f), y = getY(1564f)).size(getX(300f), getY(200f)),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            ControlButton(Icons.Default.PlayArrow, rotate = 90f)
-            ControlButton(Icons.Default.PlayArrow, rotate = -90f)
+            StudentControlButton(Icons.Default.PlayArrow, 90f, getX(135f), getY(200f)) // ВНИЗ
+            StudentControlButton(Icons.Default.PlayArrow, -90f, getX(135f), getY(200f)) // ВВЕРХ
         }
 
+        // --- ГОРИЗОНТАЛЬНЫЕ КНОПКИ (X: 140, Y: 1852, W: 800, H: 100) ---
         Row(
-            modifier = Modifier.offset(x = getX(150f), y = getY(1780f)).width(getX(780f)),
+            modifier = Modifier.offset(x = getX(140f), y = getY(1852f)).size(getX(800f), getY(100f)),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            ControlButton(Icons.Default.PlayArrow, rotate = 180f, width = getX(180f))
-            SearchButton(getX(350f), fontScale)
-            ControlButton(Icons.Default.PlayArrow, rotate = 0f, width = getX(180f))
+            StudentControlButton(Icons.Default.PlayArrow, 180f, getX(180f), getY(100f)) // ВЛЕВО
+            
+            Box(
+                modifier = Modifier.size(getX(350f), getY(100f)).clip(RoundedCornerShape(20.dp)).background(Color.White.copy(alpha = 0.6f)).border(1.dp, Color.Black.copy(alpha = 0.2f), RoundedCornerShape(20.dp)).clickable {},
+                contentAlignment = Alignment.Center
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("Поиск даты", color = Color.Black, fontSize = (14 * fontScale).sp, fontWeight = FontWeight.Bold)
+                    Spacer(Modifier.width(4.dp))
+                    Icon(Icons.Default.Search, null, modifier = Modifier.size(20.dp), tint = Color.Black)
+                }
+            }
+
+            StudentControlButton(Icons.Default.PlayArrow, 0f, getX(180f), getY(100f)) // ВПРАВО
         }
     }
 }
@@ -96,22 +108,16 @@ fun ScheduleTableComponent(width: androidx.compose.ui.unit.Dp, height: androidx.
 }
 
 @Composable
-fun ControlButton(icon: androidx.compose.ui.graphics.vector.ImageVector, rotate: Float, width: androidx.compose.ui.unit.Dp = 60.dp) {
+fun StudentControlButton(icon: androidx.compose.ui.graphics.vector.ImageVector, rotate: Float, width: androidx.compose.ui.unit.Dp, height: androidx.compose.ui.unit.Dp) {
     Box(
-        modifier = Modifier.size(width, 45.dp).clip(RoundedCornerShape(15.dp)).background(Color.White.copy(alpha = 0.6f)).border(1.dp, Color.Black.copy(alpha = 0.2f), RoundedCornerShape(15.dp)).clickable {},
+        modifier = Modifier
+            .size(width, height)
+            .clip(RoundedCornerShape(50.dp))
+            .background(Color.White.copy(alpha = 0.6f))
+            .border(1.dp, Color.Black.copy(alpha = 0.3f), RoundedCornerShape(50.dp))
+            .clickable {},
         contentAlignment = Alignment.Center
     ) {
-        Icon(icon, null, modifier = Modifier.size(24.dp).rotate(rotate), tint = Color.Black)
-    }
-}
-
-@Composable
-fun SearchButton(width: androidx.compose.ui.unit.Dp, fontScale: Float) {
-    Box(modifier = Modifier.size(width, 45.dp).clip(RoundedCornerShape(15.dp)).background(Color.White.copy(alpha = 0.6f)).border(1.dp, Color.Black.copy(alpha = 0.2f), RoundedCornerShape(15.dp)).clickable {}, contentAlignment = Alignment.Center) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("Поиск даты", color = Color.Black, fontSize = (14 * fontScale).sp, fontWeight = FontWeight.Bold)
-            Spacer(Modifier.width(4.dp))
-            Icon(Icons.Default.Search, null, modifier = Modifier.size(20.dp), tint = Color.Black)
-        }
+        Icon(icon, null, modifier = Modifier.size(24.dp).rotate(rotate), tint = Color.White)
     }
 }

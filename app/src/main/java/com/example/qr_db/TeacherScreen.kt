@@ -1,6 +1,11 @@
 package com.example.qr_db
 
 import androidx.annotation.DrawableRes
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -16,6 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.qr_db.data.User
 import com.example.qr_db.teacher.TeacherJournalScreen
@@ -34,12 +40,10 @@ fun TeacherScreen(user: User, navController: NavController) {
         val screenWidth = maxWidth
         val screenHeight = maxHeight
 
-        // Функции масштабирования
         fun getX(px: Float) = screenWidth * (px / 1080f)
         fun getY(px: Float) = screenHeight * (px / 2388f)
         val fontScale = (screenWidth.value / 360f).coerceIn(0.85f, 1.15f)
 
-        // Общий фон (картинка)
         Image(
             painter = painterResource(id = R.drawable.wavy_background),
             contentDescription = null,
@@ -47,28 +51,24 @@ fun TeacherScreen(user: User, navController: NavController) {
             contentScale = ContentScale.FillBounds
         )
 
-        // Контент в зависимости от выбранной вкладки
-        when (selectedTab) {
-            0 -> TeacherQrScreen(
-                user = user,
-                navController = navController,
-                getX = ::getX,
-                getY = ::getY,
-                fontScale = fontScale
-            )
-            1 -> TeacherJournalScreen(
-                getX = ::getX,
-                getY = ::getY,
-                fontScale = fontScale
-            )
-            2 -> TeacherScheduleScreen(
-                getX = ::getX,
-                getY = ::getY,
-                fontScale = fontScale
-            )
+        // Контент
+        Box(modifier = Modifier.fillMaxSize()) {
+            AnimatedContent(
+                targetState = selectedTab,
+                transitionSpec = {
+                    fadeIn(animationSpec = tween(200)) togetherWith fadeOut(animationSpec = tween(200))
+                },
+                label = "TabAnimation"
+            ) { targetTab ->
+                when (targetTab) {
+                    0 -> TeacherQrScreen(user, navController, ::getX, ::getY, fontScale)
+                    1 -> TeacherJournalScreen(::getX, ::getY, fontScale)
+                    2 -> TeacherScheduleScreen(::getX, ::getY, fontScale)
+                }
+            }
         }
 
-        // НИЖНЕЕ МЕНЮ
+        // НИЖНЕЕ МЕНЮ (Стиль как у Студента - точно по фото)
         Row(
             modifier = Modifier
                 .offset(x = getX(140f), y = getY(2030f))
@@ -90,9 +90,9 @@ fun NavButton(@DrawableRes iconRes: Int, isSelected: Boolean, onClick: () -> Uni
         modifier = Modifier
             .size(75.dp)
             .clip(shape)
-            .background(Color.White.copy(alpha = 0.35f)) // FFFFFF 35%
+            .background(Color.White.copy(alpha = 0.35f))
             .border(
-                width = if (isSelected) 2.6.dp else 1.dp, // 8px stroke roughly
+                width = if (isSelected) 2.6.dp else 1.dp, 
                 color = if (isSelected) Color.Black.copy(alpha = 0.8f) else Color.Black.copy(alpha = 0.2f), 
                 shape = shape
             )

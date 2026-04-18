@@ -1,4 +1,4 @@
-package com.example.qr_db.teacher
+package com.example.qr_db.admin
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -13,13 +13,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.qr_db.student.VStack
+import com.example.qr_db.teacher.TeacherLessonRow
 
 @Composable
-fun TeacherJournalScreen(
+fun AdminJournalScreen(
     getX: (Float) -> androidx.compose.ui.unit.Dp,
     getY: (Float) -> androidx.compose.ui.unit.Dp,
     fontScale: Float
@@ -33,7 +33,6 @@ fun TeacherJournalScreen(
     ) {
         Spacer(modifier = Modifier.height(60.dp))
 
-        // ЗАГОЛОВКИ (как в iOS: .black и .heavy)
         VStack(spacing = 4.dp) {
             Text(
                 text = "дд.мм.гггг",
@@ -44,7 +43,7 @@ fun TeacherJournalScreen(
                 )
             )
             Text(
-                text = "Преподаватель",
+                text = "Администратор",
                 style = TextStyle(
                     fontSize = (20 * fontScale).sp,
                     fontWeight = FontWeight.W900,
@@ -53,7 +52,6 @@ fun TeacherJournalScreen(
             )
         }
 
-        // СПИСОК ГРУПП (Стиль iOS LessonRow)
         VStack(spacing = 17.dp) {
             val groups = listOf(
                 "{group_name}" to "104",
@@ -66,13 +64,12 @@ fun TeacherJournalScreen(
             }
         }
 
-        // КНОПКА СКАЧАТЬ (как в iOS)
         Box(
             modifier = Modifier
                 .width(260.dp)
                 .height(52.dp)
                 .clip(RoundedCornerShape(25.dp))
-                .background(Color.White.copy(alpha = 0.45f)) // ultraThin
+                .background(Color.White.copy(alpha = 0.45f))
                 .background(Color.White.copy(alpha = 0.9f))
                 .border(2.dp, Color.Black, RoundedCornerShape(25.dp))
                 .clickable { },
@@ -85,47 +82,6 @@ fun TeacherJournalScreen(
                     fontWeight = FontWeight.Medium,
                     color = Color(0xFF007AFF)
                 )
-            )
-        }
-    }
-}
-
-@Composable
-fun TeacherLessonRow(title: String, room: String) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(60.dp)
-            .clip(RoundedCornerShape(25.dp))
-            .background(Color.White.copy(alpha = 0.45f))
-            .background(Color.White.copy(alpha = 0.7f))
-            .border(2.dp, Color.Black, RoundedCornerShape(25.dp))
-    ) {
-        Row(
-            modifier = Modifier.fillMaxSize(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = title,
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(horizontal = 16.dp),
-                style = TextStyle(fontSize = 16.sp, color = Color.Black),
-                textAlign = TextAlign.Left
-            )
-
-            Box(
-                modifier = Modifier
-                    .width(1.dp)
-                    .fillMaxHeight()
-                    .background(Color.Gray.copy(alpha = 0.3f))
-            )
-
-            Text(
-                text = room,
-                modifier = Modifier.width(70.dp),
-                style = TextStyle(fontSize = 17.sp, fontWeight = FontWeight.Medium),
-                textAlign = TextAlign.Center
             )
         }
     }

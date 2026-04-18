@@ -97,7 +97,7 @@ fun AppNavigation() {
 
         // Экран администратора
         composable(route = "admin") {
-            currentUser?.let { AdminScreen(user = it) }
+            currentUser?.let { AdminScreen(user = it, navController = navController) }
         }
     }
 }

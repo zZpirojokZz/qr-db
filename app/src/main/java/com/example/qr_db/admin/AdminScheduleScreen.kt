@@ -1,4 +1,4 @@
-package com.example.qr_db.teacher
+package com.example.qr_db.admin
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -20,7 +20,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -28,42 +27,43 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.qr_db.teacher.TeacherControlButton
 
-enum class TeacherScreenState {
+enum class AdminScreenState {
     GroupEntry, SubjectSelection, JournalTable
 }
 
 @Composable
-fun TeacherScheduleScreen(
+fun AdminScheduleScreen(
     getX: (Float) -> androidx.compose.ui.unit.Dp,
     getY: (Float) -> androidx.compose.ui.unit.Dp,
     fontScale: Float
 ) {
-    var currentScreen by remember { mutableStateOf(TeacherScreenState.GroupEntry) }
+    var currentScreen by remember { mutableStateOf(AdminScreenState.GroupEntry) }
     var groupName by remember { mutableStateOf("") }
 
     Box(modifier = Modifier.fillMaxSize()) {
         when (currentScreen) {
-            TeacherScreenState.GroupEntry -> {
-                GroupEntryScreen(
+            AdminScreenState.GroupEntry -> {
+                AdminGroupEntryScreen(
                     groupName = groupName,
                     onGroupNameChange = { groupName = it },
-                    onNextClick = { if (groupName.isNotBlank()) currentScreen = TeacherScreenState.SubjectSelection },
+                    onNextClick = { if (groupName.isNotBlank()) currentScreen = AdminScreenState.SubjectSelection },
                     getX, getY, fontScale
                 )
             }
-            TeacherScreenState.SubjectSelection -> {
-                SubjectSelectionScreen(
+            AdminScreenState.SubjectSelection -> {
+                AdminSubjectSelectionScreen(
                     groupName = groupName,
-                    onSubjectClick = { currentScreen = TeacherScreenState.JournalTable },
-                    onBackClick = { currentScreen = TeacherScreenState.GroupEntry },
+                    onSubjectClick = { currentScreen = AdminScreenState.JournalTable },
+                    onBackClick = { currentScreen = AdminScreenState.GroupEntry },
                     getX, getY, fontScale
                 )
             }
-            TeacherScreenState.JournalTable -> {
-                JournalTableScreen(
+            AdminScreenState.JournalTable -> {
+                AdminJournalTableScreen(
                     groupName = groupName,
-                    onBackClick = { currentScreen = TeacherScreenState.SubjectSelection },
+                    onBackClick = { currentScreen = AdminScreenState.SubjectSelection },
                     getX, getY, fontScale
                 )
             }
@@ -72,13 +72,13 @@ fun TeacherScheduleScreen(
 }
 
 @Composable
-fun GroupEntryScreen(groupName: String, onGroupNameChange: (String) -> Unit, onNextClick: () -> Unit, getX: (Float) -> androidx.compose.ui.unit.Dp, getY: (Float) -> androidx.compose.ui.unit.Dp, fontScale: Float) {
+fun AdminGroupEntryScreen(groupName: String, onGroupNameChange: (String) -> Unit, onNextClick: () -> Unit, getX: (Float) -> androidx.compose.ui.unit.Dp, getY: (Float) -> androidx.compose.ui.unit.Dp, fontScale: Float) {
     Box(modifier = Modifier.fillMaxSize()) {
         Box(
             modifier = Modifier.offset(x = getX(140f), y = getY(680f)).size(getX(800f), getY(500f)).clip(RoundedCornerShape(25.dp)).background(Color.White.copy(alpha = 0.35f)).border(1.dp, Color.Black.copy(alpha = 0.42f), RoundedCornerShape(25.dp))
         ) {
             Column(modifier = Modifier.fillMaxSize().padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-                Text("Введите название\nгруппы для журнала:", style = TextStyle(fontSize = (18 * fontScale).sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center))
+                Text("Введите название\nгруппы:", style = TextStyle(fontSize = (18 * fontScale).sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center))
                 Spacer(modifier = Modifier.height(getY(40f)))
                 Box(modifier = Modifier.fillMaxWidth(0.9f).height(getY(120f)).clip(RoundedCornerShape(20.dp)).background(Color.White.copy(alpha = 0.8f)).border(1.dp, Color.Black.copy(alpha = 0.2f), RoundedCornerShape(20.dp)), contentAlignment = Alignment.Center) {
                     if (groupName.isEmpty()) Text("Группа", color = Color.Gray, fontSize = (16 * fontScale).sp)
@@ -93,7 +93,7 @@ fun GroupEntryScreen(groupName: String, onGroupNameChange: (String) -> Unit, onN
 }
 
 @Composable
-fun SubjectSelectionScreen(groupName: String, onSubjectClick: (String) -> Unit, onBackClick: () -> Unit, getX: (Float) -> androidx.compose.ui.unit.Dp, getY: (Float) -> androidx.compose.ui.unit.Dp, fontScale: Float) {
+fun AdminSubjectSelectionScreen(groupName: String, onSubjectClick: (String) -> Unit, onBackClick: () -> Unit, getX: (Float) -> androidx.compose.ui.unit.Dp, getY: (Float) -> androidx.compose.ui.unit.Dp, fontScale: Float) {
     val subjects = listOf("Физика", "Химия", "Математика", "НВП", "Английский", "Казахский")
     Box(modifier = Modifier.fillMaxSize()) {
         Box(modifier = Modifier.offset(x = getX(110f), y = getY(380f)).size(getX(860f), getY(1150f)).clip(RoundedCornerShape(30.dp)).background(Color.White.copy(alpha = 0.45f)).border(1.dp, Color.Black.copy(alpha = 0.2f), RoundedCornerShape(30.dp))) {
@@ -117,7 +117,7 @@ fun SubjectSelectionScreen(groupName: String, onSubjectClick: (String) -> Unit, 
 }
 
 @Composable
-fun JournalTableScreen(groupName: String, onBackClick: () -> Unit, getX: (Float) -> androidx.compose.ui.unit.Dp, getY: (Float) -> androidx.compose.ui.unit.Dp, fontScale: Float) {
+fun AdminJournalTableScreen(groupName: String, onBackClick: () -> Unit, getX: (Float) -> androidx.compose.ui.unit.Dp, getY: (Float) -> androidx.compose.ui.unit.Dp, fontScale: Float) {
     Box(modifier = Modifier.fillMaxSize()) {
         Row(modifier = Modifier.fillMaxWidth().offset(x = getX(60f), y = getY(150f)), verticalAlignment = Alignment.CenterVertically) {
             Icon(Icons.AutoMirrored.Filled.ArrowBack, null, tint = Color.Black, modifier = Modifier.size(getX(60f)).clickable { onBackClick() })
@@ -145,7 +145,6 @@ fun JournalTableScreen(groupName: String, onBackClick: () -> Unit, getX: (Float)
             }
         }
         
-        // --- ВЕРТИКАЛЬНЫЕ КНОПКИ (X: 390, Y: 1564, W: 300, H: 200) ---
         Row(
             modifier = Modifier.offset(x = getX(390f), y = getY(1564f)).size(getX(300f), getY(200f)),
             horizontalArrangement = Arrangement.SpaceBetween
@@ -154,7 +153,6 @@ fun JournalTableScreen(groupName: String, onBackClick: () -> Unit, getX: (Float)
             TeacherControlButton(Icons.Default.PlayArrow, -90f, getX, getY, getX(135f), getY(200f))
         }
 
-        // --- ГОРИЗОНТАЛЬНЫЕ КНОПКИ (X: 140, Y: 1852, W: 800, H: 100) ---
         Row(
             modifier = Modifier.offset(x = getX(140f), y = getY(1852f)).size(getX(800f), getY(100f)),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -175,20 +173,5 @@ fun JournalTableScreen(groupName: String, onBackClick: () -> Unit, getX: (Float)
 
             TeacherControlButton(Icons.Default.PlayArrow, 0f, getX, getY, getX(180f), getY(100f))
         }
-    }
-}
-
-@Composable
-fun TeacherControlButton(icon: androidx.compose.ui.graphics.vector.ImageVector, rotate: Float, getX: (Float) -> androidx.compose.ui.unit.Dp, getY: (Float) -> androidx.compose.ui.unit.Dp, width: androidx.compose.ui.unit.Dp, height: androidx.compose.ui.unit.Dp) {
-    Box(
-        modifier = Modifier
-            .size(width, height)
-            .clip(RoundedCornerShape(50.dp))
-            .background(Color.White.copy(alpha = 0.6f))
-            .border(1.dp, Color.Black.copy(alpha = 0.3f), RoundedCornerShape(50.dp))
-            .clickable {},
-        contentAlignment = Alignment.Center
-    ) {
-        Icon(icon, null, modifier = Modifier.size(24.dp).rotate(rotate), tint = Color.White)
     }
 }

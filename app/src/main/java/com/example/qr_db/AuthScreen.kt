@@ -5,20 +5,26 @@ package com.example.qr_db
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
@@ -32,114 +38,97 @@ fun AuthScreen(onLoginSuccess: (User, String) -> Unit) {
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
-    // Обновленные моковые данные согласно новым моделям
-    val mockRoles = listOf(
-        Role(1, "Студент"),
-        Role(2, "Преподаватель"),
-        Role(3, "Админ")
-    )
+    val mockRoles = listOf(Role(1, "Студент"), Role(2, "Преподаватель"), Role(3, "Админ"))
     val mockUsers = listOf(
         User(1, "савелий", "student@test.com", 1),
         User(2, "игорь", "teacher@test.com", 2),
         User(3, "данил", "admin@test.com", 3)
     )
 
-    BoxWithConstraints(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFFD0D0D0))
-    ) {
-        val screenWidth = maxWidth
-        val screenHeight = maxHeight
-
-        val cardX = screenWidth * (143f / 1080f)
-        val cardY = screenHeight * (665f / 2388f)
-        val cardW = screenWidth * (793f / 1080f)
-        val cardH = screenHeight * (1013f / 2388f)
-
+    Box(modifier = Modifier.fillMaxSize()) {
+        // ФОН (как на iOS)
         Image(
             painter = painterResource(id = R.drawable.wavy_background),
             contentDescription = null,
             modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop
+            contentScale = ContentScale.FillBounds
         )
 
+        // ГЛАВНАЯ КАРТОЧКА (glassCard из iOS)
         Box(
             modifier = Modifier
-                .offset(x = cardX, y = cardY)
-                .size(width = cardW, height = cardH)
-                .clip(RoundedCornerShape(20.dp))
-                .background(Color.White.copy(alpha = 0.3f))
-                .border(1.dp, Color.Black.copy(alpha = 0.42f), RoundedCornerShape(20.dp))
+                .align(Alignment.Center)
+                .width(330.dp)
+                .height(460.dp)
+                .shadow(elevation = 20.dp, shape = RoundedCornerShape(30.dp), spotColor = Color.Black.copy(alpha = 0.25f))
+                .clip(RoundedCornerShape(30.dp))
+                .background(Color.White.copy(alpha = 0.45f))
+                .border(
+                    width = 1.5.dp,
+                    brush = Brush.linearGradient(
+                        colors = listOf(Color.White.copy(alpha = 0.7f), Color.White.copy(alpha = 0.1f))
+                    ),
+                    shape = RoundedCornerShape(30.dp)
+                )
+                .padding(horizontal = 40.dp, vertical = 50.dp)
         ) {
             Column(
                 modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(25.dp)
             ) {
                 Text(
                     text = "Войдите в аккаунт",
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.SemiBold,
                     color = Color.Black,
-                    modifier = Modifier.padding(top = cardH * (135f / 1013f))
+                    modifier = Modifier.padding(top = 10.dp)
                 )
 
-                Spacer(modifier = Modifier.height(cardH * 0.1f))
+                Spacer(modifier = Modifier.height(10.dp))
 
-                AuthTextField(
+                // Поля ввода (glassField из iOS)
+                AuthGlassField(
                     value = email,
                     onValueChange = { email = it; errorMessage = null },
                     placeholder = "Электронная почта...",
-                    modifier = Modifier
-                        .fillMaxWidth(0.8f)
-                        .height(cardH * 0.15f)
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next)
                 )
 
-                Spacer(modifier = Modifier.height(cardH * 0.05f))
-
-                AuthTextField(
+                AuthGlassField(
                     value = password,
                     onValueChange = { password = it; errorMessage = null },
                     placeholder = "Пароль...",
                     visualTransformation = PasswordVisualTransformation(),
-                    modifier = Modifier
-                        .fillMaxWidth(0.8f)
-                        .height(cardH * 0.15f)
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done)
                 )
 
                 if (errorMessage != null) {
-                    Text(
-                        text = errorMessage!!,
-                        color = Color.Red,
-                        fontSize = 10.sp,
-                        modifier = Modifier.padding(top = 4.dp)
-                    )
+                    Text(text = errorMessage!!, color = Color.Red, fontSize = 12.sp)
                 }
 
                 Spacer(modifier = Modifier.weight(1f))
 
-                Button(
-                    onClick = {
-                        val foundUser = mockUsers.find { it.email == email }
-                        if (foundUser != null) {
-                            val roleName = mockRoles.find { it.roleId == foundUser.roleId }?.roleName ?: "Неизвестно"
-                            onLoginSuccess(foundUser, roleName)
-                        } else {
-                            errorMessage = "Пользователь не найден"
-                        }
-                    },
+                // КНОПКА ВХОДА (background glassField из iOS)
+                Box(
                     modifier = Modifier
-                        .padding(bottom = 24.dp)
-                        .fillMaxWidth(0.6f)
-                        .height(40.dp),
-                    shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.LightGray.copy(alpha = 0.8f),
-                        contentColor = Color.Black
-                    ),
-                    contentPadding = PaddingValues(0.dp)
+                        .fillMaxWidth()
+                        .height(56.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(Color(0xFFD9D9D9).copy(alpha = 0.85f))
+                        .border(1.dp, Color.White.copy(alpha = 0.4f), RoundedCornerShape(16.dp))
+                        .clickable {
+                            val foundUser = mockUsers.find { it.email == email }
+                            if (foundUser != null) {
+                                val roleName = mockRoles.find { it.roleId == foundUser.roleId }?.roleName ?: "Неизвестно"
+                                onLoginSuccess(foundUser, roleName)
+                            } else {
+                                errorMessage = "Пользователь не найден"
+                            }
+                        },
+                    contentAlignment = Alignment.Center
                 ) {
-                    Text(text = "Войти", fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                    Text(text = "Войти", fontWeight = FontWeight.SemiBold, fontSize = 18.sp, color = Color.Black)
                 }
             }
         }
@@ -148,22 +137,28 @@ fun AuthScreen(onLoginSuccess: (User, String) -> Unit) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AuthTextField(
+fun AuthGlassField(
     value: String,
     onValueChange: (String) -> Unit,
     placeholder: String,
-    modifier: Modifier = Modifier,
-    visualTransformation: VisualTransformation = VisualTransformation.None
+    visualTransformation: VisualTransformation = VisualTransformation.None,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     BasicTextField(
         value = value,
         onValueChange = onValueChange,
-        modifier = modifier.clip(RoundedCornerShape(10.dp)),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(56.dp)
+            .shadow(elevation = 6.dp, shape = RoundedCornerShape(16.dp), spotColor = Color.Black.copy(alpha = 0.1f))
+            .clip(RoundedCornerShape(16.dp))
+            .background(Color(0xFFD9D9D9).copy(alpha = 0.85f))
+            .border(1.dp, Color.White.copy(alpha = 0.4f), RoundedCornerShape(16.dp)),
         visualTransformation = visualTransformation,
         singleLine = true,
-        interactionSource = interactionSource,
-        textStyle = TextStyle(color = Color.Black, fontSize = 14.sp),
+        keyboardOptions = keyboardOptions,
+        textStyle = TextStyle(color = Color.Black, fontSize = 16.sp),
         decorationBox = { innerTextField ->
             TextFieldDefaults.DecorationBox(
                 value = value,
@@ -172,11 +167,9 @@ fun AuthTextField(
                 singleLine = true,
                 visualTransformation = visualTransformation,
                 interactionSource = interactionSource,
-                placeholder = { Text(placeholder, color = Color.Black, fontSize = 14.sp) },
-                container = {
-                    Box(Modifier.background(Color(0xFFD9D9D9).copy(alpha = 0.65f)))
-                },
-                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
+                placeholder = { Text(placeholder, color = Color.Black.copy(alpha = 0.6f), fontSize = 16.sp) },
+                container = {},
+                contentPadding = PaddingValues(horizontal = 16.dp),
                 colors = TextFieldDefaults.colors(
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent
