@@ -10,11 +10,13 @@ interface QrDbApi {
     @POST("auth/login")
     suspend fun login(@Body loginRequest: LoginRequest): Response<User>
 
+    // Получить активное занятие для преподавателя
     @GET("lessons/current")
     suspend fun getCurrentLesson(@Query("teacher_id") teacherId: Int): Response<Lesson>
 
-    @POST("attendance/mark")
-    suspend fun markAttendance(@Body grade: GradeRequest): Response<Unit>
+    // Отправить данные в таблицу grades
+    @POST("grades/mark")
+    suspend fun markAttendance(@Body gradeRequest: GradeRequest): Response<Unit>
 }
 
 data class LoginRequest(
@@ -25,5 +27,6 @@ data class LoginRequest(
 data class GradeRequest(
     val lesson_id: Int,
     val student_id: Int,
+    val grade: Int? = null,
     val attendance: Boolean = true
 )
