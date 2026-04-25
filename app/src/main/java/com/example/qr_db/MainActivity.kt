@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.qr_db.admin.ProfileAdminScreen
 import com.example.qr_db.data.User
 import com.example.qr_db.student.ProfileStudentScreen
 import com.example.qr_db.student.StudentScreen
@@ -98,6 +99,21 @@ fun AppNavigation() {
         // Экран администратора
         composable(route = "admin") {
             currentUser?.let { AdminScreen(user = it, navController = navController) }
+        }
+
+        // Экран профиля администратора
+        composable(route = "profile_admin") {
+            currentUser?.let {
+                ProfileAdminScreen(
+                    user = it,
+                    onBack = { navController.popBackStack() },
+                    onLogout = {
+                        navController.navigate("auth") {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    }
+                )
+            }
         }
     }
 }
