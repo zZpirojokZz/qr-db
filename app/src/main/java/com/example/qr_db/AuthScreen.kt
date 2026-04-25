@@ -20,6 +20,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -29,24 +30,34 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.qr_db.data.User
-import com.example.qr_db.data.Role
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.qr_db.data.*
 
 @Composable
 fun AuthScreen(onLoginSuccess: (User, String) -> Unit) {
+    val context = LocalContext.current
+    val sessionManager = remember { SessionManager(context) }
+    val viewModel: AuthViewModel = viewModel(factory = AuthViewModelFactory(sessionManager))
+    val uiState by viewModel.uiState.collectAsState()
+
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
 
-    val mockRoles = listOf(Role(1, "Студент"), Role(2, "Преподаватель"), Role(3, "Админ"))
-    val mockUsers = listOf(
-        User(1, "савелий", "student@test.com", 1),
-        User(2, "игорь", "teacher@test.com", 2),
-        User(3, "данил", "admin@test.com", 3)
-    )
+    // Наблюдаем за успехом входа
+    LaunchedEffect(uiState) {
+        if (uiState is AuthState.Success) {
+            val user = (uiState as AuthState.Success).user
+            val roleName = when(user.roleId) {
+                1 -> "Студент"
+                2 -> "Преподаватель"
+                3 -> "Админ"
+                else -> "Пользователь"
+            }
+            onLoginSuccess(user, roleName)
+        }
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        // ФОН (как на iOS)
         Image(
             painter = painterResource(id = R.drawable.wavy_background),
             contentDescription = null,
@@ -54,20 +65,17 @@ fun AuthScreen(onLoginSuccess: (User, String) -> Unit) {
             contentScale = ContentScale.FillBounds
         )
 
-        // ГЛАВНАЯ КАРТОЧКА (glassCard из iOS)
         Box(
             modifier = Modifier
                 .align(Alignment.Center)
                 .width(330.dp)
                 .height(460.dp)
-                .shadow(elevation = 20.dp, shape = RoundedCornerShape(30.dp), spotColor = Color.Black.copy(alpha = 0.25f))
+                .shadow(elevation = 20.dp, shape = RoundedCornerShape(30.dp))
                 .clip(RoundedCornerShape(30.dp))
                 .background(Color.White.copy(alpha = 0.45f))
                 .border(
                     width = 1.5.dp,
-                    brush = Brush.linearGradient(
-                        colors = listOf(Color.White.copy(alpha = 0.7f), Color.White.copy(alpha = 0.1f))
-                    ),
+                    brush = Brush.linearGradient(listOf(Color.White.copy(alpha = 0.7f), Color.White.copy(alpha = 0.1f))),
                     shape = RoundedCornerShape(30.dp)
                 )
                 .padding(horizontal = 40.dp, vertical = 50.dp)
@@ -77,58 +85,45 @@ fun AuthScreen(onLoginSuccess: (User, String) -> Unit) {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(25.dp)
             ) {
-                Text(
-                    text = "Войдите в аккаунт",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = Color.Black,
-                    modifier = Modifier.padding(top = 10.dp)
-                )
+                Text("Войдите в аккаунт", fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
 
-                Spacer(modifier = Modifier.height(10.dp))
-
-                // Поля ввода (glassField из iOS)
                 AuthGlassField(
                     value = email,
-                    onValueChange = { email = it; errorMessage = null },
+                    onValueChange = { email = it },
                     placeholder = "Электронная почта...",
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next)
                 )
 
                 AuthGlassField(
                     value = password,
-                    onValueChange = { password = it; errorMessage = null },
+                    onValueChange = { password = it },
                     placeholder = "Пароль...",
                     visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done)
                 )
 
-                if (errorMessage != null) {
-                    Text(text = errorMessage!!, color = Color.Red, fontSize = 12.sp)
+                if (uiState is AuthState.Error) {
+                    Text((uiState as AuthState.Error).message, color = Color.Red, fontSize = 12.sp)
                 }
 
                 Spacer(modifier = Modifier.weight(1f))
 
-                // КНОПКА ВХОДА (background glassField из iOS)
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp)
                         .clip(RoundedCornerShape(16.dp))
                         .background(Color(0xFFD9D9D9).copy(alpha = 0.85f))
-                        .border(1.dp, Color.White.copy(alpha = 0.4f), RoundedCornerShape(16.dp))
-                        .clickable {
-                            val foundUser = mockUsers.find { it.email == email }
-                            if (foundUser != null) {
-                                val roleName = mockRoles.find { it.roleId == foundUser.roleId }?.roleName ?: "Неизвестно"
-                                onLoginSuccess(foundUser, roleName)
-                            } else {
-                                errorMessage = "Пользователь не найден"
-                            }
+                        .clickable(enabled = uiState !is AuthState.Loading) {
+                            viewModel.login(email, password)
                         },
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(text = "Войти", fontWeight = FontWeight.SemiBold, fontSize = 18.sp, color = Color.Black)
+                    if (uiState is AuthState.Loading) {
+                        CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color.Black)
+                    } else {
+                        Text("Войти", fontWeight = FontWeight.SemiBold, fontSize = 18.sp)
+                    }
                 }
             }
         }

@@ -21,7 +21,8 @@ class TeacherViewModel : ViewModel() {
     val scanState = _scanState.asStateFlow()
 
     private val api: QrDbApi = Retrofit.Builder()
-        .baseUrl("http://your-server-ip:8080/api/") // Замените на ваш URL
+        // УСТАНОВИЛ ПОРТ 3000 И ТВОЙ IP
+        .baseUrl("http://192.168.1.183:3000/") 
         .addConverterFactory(GsonConverterFactory.create())
         .build()
         .create(QrDbApi::class.java)
@@ -36,7 +37,7 @@ class TeacherViewModel : ViewModel() {
                     currentLesson = response.body()
                 }
             } catch (e: Exception) {
-                // Логика обработки ошибки загрузки урока
+                e.printStackTrace()
             }
         }
     }
@@ -61,16 +62,15 @@ class TeacherViewModel : ViewModel() {
                 if (response.isSuccessful) {
                     _scanState.value = ScanState.Success("Студент отмечен!")
                 } else {
-                    // Обработка ошибки от триггера check_lesson_time
                     val errorMsg = if (response.code() == 400) {
-                        "Ошибка: занятие еще не началось или уже закончилось"
+                        "Ошибка: Вне времени пары"
                     } else {
-                        "Ошибка сервера: ${response.code()}"
+                        "Ошибка сервера"
                     }
                     _scanState.value = ScanState.Error(errorMsg)
                 }
             } catch (e: Exception) {
-                _scanState.value = ScanState.Error("Ошибка сети: ${e.message}")
+                _scanState.value = ScanState.Error("Ошибка сети")
             }
         }
     }

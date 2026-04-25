@@ -14,6 +14,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -29,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.qr_db.data.User
 import com.google.zxing.*
@@ -44,6 +46,9 @@ fun TeacherQrScreen(
     fontScale: Float
 ) {
     val context = LocalContext.current
+    val viewModel: TeacherViewModel = viewModel()
+    val scanState by viewModel.scanState.collectAsState()
+
     var hasCameraPermission by remember {
         mutableStateOf(
             ContextCompat.checkSelfPermission(
@@ -63,6 +68,7 @@ fun TeacherQrScreen(
         if (!hasCameraPermission) {
             launcher.launch(Manifest.permission.CAMERA)
         }
+        viewModel.loadCurrentLesson(user.userId)
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -95,7 +101,7 @@ fun TeacherQrScreen(
             color = Color(0xFFD9D9D9).copy(alpha = 0.5f)
         ) {}
 
-        // ОКНО СКАНЕРА (800x800 как на скриншоте)
+        // ОКНО СКАНЕРА (800x800)
         Box(
             modifier = Modifier
                 .align(Alignment.Center)
@@ -105,7 +111,8 @@ fun TeacherQrScreen(
         ) {
             if (hasCameraPermission) {
                 CameraPreview { result ->
-                    android.util.Log.d("QR_SCAN", "Scanned: $result")
+                    // Вызов ViewModel для отправки данных в БД
+                    viewModel.markAttendance(result)
                 }
             } else {
                 Box(
@@ -116,30 +123,54 @@ fun TeacherQrScreen(
                 }
             }
 
-            // УГОЛКИ (Белые L-образные линии, немного отступают от краев как на картинке)
+            // УГОЛКИ (Белые L-образные линии)
             val cornerSize = getX(90f)
             val thickness = 6.dp
-            val innerOffset = getX(40f) // Отступ уголков внутрь черного квадрата
+            val innerOffset = getX(40f)
 
-            // Верхний левый
             Box(modifier = Modifier.align(Alignment.TopStart).offset(x = innerOffset, y = innerOffset).size(cornerSize)) {
                 Box(modifier = Modifier.fillMaxWidth().height(thickness).clip(CircleShape).background(Color.White))
                 Box(modifier = Modifier.fillMaxHeight().width(thickness).clip(CircleShape).background(Color.White))
             }
-            // Верхний правый
             Box(modifier = Modifier.align(Alignment.TopEnd).offset(x = -innerOffset, y = innerOffset).size(cornerSize)) {
                 Box(modifier = Modifier.fillMaxWidth().height(thickness).clip(CircleShape).background(Color.White))
                 Box(modifier = Modifier.align(Alignment.TopEnd).fillMaxHeight().width(thickness).clip(CircleShape).background(Color.White))
             }
-            // Нижний левый
             Box(modifier = Modifier.align(Alignment.BottomStart).offset(x = innerOffset, y = -innerOffset).size(cornerSize)) {
                 Box(modifier = Modifier.align(Alignment.BottomStart).fillMaxWidth().height(thickness).clip(CircleShape).background(Color.White))
                 Box(modifier = Modifier.fillMaxHeight().width(thickness).clip(CircleShape).background(Color.White))
             }
-            // Нижний правый
             Box(modifier = Modifier.align(Alignment.BottomEnd).offset(x = -innerOffset, y = -innerOffset).size(cornerSize)) {
                 Box(modifier = Modifier.align(Alignment.BottomEnd).fillMaxWidth().height(thickness).clip(CircleShape).background(Color.White))
                 Box(modifier = Modifier.align(Alignment.BottomEnd).fillMaxHeight().width(thickness).clip(CircleShape).background(Color.White))
+            }
+
+            // ИНДИКАТОР ЗАГРУЗКИ / СТАТУСА ПОВЕРХ СКАНЕРА
+            when (scanState) {
+                is ScanState.Loading -> {
+                    Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.3f)), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator(color = Color.White)
+                    }
+                }
+                is ScanState.Success -> {
+                    Box(modifier = Modifier.fillMaxSize().background(Color.Green.copy(alpha = 0.3f)), contentAlignment = Alignment.Center) {
+                        Text((scanState as ScanState.Success).message, color = Color.White, fontWeight = FontWeight.Bold)
+                        LaunchedEffect(Unit) {
+                            kotlinx.coroutines.delay(2000)
+                            viewModel.resetState()
+                        }
+                    }
+                }
+                is ScanState.Error -> {
+                    Box(modifier = Modifier.fillMaxSize().background(Color.Red.copy(alpha = 0.5f)), contentAlignment = Alignment.Center) {
+                        Text((scanState as ScanState.Error).message, color = Color.White, fontWeight = FontWeight.Bold, textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.padding(16.dp))
+                        LaunchedEffect(Unit) {
+                            kotlinx.coroutines.delay(3000)
+                            viewModel.resetState()
+                        }
+                    }
+                }
+                else -> {}
             }
         }
     }
@@ -192,19 +223,16 @@ fun CameraPreview(onQrScanned: (String) -> Unit) {
                     }.decode(binaryBitmap)
                     onQrScanned(result.text)
                 } catch (e: Exception) {
-                    // QR не найден
                 } finally {
                     imageProxy.close()
                 }
             }
 
-            val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
-
             try {
                 cameraProvider.unbindAll()
                 cameraProvider.bindToLifecycle(
                     lifecycleOwner,
-                    cameraSelector,
+                    CameraSelector.DEFAULT_BACK_CAMERA,
                     preview,
                     imageAnalysis
                 )

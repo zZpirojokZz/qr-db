@@ -10,6 +10,9 @@ interface QrDbApi {
     @POST("auth/login")
     suspend fun login(@Body loginRequest: LoginRequest): Response<User>
 
+    @POST("auth/register")
+    suspend fun register(@Body registerRequest: RegisterRequest): Response<User>
+
     @GET("lessons/current")
     suspend fun getCurrentLesson(@Query("teacher_id") teacherId: Int): Response<Lesson>
 
@@ -20,6 +23,13 @@ interface QrDbApi {
 data class LoginRequest(
     val email: String,
     val password_hash: String
+)
+
+data class RegisterRequest(
+    val full_name: String,
+    val email: String,
+    val password_hash: String,
+    val role_id: Int
 )
 
 data class MarkAttendanceRequest(
