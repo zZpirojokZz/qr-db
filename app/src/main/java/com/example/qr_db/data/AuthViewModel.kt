@@ -70,6 +70,9 @@ class AuthViewModel(private val sessionManager: SessionManager) : ViewModel() {
     }
 }
 
+
+
+
 class AuthViewModelFactory(private val sessionManager: SessionManager) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(AuthViewModel::class.java)) {

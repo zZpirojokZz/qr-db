@@ -1,6 +1,6 @@
 const express = require('express');
-const pool = require('./db');
 const cors = require('cors');
+const pool = require('./db');
 
 const app = express();
 app.use(express.json());
@@ -8,14 +8,19 @@ app.use(express.json());
 // Разрешает подключение с других устройств
 app.use(cors());
 
-// Подключаем роуты
+// --- ПОДКЛЮЧАЕМ РОУТЫ ---
 const authRoutes = require('./routes/auth');
 app.use('/auth', authRoutes);
 
 const gradeRoutes = require('./routes/grades');
 app.use('/grades', gradeRoutes);
 
-// Тест подключения к БД
+const scheduleRoutes = require('./routes/schedule');
+app.use('/schedule', scheduleRoutes); 
+
+// --- БАЗОВЫЕ ПРОВЕРКИ ---
+
+// Тест подключения к БД (Я восстановил закрывающие скобки)
 app.get('/test-db', async (req, res) => {
     try {
         const result = await pool.query('SELECT NOW()');
@@ -32,7 +37,6 @@ app.get('/', (req, res) => {
 });
 
 // ЗАПУСК СЕРВЕРА
-// Добавили '0.0.0.0', чтобы телефон мог подключиться к компьютеру по Wi-Fi
 const PORT = 3000;
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server is running on http://0.0.0.0:${PORT}`);

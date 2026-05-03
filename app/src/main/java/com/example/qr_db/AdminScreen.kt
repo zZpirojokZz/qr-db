@@ -1,5 +1,6 @@
 package com.example.qr_db
 
+import androidx.compose.runtime.getValue
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
@@ -21,16 +22,24 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel // <-- Важно для подключения ViewModel
 import androidx.navigation.NavController
 import com.example.qr_db.admin.AdminJournalScreen
 import com.example.qr_db.admin.AdminQrScreen
 import com.example.qr_db.admin.AdminScheduleScreen
+import com.example.qr_db.admin.AdminViewModel // <-- Подключаем нашу логику
 import com.example.qr_db.data.User
 
 @Composable
 fun AdminScreen(user: User, navController: NavController) {
     var selectedTab by remember { mutableIntStateOf(0) }
+
+    // 1. Инициализируем ViewModel
+    val adminViewModel: AdminViewModel = viewModel()
+
+    // 2. "Слушаем" список уроков из базы.
+    // Как только в базе что-то изменится, экран перерисуется сам.
+    val currentSchedule by adminViewModel.scheduleState.collectAsState()
 
     BoxWithConstraints(
         modifier = Modifier
@@ -51,7 +60,6 @@ fun AdminScreen(user: User, navController: NavController) {
             contentScale = ContentScale.FillBounds
         )
 
-        // Контент
         Box(modifier = Modifier.fillMaxSize()) {
             AnimatedContent(
                 targetState = selectedTab,
@@ -62,7 +70,16 @@ fun AdminScreen(user: User, navController: NavController) {
             ) { targetTab ->
                 when (targetTab) {
                     0 -> AdminQrScreen(user, navController, ::getX, ::getY, fontScale)
-                    1 -> AdminJournalScreen(::getX, ::getY, fontScale)
+                    1 -> {
+                        // 3. ПЕРЕДАЕМ РЕАЛЬНЫЕ ДАННЫЕ вместо заглушки
+                        AdminJournalScreen(
+                            currentDate = "03.05.2026",
+                            lessonsList = currentSchedule, // <--- ТЕПЕРЬ ТУТ ДАННЫЕ ИЗ БД
+                            getX = ::getX,
+                            getY = ::getY,
+                            fontScale = fontScale
+                        )
+                    }
                     2 -> AdminScheduleScreen(::getX, ::getY, fontScale)
                 }
             }
@@ -92,17 +109,17 @@ fun AdminNavButton(@DrawableRes iconRes: Int, isSelected: Boolean, onClick: () -
             .clip(shape)
             .background(Color.White.copy(alpha = 0.35f))
             .border(
-                width = if (isSelected) 2.6.dp else 1.dp, 
-                color = if (isSelected) Color.Black.copy(alpha = 0.8f) else Color.Black.copy(alpha = 0.2f), 
+                width = if (isSelected) 2.6.dp else 1.dp,
+                color = if (isSelected) Color.Black.copy(alpha = 0.8f) else Color.Black.copy(alpha = 0.2f),
                 shape = shape
             )
             .clickable { onClick() },
         contentAlignment = Alignment.Center
     ) {
         Icon(
-            painter = painterResource(id = iconRes), 
-            contentDescription = null, 
-            modifier = Modifier.size(38.dp), 
+            painter = painterResource(id = iconRes),
+            contentDescription = null,
+            modifier = Modifier.size(38.dp),
             tint = Color.Black
         )
     }

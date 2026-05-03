@@ -4,11 +4,7 @@ import android.Manifest
 import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.camera.core.CameraSelector
-import androidx.camera.core.ImageAnalysis
-import androidx.camera.core.Preview
-import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.camera.view.PreviewView
+import com.example.qr_db.teacher.CameraPreview
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -22,16 +18,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import com.example.qr_db.data.User
-import com.example.qr_db.teacher.CameraPreview
+
 
 @Composable
 fun AdminQrScreen(
@@ -93,6 +87,22 @@ fun AdminQrScreen(
             color = Color(0xFFD9D9D9).copy(alpha = 0.5f)
         ) {}
 
+
+        if (hasCameraPermission) {
+            CameraPreview { result ->
+                // 1. Извлекаем ID студента (до знака нижнего подчеркивания)
+                val studentId = result.split("_").firstOrNull()?.toIntOrNull()
+
+                if (studentId != null) {
+                    android.util.Log.d("QR_SCAN", "Сканирован студент с ID: $studentId")
+
+                    // 2. Отправляем отметку в базу через ViewModel
+                    // viewModel.markAttendance(studentId)
+
+                    // Можно добавить вибрацию или звук успеха для эффекта
+                }
+            }
+        }
         // ОКНО СКАНЕРА
         Box(
             modifier = Modifier

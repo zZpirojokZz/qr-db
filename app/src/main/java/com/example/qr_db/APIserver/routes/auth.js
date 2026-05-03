@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const pool = require('../db');
+// Обрати внимание на '../db', потому что мы внутри папки routes
+const pool = require('../db'); 
 
 // ЛОГИН (ВРЕМЕННО БЕЗ ШИФРОВАНИЯ ДЛЯ ТЕСТА)
 router.post('/login', async (req, res) => {

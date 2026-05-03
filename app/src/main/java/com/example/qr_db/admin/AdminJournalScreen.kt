@@ -16,10 +16,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.qr_db.student.VStack
-import com.example.qr_db.teacher.TeacherLessonRow
 
 @Composable
 fun AdminJournalScreen(
+    currentDate: String,
+    lessonsList: List<Pair<String, String>>,
     getX: (Float) -> androidx.compose.ui.unit.Dp,
     getY: (Float) -> androidx.compose.ui.unit.Dp,
     fontScale: Float
@@ -28,51 +29,70 @@ fun AdminJournalScreen(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(25.dp)
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.height(60.dp))
 
-        VStack(spacing = 4.dp) {
-            Text(
-                text = "дд.мм.гггг",
-                style = TextStyle(
-                    fontSize = (28 * fontScale).sp,
-                    fontWeight = FontWeight.Black,
-                    color = Color.Black
-                )
+        // ЗАГОЛОВОК С ДАТОЙ
+        Text(
+            text = currentDate,
+            style = TextStyle(
+                fontSize = (28 * fontScale).sp,
+                fontWeight = FontWeight.Black,
+                color = Color.Black // Черная дата
             )
-            Text(
-                text = "Администратор",
-                style = TextStyle(
-                    fontSize = (20 * fontScale).sp,
-                    fontWeight = FontWeight.W900,
-                    color = Color.Black
-                )
-            )
-        }
+        )
 
+        Spacer(modifier = Modifier.height(25.dp))
+
+        // СПИСОК ГРУПП ИЗ БАЗЫ
         VStack(spacing = 17.dp) {
-            val groups = listOf(
-                "{group_name}" to "104",
-                "{group_name}" to "303",
-                "{group_name}" to "400",
-                "{group_name}" to "123"
-            )
-            groups.forEach { (name, room) ->
-                TeacherLessonRow(name, room)
+            lessonsList.forEach { (name, room) ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(55.dp)
+                        .clip(RoundedCornerShape(25.dp))
+                        .background(Color.White.copy(alpha = 0.9f))
+                        .border(1.dp, Color.Black.copy(alpha = 0.1f), RoundedCornerShape(25.dp))
+                        .padding(horizontal = 20.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    // Название группы
+                    Text(
+                        text = name,
+                        style = TextStyle(
+                            fontSize = (18 * fontScale).sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color.Black // ЧЕРНЫЙ
+                        )
+                    )
+
+                    // Номер кабинета
+                    Text(
+                        text = "Каб. $room",
+                        style = TextStyle(
+                            fontSize = (16 * fontScale).sp,
+                            fontWeight = FontWeight.Normal,
+                            color = Color.Black // ЧЕРНЫЙ
+                        )
+                    )
+                }
             }
         }
 
+        Spacer(modifier = Modifier.height(30.dp))
+
+        // КНОПКА СКАЧАТЬ
         Box(
             modifier = Modifier
                 .width(260.dp)
                 .height(52.dp)
                 .clip(RoundedCornerShape(25.dp))
-                .background(Color.White.copy(alpha = 0.45f))
                 .background(Color.White.copy(alpha = 0.9f))
                 .border(2.dp, Color.Black, RoundedCornerShape(25.dp))
-                .clickable { },
+                .clickable { /* Сюда потом добавим логику скачивания */ },
             contentAlignment = Alignment.Center
         ) {
             Text(
@@ -80,7 +100,7 @@ fun AdminJournalScreen(
                 style = TextStyle(
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Medium,
-                    color = Color(0xFF007AFF)
+                    color = Color(0xFF007AFF) // Синий цвет ссылки
                 )
             )
         }
