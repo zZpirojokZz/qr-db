@@ -6,9 +6,7 @@ plugins {
 
 android {
     namespace = "com.example.qr_db"
-    compileSdk {
-        version = release(36)
-    }
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.example.qr_db"
@@ -54,8 +52,25 @@ dependencies {
     // Навигация
     implementation("androidx.navigation:navigation-compose:2.8.5")
 
-    // Gson для сериализации/десериализации JSON
+    // Gson
     implementation("com.google.code.gson:gson:2.10.1")
+
+    // QR Code Generation (ZXing)
+    implementation("com.google.zxing:core:3.5.3")
+    
+    // CameraX
+    implementation(libs.androidx.camera.camera2)
+    implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.androidx.camera.view)
+
+    // Retrofit & OkHttp
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.gson)
+    implementation(libs.okhttp)
+    implementation(libs.okhttp.logging)
+
+    // DataStore
+    implementation(libs.androidx.datastore.preferences)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
@@ -64,4 +79,13 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+
+    val cameraxVersion = "1.3.1"
+    implementation("androidx.camera:camera-core:$cameraxVersion")
+    implementation("androidx.camera:camera-camera2:$cameraxVersion")
+    implementation("androidx.camera:camera-lifecycle:$cameraxVersion")
+    implementation("androidx.camera:camera-view:$cameraxVersion")
+
+    // Для распознавания кодов используем ML Kit (он быстрее и точнее ZXing для камеры)
+    implementation("com.google.mlkit:barcode-scanning:17.2.0")
 }

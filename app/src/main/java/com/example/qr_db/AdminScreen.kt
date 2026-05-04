@@ -1,82 +1,126 @@
 package com.example.qr_db
 
+import androidx.compose.runtime.getValue
+import androidx.annotation.DrawableRes
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel // <-- Важно для подключения ViewModel
+import androidx.navigation.NavController
+import com.example.qr_db.admin.AdminJournalScreen
+import com.example.qr_db.admin.AdminQrScreen
+import com.example.qr_db.admin.AdminScheduleScreen
+import com.example.qr_db.admin.AdminViewModel // <-- Подключаем нашу логику
 import com.example.qr_db.data.User
 
 @Composable
-fun AdminScreen(user: User) {
-    Box(modifier = Modifier.fillMaxSize().background(Color(0xFFD0D0D0))) {
+fun AdminScreen(user: User, navController: NavController) {
+    var selectedTab by remember { mutableIntStateOf(0) }
+
+    // 1. Инициализируем ViewModel
+    val adminViewModel: AdminViewModel = viewModel()
+
+    // 2. "Слушаем" список уроков из базы.
+    // Как только в базе что-то изменится, экран перерисуется сам.
+    val currentSchedule by adminViewModel.scheduleState.collectAsState()
+
+    BoxWithConstraints(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFFD0D0D0))
+    ) {
+        val screenWidth = maxWidth
+        val screenHeight = maxHeight
+
+        fun getX(px: Float) = screenWidth * (px / 1080f)
+        fun getY(px: Float) = screenHeight * (px / 2388f)
+        val fontScale = (screenWidth.value / 360f).coerceIn(0.85f, 1.15f)
+
         Image(
             painter = painterResource(id = R.drawable.wavy_background),
             contentDescription = null,
             modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop
+            contentScale = ContentScale.FillBounds
         )
 
-        Column(
-            modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp, vertical = 48.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            // Шапка администратора
-            Row(
-                modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp))
-                    .background(Color.White.copy(alpha = 0.4f)).padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Column {
-                    Text(text = user.fullName, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                    Text(text = "Администратор", fontSize = 14.sp, color = Color.DarkGray)
+        Box(modifier = Modifier.fillMaxSize()) {
+            AnimatedContent(
+                targetState = selectedTab,
+                transitionSpec = {
+                    fadeIn(animationSpec = tween(200)) togetherWith fadeOut(animationSpec = tween(200))
+                },
+                label = "TabAnimation"
+            ) { targetTab ->
+                when (targetTab) {
+                    0 -> AdminQrScreen(user, navController, ::getX, ::getY, fontScale)
+                    1 -> {
+                        // 3. ПЕРЕДАЕМ РЕАЛЬНЫЕ ДАННЫЕ вместо заглушки
+                        AdminJournalScreen(
+                            currentDate = "03.05.2026",
+                            lessonsList = currentSchedule, // <--- ТЕПЕРЬ ТУТ ДАННЫЕ ИЗ БД
+                            getX = ::getX,
+                            getY = ::getY,
+                            fontScale = fontScale
+                        )
+                    }
+                    2 -> AdminScheduleScreen(::getX, ::getY, fontScale)
                 }
-                Surface(modifier = Modifier.size(40.dp), shape = CircleShape, color = Color.Gray) {}
             }
+        }
 
-            Spacer(modifier = Modifier.height(40.dp))
-
-            // Панель управления админа
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                AdminActionButton("Управление пользователями")
-                AdminActionButton("Управление группами")
-                AdminActionButton("Настройка предметов")
-                AdminActionButton("Просмотр логов")
-            }
-
-            Spacer(modifier = Modifier.weight(1f))
-
-            Text(text = "Режим полного доступа", color = Color.White, fontSize = 14.sp)
+        // НИЖНЕЕ МЕНЮ
+        Row(
+            modifier = Modifier
+                .offset(x = getX(140f), y = getY(2030f))
+                .size(width = getX(800f), height = getY(200f)),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            AdminNavButton(R.drawable.ic_scanner, isSelected = selectedTab == 0) { selectedTab = 0 }
+            AdminNavButton(R.drawable.ic_journal, isSelected = selectedTab == 1) { selectedTab = 1 }
+            AdminNavButton(R.drawable.ic_profile, isSelected = selectedTab == 2) { selectedTab = 2 }
         }
     }
 }
 
 @Composable
-fun AdminActionButton(text: String) {
-    Button(
-        onClick = { /* Логика управления */ },
-        modifier = Modifier.fillMaxWidth().height(56.dp),
-        shape = RoundedCornerShape(16.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = Color.White.copy(alpha = 0.6f),
-            contentColor = Color.Black
-        )
+fun AdminNavButton(@DrawableRes iconRes: Int, isSelected: Boolean, onClick: () -> Unit) {
+    val shape = RoundedCornerShape(24.dp)
+    Box(
+        modifier = Modifier
+            .size(75.dp)
+            .clip(shape)
+            .background(Color.White.copy(alpha = 0.35f))
+            .border(
+                width = if (isSelected) 2.6.dp else 1.dp,
+                color = if (isSelected) Color.Black.copy(alpha = 0.8f) else Color.Black.copy(alpha = 0.2f),
+                shape = shape
+            )
+            .clickable { onClick() },
+        contentAlignment = Alignment.Center
     ) {
-        Text(text = text, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
+        Icon(
+            painter = painterResource(id = iconRes),
+            contentDescription = null,
+            modifier = Modifier.size(38.dp),
+            tint = Color.Black
+        )
     }
 }
