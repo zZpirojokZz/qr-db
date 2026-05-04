@@ -2,12 +2,10 @@ package com.example.qr_db.student
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -26,98 +24,121 @@ fun StudentJournalScreen(
     getY: (Float) -> androidx.compose.ui.unit.Dp,
     fontScale: Float
 ) {
-    Box(modifier = Modifier.fillMaxSize()) {
-        // Заголовок Дата + Группа
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .offset(y = getY(380f)),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(25.dp)
+    ) {
+        Spacer(modifier = Modifier.height(60.dp))
+
+        // ЗАГОЛОВКИ (как в iOS: .black и .heavy)
+        VStack(spacing = 4.dp) {
             Text(
-                text = "Дата",
-                style = TextStyle(fontSize = (20 * fontScale).sp, fontWeight = FontWeight.Medium, color = Color.Black)
+                text = "дд.мм.гггг",
+                style = TextStyle(
+                    fontSize = (28 * fontScale).sp,
+                    fontWeight = FontWeight.Black, // .black в iOS
+                    color = Color.Black
+                )
             )
             Text(
-                text = "{group_name}",
-                style = TextStyle(fontSize = (22 * fontScale).sp, fontWeight = FontWeight.Bold, color = Color.Black)
+                text = "ИС22-4Б",
+                style = TextStyle(
+                    fontSize = (20 * fontScale).sp,
+                    fontWeight = FontWeight.W900, // .heavy в iOS
+                    color = Color.Black
+                )
             )
         }
 
-        // Список предметов
-        Box(
-            modifier = Modifier
-                .offset(x = getX(140f), y = getY(665f))
-                .size(width = getX(800f), height = getY(850f))
-        ) {
+        // СПИСОК ЗАНЯТИЙ (как в iOS ForEach)
+        VStack(spacing = 17.dp) {
             val lessons = listOf(
                 "Предмет, преподаватель" to "104",
                 "Предмет, преподаватель" to "303",
                 "Предмет, преподаватель" to "400",
                 "Предмет, преподаватель" to "123"
             )
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(getY(30f)),
-                modifier = Modifier.fillMaxSize()
-            ) {
-                items(lessons) { (name, room) ->
-                    LessonCard(name, room, getX(800f), getY(176f))
-                }
+            lessons.forEach { (title, room) ->
+                LessonRow(title, room)
             }
         }
 
-        // Кнопка Скачать расписание
-        Button(
-            onClick = {},
+        // КНОПКА СКАЧАТЬ (как в iOS Button)
+        Box(
             modifier = Modifier
-                .offset(x = getX(265f), y = getY(1550f))
-                .size(width = getX(550f), height = getY(110f)),
-            shape = RoundedCornerShape(15.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color.White,
-                contentColor = Color(0xFF0D5B87)
-            ),
-            border = androidx.compose.foundation.BorderStroke(2.dp, Color.Black.copy(alpha = 0.8f)),
-            contentPadding = PaddingValues(0.dp)
+                .width(260.dp) // maxWidth: 260 в iOS
+                .height(52.dp)
+                .clip(RoundedCornerShape(25.dp))
+                .background(Color.White.copy(alpha = 0.45f)) // ultraThinMaterial
+                .background(Color.White.copy(alpha = 0.9f))  // white.opacity(0.9)
+                .border(2.dp, Color.Black, RoundedCornerShape(25.dp))
+                .clickable { },
+            contentAlignment = Alignment.Center
         ) {
             Text(
                 text = "Скачать расписание",
-                fontWeight = FontWeight.Bold,
-                fontSize = (15 * fontScale).sp
+                style = TextStyle(
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = Color(0xFF007AFF) // .blue в iOS
+                )
             )
         }
     }
 }
 
 @Composable
-fun LessonCard(name: String, room: String, width: androidx.compose.ui.unit.Dp, height: androidx.compose.ui.unit.Dp) {
-    val cardShape = RoundedCornerShape(10.dp)
-    Row(
+fun LessonRow(title: String, room: String) {
+    Box(
         modifier = Modifier
-            .size(width, height)
-            .clip(cardShape)
-            .background(Color.White.copy(alpha = 0.65f))
-            .border(2.dp, Color.Black, cardShape)
-            .padding(start = 24.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .fillMaxWidth()
+            .height(60.dp) // height: 60 в iOS
+            .clip(RoundedCornerShape(25.dp))
+            .background(Color.White.copy(alpha = 0.45f)) // ultraThinMaterial
+            .background(Color.White.copy(alpha = 0.7f))  // white.opacity(0.7)
+            .border(2.dp, Color.Black, RoundedCornerShape(25.dp))
     ) {
-        Text(
-            text = name,
-            modifier = Modifier.weight(1f),
-            style = TextStyle(color = Color.Black, fontSize = 16.sp),
-            maxLines = 2
-        )
-        Box(
-            modifier = Modifier
-                .fillMaxHeight()
-                .width(2.dp)
-                .background(Color.Black)
-        )
-        Text(
-            text = room,
-            modifier = Modifier.width(80.dp),
-            textAlign = TextAlign.Center,
-            style = TextStyle(color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-        )
+        Row(
+            modifier = Modifier.fillMaxSize(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = title,
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 16.dp),
+                style = TextStyle(fontSize = 16.sp, color = Color.Black),
+                textAlign = TextAlign.Left
+            )
+
+            // РАЗДЕЛИТЕЛЬ (Divider)
+            Box(
+                modifier = Modifier
+                    .width(1.dp)
+                    .fillMaxHeight()
+                    .background(Color.Gray.copy(alpha = 0.3f))
+            )
+
+            Text(
+                text = room,
+                modifier = Modifier.width(70.dp), // width: 70 в iOS
+                style = TextStyle(fontSize = 17.sp, fontWeight = FontWeight.Medium),
+                textAlign = TextAlign.Center
+            )
+        }
+    }
+}
+
+// Вспомогательный компонент для имитации SwiftUI VStack
+@Composable
+fun VStack(spacing: androidx.compose.ui.unit.Dp, content: @Composable () -> Unit) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(spacing),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        content()
     }
 }
