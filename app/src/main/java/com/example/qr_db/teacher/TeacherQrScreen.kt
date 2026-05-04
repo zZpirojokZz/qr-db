@@ -115,6 +115,16 @@ fun TeacherQrScreen(
                 Box(modifier = Modifier.align(Alignment.BottomEnd).fillMaxHeight().width(thickness).clip(CircleShape).background(Color.White))
             }
 
+            // Внутри TeacherQrScreen.kt в блоке Box сканера
+            if (hasCameraPermission) {
+                CameraPreview { result ->
+
+                    android.util.Log.d("QR_SCAN", "Teacher Scanned: $result")
+
+                    viewModel.markAttendance(result)
+                }
+            }
+
             // Статусы сканирования (Loading/Success/Error)
             when (scanState) {
                 is ScanState.Loading -> {
