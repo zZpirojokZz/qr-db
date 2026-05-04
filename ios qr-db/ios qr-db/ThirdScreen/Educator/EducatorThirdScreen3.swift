@@ -1,10 +1,10 @@
 import SwiftUI
-
-struct StudentThirdScreen: View {
+//Третий экран, поменять данные на основе фигмы
+struct EducatorThirdScreen3: View {
     
     let days = ["9\nФев.", "10\nФев.", "11\nФев.", "12\nФев.", "13\nФев.", "14\nФев."]
     //После БД изменить
-    let subjects = (1...10).map { "\($0)" }
+    let subjects = ["Студент Студентов", "Студентка Студентова", "Студент Студентов", "Студентка Студентова", "Студент Студентов", "Студентка Студентова", "Студент Студентов", "Студентка Студентова", "Студент Студентов", "Студентка Студентова"]
     
     @State private var startIndex: Int = 0
     
@@ -23,21 +23,22 @@ struct StudentThirdScreen: View {
             VStack(spacing: 0) {
                 
                 HStack(spacing: 0) {
-                    TableCellS(text: "Предметы", isHeader: true, width: 100)
+                    TableCellE(text: "Предметы", isHeader: true, width: 100)
                     
                     ForEach(days, id: \.self) { day in
-                        TableCellS(text: day, isHeader: true)
+                        TableCellE(text: day, isHeader: true)
                     }
                     .multilineTextAlignment(.center)
                 }
                 
                 ForEach(visibleSubjects, id: \.self) { subject in
                     HStack(spacing: 0) {
-                        TableCellS(text: subject, width: 100)
+                        TableCellE(text: subject, width: 100)
+                            .multilineTextAlignment(.center)
                     
                         //Пустое место в таблице. После БД изменить
                         ForEach(days, id: \.self) { _ in
-                            TableCellS(text: "")
+                            TableCellE(text: "")
                         }
                     }
                 }
@@ -60,14 +61,14 @@ struct StudentThirdScreen: View {
             
             HStack(spacing: 30) {
                 
-                ImageButtonS(image: "up_button", width: 40) {
+                ImageButtonE(image: "up_button", width: 40) {
                     if startIndex > 0 {
                         startIndex -= 1
                     }
                 }
                 .shadow(color: Color.black.opacity(0.15), radius: 6, x: 0, y: 4)
                 
-                ImageButtonS(image: "down_button", width: 40) {
+                ImageButtonE(image: "down_button", width: 40) {
                     if startIndex < subjects.count - 7 {
                         startIndex += 1
                     }
@@ -77,15 +78,15 @@ struct StudentThirdScreen: View {
 
             HStack(spacing: 25) {
                 
-                ImageButtonS(image: "left_button") {
+                ImageButtonE(image: "left_button") {
                 }
                 .shadow(color: Color.black.opacity(0.15), radius: 6, x: 0, y: 4)
                 
-                ImageButtonS(image: "search_button", width: 106, height: 40) {
+                ImageButtonE(image: "search_button", width: 106, height: 40) {
                 }
                 .shadow(color: Color.black.opacity(0.15), radius: 6, x: 0, y: 4)
                 
-                ImageButtonS(image: "right_button") {
+                ImageButtonE(image: "right_button") {
                 }
                 .shadow(color: Color.black.opacity(0.15), radius: 6, x: 0, y: 4)
             }
@@ -96,7 +97,7 @@ struct StudentThirdScreen: View {
 
 import SwiftUI
 
-struct ImageButtonS: View {
+struct ImageButtonE: View {
     
     let image: String
     var width: CGFloat = 70
@@ -126,7 +127,7 @@ struct ImageButtonS: View {
     }
 }
 
-struct TableCellS: View {
+struct TableCellE: View {
     
     let text: String
     var isHeader: Bool = false
@@ -146,5 +147,5 @@ struct TableCellS: View {
 }
 
 #Preview {
-    StudentThirdScreen()
+    EducatorThirdScreen3()
 }
