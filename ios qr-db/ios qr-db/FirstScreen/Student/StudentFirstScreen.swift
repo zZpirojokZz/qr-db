@@ -42,7 +42,7 @@ struct StudentFirstScreen: View {
                             }
                         }
                         .padding(.top, 60)
-                        .padding(.horizontal, 45)
+                        .padding(.horizontal, 30)
                     }
                     
                     Spacer()
@@ -50,19 +50,19 @@ struct StudentFirstScreen: View {
                     Group {
                         switch selectedPage {
                         case 0:
-                            QRPage()
+                            QRPageS()
                         case 1:
                             StudentSecondScreen()
                         case 2:
                             StudentThirdScreen()
                         default:
-                            QRPage()
+                            QRPageS()
                         }
                     }
                     
                     Spacer()
                     
-                    BottomNavigation(selectedPage: $selectedPage)
+                    BottomNavigationS(selectedPage: $selectedPage)
                         .padding(.bottom, 40)
                 }
                 .animation(.easeInOut(duration: 0.2), value: selectedPage)
@@ -75,7 +75,7 @@ struct StudentFirstScreen: View {
     }
 }
 
-struct BottomNavigation: View {
+struct BottomNavigationS: View {
     
     @Binding var selectedPage: Int
     
@@ -83,16 +83,16 @@ struct BottomNavigation: View {
         
         HStack(spacing: 40) {
             
-            NavButton(icon: "iconsb", index: 0, selectedPage: $selectedPage)
+            NavButtonS(icon: "iconsb", index: 0, selectedPage: $selectedPage)
             
-            NavButton(icon: "iconsb1", index: 1, selectedPage: $selectedPage)
+            NavButtonS(icon: "iconsb1", index: 1, selectedPage: $selectedPage)
             
-            NavButton(icon: "iconsb2", index: 2, selectedPage: $selectedPage)
+            NavButtonS(icon: "iconsb2", index: 2, selectedPage: $selectedPage)
         }
     }
 }
 
-struct NavButton: View {
+struct NavButtonS: View {
     
     let icon: String
     let index: Int
@@ -142,7 +142,7 @@ struct NavButton: View {
     }
 }
 
-struct QRPage: View {
+struct QRPageS: View {
     
     var body: some View {
         
