@@ -4,7 +4,7 @@ struct EducatorThirdScreen3: View {
     
     let days = ["9\nФев.", "10\nФев.", "11\nФев.", "12\nФев.", "13\nФев.", "14\nФев."]
     //После БД изменить
-    let subjects = (1...10).map { "\($0)" }
+    let subjects = ["Студент Студентов", "Студентка Студентова", "Студент Студентов", "Студентка Студентова", "Студент Студентов", "Студентка Студентова", "Студент Студентов", "Студентка Студентова", "Студент Студентов", "Студентка Студентова"]
     
     @State private var startIndex: Int = 0
     
@@ -34,6 +34,7 @@ struct EducatorThirdScreen3: View {
                 ForEach(visibleSubjects, id: \.self) { subject in
                     HStack(spacing: 0) {
                         TableCellE(text: subject, width: 100)
+                            .multilineTextAlignment(.center)
                     
                         //Пустое место в таблице. После БД изменить
                         ForEach(days, id: \.self) { _ in
