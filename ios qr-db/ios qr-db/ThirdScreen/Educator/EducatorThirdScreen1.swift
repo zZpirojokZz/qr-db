@@ -60,7 +60,7 @@ struct EducatorThirdScreen1: View {
             Button {
                 selectedPage = 4
             } label: {
-                Text("Перейти к группе\nИС22-4Б")
+                Text("Перейти к группе\nИС22-4Б") //После БД изменить
                     .font(.system(size: 18, weight: .medium))
                     .foregroundColor(.black)
                     .multilineTextAlignment(.center)

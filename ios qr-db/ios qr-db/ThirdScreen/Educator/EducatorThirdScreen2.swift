@@ -3,7 +3,7 @@ import SwiftUI
 struct EducatorThirdScreen2: View {
     
     @Binding var selectedPage: Int
-    
+    //После БД изменить
     let subjects: [String] = [
         "Физика",
         "Химия",
@@ -21,24 +21,22 @@ struct EducatorThirdScreen2: View {
     
     var body: some View {
         
-        VStack(spacing: 18) {
+        VStack(spacing: 5) {
             
-            Spacer(minLength: 10)
+            Spacer(minLength: 0)
             
             VStack(spacing: 20) {
-                
+                //После БД изменить
                 Text("Группа ИС22-4Б,\nВыберите предмет:")
                     .font(.title3)
                     .multilineTextAlignment(.center)
                 
                 Group {
                     if subjects.count <= maxVisible {
-                        // БЕЗ СКРОЛЛА
                         VStack(spacing: spacing) {
                             subjectList
                         }
                     } else {
-                        // СО СКРОЛЛОМ
                         ScrollView {
                             VStack(spacing: spacing) {
                                 subjectList
@@ -69,16 +67,17 @@ struct EducatorThirdScreen2: View {
             .padding(.horizontal, 20)
             
             ImageButton(image: "back_button") {
-                selectedPage = 3
+                selectedPage = 2
             }
         }
+        .padding(.top, 40)
     }
     
     private var subjectList: some View {
         ForEach(subjects, id: \.self) { subject in
             
             Button {
-                selectedPage = 5
+                selectedPage = 4
             } label: {
                 Text(subject)
                     .font(.system(size: 20, weight: .medium))
