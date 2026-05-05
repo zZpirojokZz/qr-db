@@ -43,7 +43,10 @@ class TeacherViewModel : ViewModel() {
     }
 
     fun markAttendance(studentIdStr: String) {
-        val studentId = studentIdStr.toIntOrNull()
+        // Раньше: studentIdStr.toIntOrNull() — это не работало для "8_0"
+        // Теперь: разделяем по "_" и берем первую часть ("8")
+        val studentId = studentIdStr.split("_").firstOrNull()?.toIntOrNull()
+
         if (studentId == null) {
             _scanState.value = ScanState.Error("Неверный формат QR")
             return
@@ -62,14 +65,15 @@ class TeacherViewModel : ViewModel() {
                 if (response.isSuccessful) {
                     _scanState.value = ScanState.Success("Студент отмечен!")
                 } else {
-                    val errorMsg = if (response.code() == 400) {
-                        "Ошибка: Вне времени пары"
-                    } else {
-                        "Ошибка сервера"
+                    val errorMsg = when (response.code()) {
+                        400 -> "Ошибка: Вне времени пары"
+                        409 -> "Студент уже отмечен" // Полезно добавить обработку 409, если есть в базе
+                        else -> "Ошибка сервера: ${response.code()}"
                     }
                     _scanState.value = ScanState.Error(errorMsg)
                 }
             } catch (e: Exception) {
+                android.util.Log.e("NETWORK_ERROR", "Detail: ${e.message}")
                 _scanState.value = ScanState.Error("Ошибка сети")
             }
         }

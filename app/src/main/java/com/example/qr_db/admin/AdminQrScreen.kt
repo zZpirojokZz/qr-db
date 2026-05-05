@@ -26,7 +26,6 @@ import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import com.example.qr_db.data.User
 
-
 @Composable
 fun AdminQrScreen(
     user: User,
@@ -46,9 +45,7 @@ fun AdminQrScreen(
     }
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
-        onResult = { granted ->
-            hasCameraPermission = granted
-        }
+        onResult = { granted -> hasCameraPermission = granted }
     )
 
     LaunchedEffect(Unit) {
@@ -58,25 +55,28 @@ fun AdminQrScreen(
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        Text(
-            text = user.fullName,
-            style = TextStyle(
-                fontSize = (26 * fontScale).sp, 
-                fontWeight = FontWeight.Bold, 
-                color = Color.Black
-            ),
-            modifier = Modifier.offset(x = getX(121f), y = getY(142f)).width(getX(800f))
-        )
-        Text(
-            text = "Администратор",
-            style = TextStyle(
-                fontSize = (18 * fontScale).sp, 
-                color = Color.Black.copy(alpha = 0.8f)
-            ),
-            modifier = Modifier.offset(x = getX(139f), y = getY(236f)).width(getX(600f))
+        // 1. ФОН
+        // Убедись, что картинка background_waves есть в папке res/drawable
+        androidx.compose.foundation.Image(
+            painter = androidx.compose.ui.res.painterResource(id = com.example.qr_db.R.drawable.wavy_background),
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = androidx.compose.ui.layout.ContentScale.FillBounds
         )
 
-        // АВАТАР
+        // 2. ИМЯ И РОЛЬ
+        Column(modifier = Modifier.offset(x = getX(121f), y = getY(142f))) {
+            Text(
+                text = user.fullName,
+                style = TextStyle(fontSize = (26 * fontScale).sp, fontWeight = FontWeight.Bold, color = Color.White)
+            )
+            Text(
+                text = "Администратор",
+                style = TextStyle(fontSize = (18 * fontScale).sp, color = Color.White.copy(alpha = 0.8f))
+            )
+        }
+
+        // 3. АВАТАР
         Surface(
             modifier = Modifier
                 .offset(x = getX(800f), y = getY(142f))
@@ -87,33 +87,21 @@ fun AdminQrScreen(
             color = Color(0xFFD9D9D9).copy(alpha = 0.5f)
         ) {}
 
-
-        if (hasCameraPermission) {
-            CameraPreview { result ->
-                // 1. Извлекаем ID студента (до знака нижнего подчеркивания)
-                val studentId = result.split("_").firstOrNull()?.toIntOrNull()
-
-                if (studentId != null) {
-                    android.util.Log.d("QR_SCAN", "Сканирован студент с ID: $studentId")
-
-                    // 2. Отправляем отметку в базу через ViewModel
-                    // viewModel.markAttendance(studentId)
-
-                    // Можно добавить вибрацию или звук успеха для эффекта
-                }
-            }
-        }
-        // ОКНО СКАНЕРА
+        // 4. ОКНО СКАНЕРА
         Box(
             modifier = Modifier
                 .align(Alignment.Center)
-                .size(getX(800f)) 
+                .size(getX(800f))
                 .clip(RoundedCornerShape(4.dp))
                 .background(Color.Black)
         ) {
             if (hasCameraPermission) {
                 CameraPreview { result ->
-                    android.util.Log.d("QR_SCAN", "Admin Scanned: $result")
+                    val studentId = result.split("_").firstOrNull()?.toIntOrNull()
+                    if (studentId != null) {
+                        android.util.Log.d("QR_SCAN", "Admin Scanned ID: $studentId")
+                        // viewModel.markAttendance(studentId)
+                    }
                 }
             } else {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -121,11 +109,11 @@ fun AdminQrScreen(
                 }
             }
 
+            // Уголки
             val cornerSize = getX(90f)
             val thickness = 6.dp
             val innerOffset = getX(40f)
 
-            // Уголки
             Box(modifier = Modifier.align(Alignment.TopStart).offset(x = innerOffset, y = innerOffset).size(cornerSize)) {
                 Box(modifier = Modifier.fillMaxWidth().height(thickness).clip(CircleShape).background(Color.White))
                 Box(modifier = Modifier.fillMaxHeight().width(thickness).clip(CircleShape).background(Color.White))

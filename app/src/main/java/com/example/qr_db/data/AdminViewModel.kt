@@ -32,7 +32,7 @@ class AdminViewModel : ViewModel() {
         .build()
 
     private val api: QrDbApi = Retrofit.Builder()
-        .baseUrl("http://192.168.1.183:3000/") // Твой локальный IP
+        .baseUrl("http://192.168.8.100:3000/") // Твой локальный IP
         .client(client)
         .addConverterFactory(GsonConverterFactory.create())
         .build()
@@ -47,10 +47,18 @@ class AdminViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val response = api.getTodaySchedule()
-                val mappedList = response.map { Pair(it.groupName, it.room) }
+
+                val mappedList = response.map {
+                    Pair(
+                        it.groupName ?: "Без группы",
+                        it.room ?: "-"
+                    )
+                }
+
                 _scheduleState.value = mappedList
+
             } catch (e: Exception) {
-                Log.e("AdminViewModel", "Ошибка расписания: ${e.message}")
+                Log.e("AdminViewModel", "Ошибка расписания: ${e.message}", e)
             }
         }
     }
@@ -69,3 +77,10 @@ class AdminViewModel : ViewModel() {
         }
     }
 }
+
+        data class ScheduleEntry(
+            val groupName: String?,
+            val room: String?,
+            val start_time: String?,
+            val end_time: String?
+        )

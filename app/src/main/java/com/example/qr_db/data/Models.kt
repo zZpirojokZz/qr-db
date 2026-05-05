@@ -54,6 +54,8 @@ data class StudentQr(
 
 // 7. Расписание для экрана администратора
 data class ScheduleItem(
-    @SerializedName("group_name") val groupName: String,
-    @SerializedName("room") val room: String
+    val groupName: String?,
+    val room: String?,
+    val start_time: String?,
+    val end_time: String?
 )
