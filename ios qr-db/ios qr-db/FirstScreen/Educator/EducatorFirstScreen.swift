@@ -54,6 +54,10 @@ struct EducatorFirstScreen: View {
                         case 1:
                             EducatorSecondScreen()
                         case 2:
+                            EducatorThirdScreen1(selectedPage: $selectedPage)
+                        case 3:
+                            EducatorThirdScreen2(selectedPage: $selectedPage)
+                        case 4:
                             EducatorThirdScreen3()
                         default:
                             QRPageE()
