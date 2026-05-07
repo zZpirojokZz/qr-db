@@ -4,7 +4,6 @@ import android.Manifest
 import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import com.example.qr_db.teacher.CameraPreview // Оставляем этот импорт
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -63,30 +62,49 @@ fun TeacherQrScreen(
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        // Дизайн шапки (Имя, Группа, Аватар)
+        // ДАННЫЕ СКОПИРОВАНЫ ИЗ StudentQrScreen
         Text(
             text = user.fullName,
-            style = TextStyle(fontSize = (26 * fontScale).sp, fontWeight = FontWeight.Bold),
-            modifier = Modifier.offset(x = getX(121f), y = getY(142f)).width(getX(800f))
+            style = TextStyle(
+                fontSize = (26 * fontScale).sp, 
+                fontWeight = FontWeight.Bold, 
+                color = Color.Black
+            ),
+            modifier = Modifier
+                .offset(x = getX(121f), y = getY(142f))
+                .width(getX(800f))
         )
         Text(
-            text = "{group_name}",
-            style = TextStyle(fontSize = (18 * fontScale).sp, color = Color.Black.copy(alpha = 0.8f)),
-            modifier = Modifier.offset(x = getX(139f), y = getY(236f)).width(getX(600f))
+            text = "{group_name}", // Можно заменить на user.role или оставить как в макете
+            style = TextStyle(
+                fontSize = (18 * fontScale).sp, 
+                color = Color.Black.copy(alpha = 0.8f)
+            ),
+            modifier = Modifier
+                .offset(x = getX(139f), y = getY(236f))
+                .width(getX(600f))
         )
 
+        // АВАТАР (как в StudentQrScreen)
         Surface(
-            modifier = Modifier.offset(x = getX(800f), y = getY(142f)).size(getX(150f)).clip(CircleShape).clickable { navController.navigate("profile_teacher") },
+            modifier = Modifier
+                .offset(x = getX(800f), y = getY(142f))
+                .size(getX(150f))
+                .clip(CircleShape)
+                .clickable { navController.navigate("profile_teacher") },
             shape = CircleShape,
             color = Color(0xFFD9D9D9).copy(alpha = 0.5f)
         ) {}
 
-        // ОКНО СКАНЕРА
+        // ОКНО СКАНЕРА (Координаты из Figma: X 140, Y 670, W 800, H 800)
         Box(
-            modifier = Modifier.align(Alignment.Center).size(getX(800f)).clip(RoundedCornerShape(4.dp)).background(Color.Black)
+            modifier = Modifier
+                .offset(x = getX(140f), y = getY(670f))
+                .size(width = getX(800f), height = getY(800f))
+                .clip(RoundedCornerShape(4.dp))
+                .background(Color.Black)
         ) {
             if (hasCameraPermission) {
-                // ВЫЗОВ ОБЩЕЙ ФУНКЦИИ
                 CameraPreview { result ->
                     viewModel.markAttendance(result)
                 }
@@ -96,36 +114,33 @@ fun TeacherQrScreen(
                 }
             }
 
-            // Уголки сканера (отрисовка Box-ов остается прежней)
-            val cornerSize = getX(90f); val thickness = 6.dp; val innerOffset = getX(40f)
+            // Уголки сканера
+            val cornerSize = getX(90f)
+            val thickness = 6.dp
+            val innerOffset = getX(40f)
+            
+            // Левый верхний
             Box(modifier = Modifier.align(Alignment.TopStart).offset(x = innerOffset, y = innerOffset).size(cornerSize)) {
                 Box(modifier = Modifier.fillMaxWidth().height(thickness).clip(CircleShape).background(Color.White))
                 Box(modifier = Modifier.fillMaxHeight().width(thickness).clip(CircleShape).background(Color.White))
             }
+            // Правый верхний
             Box(modifier = Modifier.align(Alignment.TopEnd).offset(x = -innerOffset, y = innerOffset).size(cornerSize)) {
                 Box(modifier = Modifier.fillMaxWidth().height(thickness).clip(CircleShape).background(Color.White))
                 Box(modifier = Modifier.align(Alignment.TopEnd).fillMaxHeight().width(thickness).clip(CircleShape).background(Color.White))
             }
+            // Левый нижний
             Box(modifier = Modifier.align(Alignment.BottomStart).offset(x = innerOffset, y = -innerOffset).size(cornerSize)) {
                 Box(modifier = Modifier.align(Alignment.BottomStart).fillMaxWidth().height(thickness).clip(CircleShape).background(Color.White))
                 Box(modifier = Modifier.fillMaxHeight().width(thickness).clip(CircleShape).background(Color.White))
             }
+            // Правый нижний
             Box(modifier = Modifier.align(Alignment.BottomEnd).offset(x = -innerOffset, y = -innerOffset).size(cornerSize)) {
                 Box(modifier = Modifier.align(Alignment.BottomEnd).fillMaxWidth().height(thickness).clip(CircleShape).background(Color.White))
                 Box(modifier = Modifier.align(Alignment.BottomEnd).fillMaxHeight().width(thickness).clip(CircleShape).background(Color.White))
             }
 
-            // Внутри TeacherQrScreen.kt в блоке Box сканера
-            if (hasCameraPermission) {
-                CameraPreview { result ->
-
-                    android.util.Log.d("QR_SCAN", "Teacher Scanned: $result")
-
-                    viewModel.markAttendance(result)
-                }
-            }
-
-            // Статусы сканирования (Loading/Success/Error)
+            // Статусы сканирования
             when (scanState) {
                 is ScanState.Loading -> {
                     Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.3f)), contentAlignment = Alignment.Center) {

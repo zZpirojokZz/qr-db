@@ -41,7 +41,7 @@ fun AppNavigation() {
     val navController = rememberNavController()
     val scope = rememberCoroutineScope()
     val sessionManager = remember { SessionManager(context) }
-    
+
     val currentUser by sessionManager.userFlow.collectAsState(initial = null)
 
     // Авто-вход при запуске, если сессия сохранена

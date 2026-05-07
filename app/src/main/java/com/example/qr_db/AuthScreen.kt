@@ -60,7 +60,12 @@ fun AuthScreen(onLoginSuccess: (User, String) -> Unit) {
 
 
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
+    ) {
+
         Image(
             painter = painterResource(id = R.drawable.wavy_background),
             contentDescription = null,
@@ -86,15 +91,16 @@ fun AuthScreen(onLoginSuccess: (User, String) -> Unit) {
             Column(
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(25.dp)
+                verticalArrangement = Arrangement.spacedBy(30.dp)
             ) {
-                Text("Войдите в аккаунт", fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
+                Text("Войдите в аккаунт", color = Color.Black.copy(alpha = 0.5f), fontSize = 20.sp, fontWeight = FontWeight.SemiBold, )
 
                 AuthGlassField(
                     value = email,
                     onValueChange = { email = it },
                     placeholder = "Электронная почта...",
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next)
+
                 )
 
                 AuthGlassField(
@@ -125,7 +131,7 @@ fun AuthScreen(onLoginSuccess: (User, String) -> Unit) {
                     if (uiState is AuthState.Loading) {
                         CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color.Black)
                     } else {
-                        Text("Войти", fontWeight = FontWeight.SemiBold, fontSize = 18.sp)
+                        Text("Войти", color = Color.Black.copy(alpha = 0.5f), fontWeight = FontWeight.SemiBold, fontSize = 18.sp)
                     }
                 }
             }
@@ -156,7 +162,7 @@ fun AuthGlassField(
         visualTransformation = visualTransformation,
         singleLine = true,
         keyboardOptions = keyboardOptions,
-        textStyle = TextStyle(color = Color.Black, fontSize = 16.sp),
+        textStyle = TextStyle(color = Color.Black.copy(alpha = 0.7f), fontSize = 16.sp),
         decorationBox = { innerTextField ->
             TextFieldDefaults.DecorationBox(
                 value = value,
@@ -165,7 +171,7 @@ fun AuthGlassField(
                 singleLine = true,
                 visualTransformation = visualTransformation,
                 interactionSource = interactionSource,
-                placeholder = { Text(placeholder, color = Color.Black.copy(alpha = 0.6f), fontSize = 16.sp) },
+                placeholder = { Text(placeholder, color = Color.Black.copy(alpha = 0.42f), fontSize = 16.sp) },
                 container = {},
                 contentPadding = PaddingValues(horizontal = 16.dp),
                 colors = TextFieldDefaults.colors(

@@ -29,9 +29,11 @@ data class Lesson(
     @SerializedName("lesson_id") val lessonId: Int,
     @SerializedName("teacher_id") val teacherId: Int,
     @SerializedName("group_id") val groupId: Int,
-    @SerializedName("subject") val subject: String, // В SQL это character varying(100)
+    @SerializedName("subject") val subject: String,
     @SerializedName("start_time") val startTime: String, // ISO timestamp
-    @SerializedName("end_time") val endTime: String     // ISO timestamp
+    @SerializedName("end_time") val endTime: String,     // ISO timestamp
+    @SerializedName("room") val room: String?,           // Добавили кабинет
+    @SerializedName("group_name") val groupName: String? // Добавили имя группы (для Join)
 )
 
 // 5. Оценки и Посещаемость (Grades)

@@ -20,17 +20,25 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.qr_db.data.User
 import com.example.qr_db.teacher.TeacherJournalScreen
 import com.example.qr_db.teacher.TeacherQrScreen
 import com.example.qr_db.teacher.TeacherScheduleScreen
+import com.example.qr_db.teacher.TeacherViewModel
 
 @Composable
 fun TeacherScreen(user: User, navController: NavController) {
     var selectedTab by remember { mutableIntStateOf(0) }
+    val viewModel: TeacherViewModel = viewModel()
+    val lessons by viewModel.lessonsState.collectAsState()
+
+    LaunchedEffect(user.userId) {
+        viewModel.loadLessons(user.userId)
+    }
 
     BoxWithConstraints(
         modifier = Modifier
@@ -40,10 +48,12 @@ fun TeacherScreen(user: User, navController: NavController) {
         val screenWidth = maxWidth
         val screenHeight = maxHeight
 
-        fun getX(px: Float) = screenWidth * (px / 1080f)
-        fun getY(px: Float) = screenHeight * (px / 2388f)
+        // Характеристики по сетке 1080 x 2388 из Figma
+        fun getX(px: Float): Dp = screenWidth * (px / 1080f)
+        fun getY(px: Float): Dp = screenHeight * (px / 2388f)
         val fontScale = (screenWidth.value / 360f).coerceIn(0.85f, 1.15f)
 
+        // Фоновый рисунок
         Image(
             painter = painterResource(id = R.drawable.wavy_background),
             contentDescription = null,
@@ -51,24 +61,32 @@ fun TeacherScreen(user: User, navController: NavController) {
             contentScale = ContentScale.FillBounds
         )
 
-        // Контент
+        // Контент экранов
         Box(modifier = Modifier.fillMaxSize()) {
-            AnimatedContent(
-                targetState = selectedTab,
-                transitionSpec = {
-                    fadeIn(animationSpec = tween(200)) togetherWith fadeOut(animationSpec = tween(200))
-                },
-                label = "TabAnimation"
-            ) { targetTab ->
-                when (targetTab) {
-                    0 -> TeacherQrScreen(user, navController, ::getX, ::getY, fontScale)
-                    1 -> TeacherJournalScreen(::getX, ::getY, fontScale)
-                    2 -> TeacherScheduleScreen(::getX, ::getY, fontScale)
-                }
+            when (selectedTab) {
+                0 -> TeacherQrScreen(
+                    user = user,
+                    navController = navController,
+                    getX = ::getX,
+                    getY = ::getY,
+                    fontScale = fontScale
+                )
+                1 -> TeacherJournalScreen(
+                    currentDate = "07.05.2026",
+                    lessons = lessons,
+                    getX = ::getX,
+                    getY = ::getY,
+                    fontScale = fontScale
+                )
+                2 -> TeacherScheduleScreen(
+                    getX = ::getX,
+                    getY = ::getY,
+                    fontScale = fontScale
+                )
             }
         }
 
-        // НИЖНЕЕ МЕНЮ (Стиль как у Студента - точно по фото)
+        // НИЖНЕЕ МЕНЮ (Позиционирование по сетке)
         Row(
             modifier = Modifier
                 .offset(x = getX(140f), y = getY(2030f))
@@ -92,17 +110,17 @@ fun NavButton(@DrawableRes iconRes: Int, isSelected: Boolean, onClick: () -> Uni
             .clip(shape)
             .background(Color.White.copy(alpha = 0.35f))
             .border(
-                width = if (isSelected) 2.6.dp else 1.dp, 
-                color = if (isSelected) Color.Black.copy(alpha = 0.8f) else Color.Black.copy(alpha = 0.2f), 
+                width = if (isSelected) 2.6.dp else 1.dp,
+                color = if (isSelected) Color.Black.copy(alpha = 0.8f) else Color.Black.copy(alpha = 0.2f),
                 shape = shape
             )
             .clickable { onClick() },
         contentAlignment = Alignment.Center
     ) {
         Icon(
-            painter = painterResource(id = iconRes), 
-            contentDescription = null, 
-            modifier = Modifier.size(38.dp), 
+            painter = painterResource(id = iconRes),
+            contentDescription = null,
+            modifier = Modifier.size(38.dp),
             tint = Color.Black
         )
     }
