@@ -38,6 +38,15 @@ fun TeacherQrScreen(
     val context = LocalContext.current
     val viewModel: TeacherViewModel = viewModel()
     val scanState by viewModel.scanState.collectAsState()
+    val currentLesson by viewModel.currentLessonState.collectAsState()
+
+    LaunchedEffect(user.userId) {
+        while (true) {
+            viewModel.loadCurrentLesson(user.userId)
+            kotlinx.coroutines.delay(10000)
+        }
+    }
+
 
     var hasCameraPermission by remember {
         mutableStateOf(
@@ -54,12 +63,7 @@ fun TeacherQrScreen(
         }
     )
 
-    LaunchedEffect(Unit) {
-        if (!hasCameraPermission) {
-            launcher.launch(Manifest.permission.CAMERA)
-        }
-        viewModel.loadCurrentLesson(user.userId)
-    }
+
 
     Box(modifier = Modifier.fillMaxSize()) {
         // ДАННЫЕ СКОПИРОВАНЫ ИЗ StudentQrScreen
@@ -75,7 +79,7 @@ fun TeacherQrScreen(
                 .width(getX(800f))
         )
         Text(
-            text = "{group_name}", // Можно заменить на user.role или оставить как в макете
+            text = currentLesson?.groupName ?: "Нет активной пары", // Можно заменить на user.role или оставить как в макете
             style = TextStyle(
                 fontSize = (18 * fontScale).sp, 
                 color = Color.Black.copy(alpha = 0.8f)

@@ -31,11 +31,14 @@ class TeacherViewModel : ViewModel() {
     private val _lessonsState = MutableStateFlow<List<Lesson>>(emptyList())
     val lessonsState: StateFlow<List<Lesson>> = _lessonsState.asStateFlow()
 
+    private val _currentLessonState = MutableStateFlow<Lesson?>(null)
+    val currentLessonState: StateFlow<Lesson?> = _currentLessonState.asStateFlow()
+
     // ==========================================
     // НАСТРОЙКА API
     // ==========================================
     private val api: QrDbApi = Retrofit.Builder()
-        .baseUrl("http://192.168.1.183:3000/")
+        .baseUrl("http://192.168.1.184:3000/")
         .addConverterFactory(GsonConverterFactory.create())
         .build()
         .create(QrDbApi::class.java)
@@ -48,12 +51,18 @@ class TeacherViewModel : ViewModel() {
     fun loadCurrentLesson(teacherId: Int) {
         viewModelScope.launch {
             try {
-                val response = api.getCurrentLesson(teacherId)
+                val response = api.getCurrentTeacherLesson(teacherId)
                 if (response.isSuccessful) {
                     currentLesson = response.body()
+                    _currentLessonState.value = response.body()
+                } else {
+                    currentLesson = null
+                    _currentLessonState.value = null
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
+                currentLesson = null
+                _currentLessonState.value = null
             }
         }
     }
@@ -106,7 +115,9 @@ class TeacherViewModel : ViewModel() {
                 val response = api.getTeacherLessons(teacherId)
                 if (response.isSuccessful) {
                     _lessonsState.value = response.body() ?: emptyList()
+
                 }
+
             } catch (e: Exception) {
                 e.printStackTrace()
             }

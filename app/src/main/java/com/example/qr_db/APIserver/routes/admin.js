@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../db'); // Путь к твоему файлу db.js
 
+
 // --- УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЯМИ ---
 
 // Получить всех пользователей
@@ -40,6 +41,18 @@ router.delete('/users/:id', async (req, res) => {
 
 // --- УПРАВЛЕНИЕ ПАРАМИ (LESSONS) ---
 
+function localToUTC(dateStr, offsetHours = 0) {
+    if (!dateStr) return null;
+
+    // dateStr приходит как "2026-05-08T14:30"
+    const date = new Date(dateStr);
+
+    // Вычитаем локальный offset
+    date.setHours(date.getHours() - offsetHours);
+
+    return date.toISOString();
+}
+
 // Получить все пары с именами препода и группы
 router.get('/lessons', async (req, res) => {
     try {
@@ -58,21 +71,40 @@ router.get('/lessons', async (req, res) => {
 
 // Добавить пару
 router.post('/lessons', async (req, res) => {
-    const { teacher_id, group_id, subject, start_time, end_time, room } = req.body;
+    const {
+        teacher_id,
+        group_id,
+        subject,
+        start_time,
+        end_time,
+        room,
+        timezone_offset_hours
+    } = req.body;
 
-    // Проверка на пустые значения
     if (!teacher_id || !group_id || !subject || !start_time || !end_time) {
         return res.status(400).json({
-            error: 'Пожалуйста, заполните все обязательные поля (преподаватель, группа, предмет, время начала и окончания)'
+            error: 'Пожалуйста, заполните все обязательные поля'
         });
     }
 
+    const offset = timezone_offset_hours || 0;
+
     try {
         const result = await pool.query(
-            `INSERT INTO lessons (teacher_id, group_id, subject, start_time, end_time, room)
-             VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-            [teacher_id, group_id, subject, start_time, end_time, room]
+            `INSERT INTO lessons
+            (teacher_id, group_id, subject, start_time, end_time, room)
+            VALUES ($1, $2, $3, $4, $5, $6)
+            RETURNING *`,
+            [
+                teacher_id,
+                group_id,
+                subject,
+                localToUTC(start_time, offset),
+                localToUTC(end_time, offset),
+                room
+            ]
         );
+
         res.json(result.rows[0]);
     } catch (err) {
         console.error(err);
@@ -109,5 +141,74 @@ router.get('/groups', async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
+
+
+
+
+
+// Получить текущую пару преподавателя
+router.get('/teacher/current-lesson/:id', async (req, res) => {
+    const teacherId = req.params.id;
+    const now = new Date().toISOString();
+
+    try {
+        const result = await pool.query(`
+            SELECT l.lesson_id, l.subject, l.start_time, l.end_time,
+                   g.group_id, g.group_name
+            FROM lessons l
+            JOIN groups g ON l.group_id = g.group_id
+            WHERE l.teacher_id = $1
+              AND l.start_time <= $2
+              AND l.end_time >= $2
+            LIMIT 1
+        `, [teacherId, now]);
+
+        if (result.rows.length === 0) {
+            return res.json(null); // Нет активной пары
+        }
+
+        res.json(result.rows[0]);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+
+// Текущая пара студента
+router.get('/student/current-lesson/:id', async (req, res) => {
+
+    const studentId = req.params.id;
+
+    try {
+
+        const result = await pool.query(`
+            SELECT
+                l.lesson_id,
+                l.subject,
+                l.start_time,
+                l.end_time,
+                l.group_id,
+                g.group_name
+            FROM lessons l
+            JOIN group_students gs ON l.group_id = gs.group_id
+            JOIN groups g ON l.group_id = g.group_id
+            WHERE gs.student_id = $1
+              AND l.start_time <= NOW()
+              AND l.end_time >= NOW()
+            LIMIT 1
+        `, [studentId]);
+
+        if (result.rows.length === 0) {
+            return res.json(null);
+        }
+
+        res.json(result.rows[0]);
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Ошибка сервера' });
+    }
+});
+
 
 module.exports = router;

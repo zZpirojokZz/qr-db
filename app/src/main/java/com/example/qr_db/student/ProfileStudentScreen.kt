@@ -112,7 +112,7 @@ fun ProfileStudentScreen(user: User, onBack: () -> Unit, onLogout: () -> Unit) {
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "ИС22-4Б",
+                            text = user.groupName ?: "Группа не указана",
                             style = TextStyle(fontSize = getSp(54f), fontWeight = FontWeight.Medium, color = Color.Black)
                         )
                     }

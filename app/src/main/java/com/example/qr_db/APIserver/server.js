@@ -16,6 +16,8 @@ app.use('/grades', gradeRoutes);
 const scheduleRoutes = require('./routes/schedule');
 app.use('/schedule', scheduleRoutes);
 
+
+
 const adminRoutes = require('./routes/admin');
 app.use('/admin', adminRoutes);
 

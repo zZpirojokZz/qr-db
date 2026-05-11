@@ -14,7 +14,9 @@ data class User(
     @SerializedName("full_name") val fullName: String,
     @SerializedName("email") val email: String?,
     @SerializedName("role_id") val roleId: Int,
-    @SerializedName("created_at") val createdAt: String? = null
+    @SerializedName("created_at") val createdAt: String? = null,
+
+    @SerializedName("group_name") val groupName: String? = null // ✅ ДОБАВИТЬ
 )
 
 // 3. Группы (Groups)

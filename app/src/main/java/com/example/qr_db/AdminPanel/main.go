@@ -265,7 +265,7 @@ func main() {
 
 <script>
 
-	const API = 'http://192.168.1.183:3000';
+	const API = 'http://192.168.1.184:3000';
 
 	function openTab(tabId, btn) {
 
@@ -586,73 +586,46 @@ func main() {
     }
 
 	async function addLesson() {
+        const startInput = document.getElementById('l-start').value;
+        const endInput = document.getElementById('l-end').value;
+        const offset = -new Date().getTimezoneOffset() / 60;
 
-		const startInput =
-			document.getElementById('l-start').value;
+        if (!startInput || !endInput) {
+            alert('Укажите время');
+            return;
+        }
 
-		const endInput =
-			document.getElementById('l-end').value;
+        const data = {
+            teacher_id: parseInt(document.getElementById('l-teacher').value),
+            group_id: parseInt(document.getElementById('l-group').value),
+            subject: document.getElementById('l-subject').value.trim(),
+            start_time: startInput,
+            end_time: endInput,
+            room: document.getElementById('l-room').value.trim(),
+            timezone_offset_hours: offset
+        };
 
-		if (!startInput || !endInput) {
+        try {
+            const res = await fetch(API + '/admin/lessons', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
 
-			alert('Укажите время');
-
-			return;
-		}
-
-		const data = {
-
-			teacher_id:
-				parseInt(document.getElementById('l-teacher').value),
-
-			group_id:
-				parseInt(document.getElementById('l-group').value),
-
-			subject:
-				document.getElementById('l-subject')
-					.value.trim(),
-
-			start_time: startInput,
-
-			end_time: endInput,
-
-			room:
-				document.getElementById('l-room')
-					.value.trim()
-		};
-
-		try {
-
-			const res =
-				await fetch(API + '/admin/lessons', {
-
-				method: 'POST',
-
-				headers: {
-					'Content-Type': 'application/json'
-				},
-
-				body: JSON.stringify(data)
-			});
-
-			if (res.ok) {
-
-				alert('Пара добавлена');
-
-				loadLessons();
-
-			} else {
-
-				alert('Ошибка');
-
-			}
-
-		} catch (e) {
-
-			console.error(e);
-
-		}
-	}
+            if (res.ok) {
+                alert('Пара добавлена');
+                loadLessons();
+            } else {
+                const err = await res.json();
+                alert('Ошибка: ' + (err.error || 'неизвестная ошибка'));
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Ошибка сети');
+        }
+    }
 
 	async function deleteLesson(id) {
 

@@ -90,3 +90,5 @@ INSERT INTO roles (role_id, role_name) VALUES
 (1, 'student'),
 (2, 'teacher'),
 (3, 'admin');
+
+
