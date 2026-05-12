@@ -14,7 +14,7 @@ import com.example.qr_db.data.Lesson
 class StudentViewModel : ViewModel() {
 
     private val api: QrDbApi = Retrofit.Builder()
-        .baseUrl("http://192.168.1.184:3000/")
+        .baseUrl("http://192.168.8.100:3000/")
         .addConverterFactory(GsonConverterFactory.create())
         .build()
         .create(QrDbApi::class.java)

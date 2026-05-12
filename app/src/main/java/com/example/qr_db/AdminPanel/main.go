@@ -154,6 +154,10 @@ func main() {
 				<option value="3">Админ</option>
 			</select>
 
+			<select id="u-group">
+                <option value="">Без группы</option>
+            </select>
+
 			<input id="u-pass" placeholder="Пароль">
 
 			<button class="btn btn-add"
@@ -265,7 +269,7 @@ func main() {
 
 <script>
 
-	const API = 'http://192.168.1.184:3000';
+	const API = 'http://192.168.8.100:3000';
 
 	function openTab(tabId, btn) {
 
@@ -344,19 +348,14 @@ func main() {
 	async function addUser() {
 
 		const data = {
-
-			full_name:
-				document.getElementById('u-name').value.trim(),
-
-			email:
-				document.getElementById('u-email').value.trim(),
-
-			password_hash:
-				document.getElementById('u-pass').value.trim(),
-
-			role_id:
-				parseInt(document.getElementById('u-role').value)
-		};
+            full_name: document.getElementById('u-name').value.trim(),
+            email: document.getElementById('u-email').value.trim(),
+            password_hash: document.getElementById('u-pass').value.trim(),
+            role_id: parseInt(document.getElementById('u-role').value),
+            group_id: document.getElementById('u-group').value
+                ? parseInt(document.getElementById('u-group').value)
+                : null
+        };
 
 		try {
 
@@ -663,6 +662,14 @@ func main() {
 
 			]);
 
+            const groupSelect = document.getElementById('u-group');
+            groupSelect.innerHTML = '<option value="">Без группы</option>';
+
+            groups.forEach(function(g) {
+                groupSelect.innerHTML +=
+                    '<option value="' + g.group_id + '">' + g.group_name + '</option>';
+            });
+
 			const teachers =
 				await responses[0].json();
 
@@ -687,6 +694,8 @@ func main() {
 					t.full_name +
 					'</option>';
 			});
+
+
 
 			groups.forEach(function(g) {
 

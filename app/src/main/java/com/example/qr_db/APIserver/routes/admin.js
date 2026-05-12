@@ -16,15 +16,31 @@ router.get('/users', async (req, res) => {
 });
 
 // Добавить пользователя
+// Добавить пользователя + привязать к группе
 router.post('/users', async (req, res) => {
-    const { full_name, email, password_hash, role_id } = req.body;
+    const { full_name, email, password_hash, role_id, group_id } = req.body;
+
     try {
         const result = await pool.query(
-            'INSERT INTO users (full_name, email, password_hash, role_id) VALUES ($1, $2, $3, $4) RETURNING *',
+            `INSERT INTO users (full_name, email, password_hash, role_id)
+             VALUES ($1, $2, $3, $4)
+             RETURNING *`,
             [full_name, email, password_hash, role_id]
         );
-        res.json(result.rows[0]);
+
+        const newUser = result.rows[0];
+
+        if (role_id == 1 && group_id) {
+            await pool.query(
+                `INSERT INTO group_students (group_id, student_id)
+                 VALUES ($1, $2)`,
+                [group_id, newUser.user_id]
+            );
+        }
+
+        res.json(newUser);
     } catch (err) {
+        console.error(err);
         res.status(500).json({ error: err.message });
     }
 });

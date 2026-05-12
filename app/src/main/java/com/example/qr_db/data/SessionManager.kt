@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "user_session")
-
+private val GROUP_NAME = stringPreferencesKey("group_name")
 class SessionManager(private val context: Context) {
 
     companion object {
@@ -27,6 +27,7 @@ class SessionManager(private val context: Context) {
             preferences[FULL_NAME] = user.fullName
             preferences[ROLE_ID] = user.roleId
             preferences[EMAIL] = user.email ?: ""
+            preferences[GROUP_NAME] = user.groupName ?: ""
         }
     }
 
@@ -37,7 +38,8 @@ class SessionManager(private val context: Context) {
                 userId = id,
                 fullName = preferences[FULL_NAME] ?: "",
                 email = preferences[EMAIL],
-                roleId = preferences[ROLE_ID] ?: 1
+                roleId = preferences[ROLE_ID] ?: 1,
+                groupName = preferences[GROUP_NAME]
             )
         } else null
     }

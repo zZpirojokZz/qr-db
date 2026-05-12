@@ -32,6 +32,7 @@ router.post('/login', async (req, res) => {
         // ПРЯМОЕ СРАВНЕНИЕ ТЕКСТА (БЕЗ BCRYPT)
         if (finalPassword.trim() === user.password_hash.trim()) {
             console.log("УСПЕХ: Пароли совпали!");
+            console.log("LOGIN RESULT:", user);
             return res.json({
                 user_id: user.user_id,
                 full_name: user.full_name,
