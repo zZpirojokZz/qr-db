@@ -87,6 +87,7 @@ router.get('/lessons', async (req, res) => {
 
 // Добавить пару
 router.post('/lessons', async (req, res) => {
+
     const {
         teacher_id,
         group_id,
@@ -94,6 +95,7 @@ router.post('/lessons', async (req, res) => {
         start_time,
         end_time,
         room,
+        lesson_type,
         timezone_offset_hours
     } = req.body;
 
@@ -106,10 +108,19 @@ router.post('/lessons', async (req, res) => {
     const offset = timezone_offset_hours || 0;
 
     try {
+
         const result = await pool.query(
             `INSERT INTO lessons
-            (teacher_id, group_id, subject, start_time, end_time, room)
-            VALUES ($1, $2, $3, $4, $5, $6)
+            (
+                teacher_id,
+                group_id,
+                subject,
+                start_time,
+                end_time,
+                room,
+                lesson_type
+            )
+            VALUES ($1, $2, $3, $4, $5, $6, $7)
             RETURNING *`,
             [
                 teacher_id,
@@ -117,14 +128,20 @@ router.post('/lessons', async (req, res) => {
                 subject,
                 localToUTC(start_time, offset),
                 localToUTC(end_time, offset),
-                room
+                room,
+                lesson_type || 'normal'
             ]
         );
 
         res.json(result.rows[0]);
+
     } catch (err) {
+
         console.error(err);
-        res.status(500).json({ error: err.message });
+
+        res.status(500).json({
+            error: err.message
+        });
     }
 });
 
@@ -158,7 +175,32 @@ router.get('/groups', async (req, res) => {
     }
 });
 
+// Создать группу
+router.post('/groups', async (req, res) => {
+  const { group_name, starosta_id } = req.body;
 
+  if (!group_name || !group_name.trim()) {
+    return res.status(400).json({ error: 'group_name обязателен' });
+  }
+
+  try {
+    const result = await pool.query(
+      `INSERT INTO groups (group_name, starosta_id)
+       VALUES ($1, $2)
+       RETURNING *`,
+      [group_name.trim(), starosta_id ?? null]
+    );
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    // уникальность group_name
+    if (err.code === '23505') {
+      return res.status(409).json({ error: 'Такая группа уже существует' });
+    }
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
 
 
 

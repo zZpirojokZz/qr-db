@@ -16,16 +16,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.Dp
 import androidx.navigation.NavController
 import com.example.qr_db.R
 import com.example.qr_db.data.User
 import com.example.qr_db.generateQrCode
 
+
+
 @Composable
 fun StudentScreen(user: User, navController: NavController) {
     var selectedTab by remember { mutableIntStateOf(0) }
     var qrVersion by remember { mutableIntStateOf(0) }
-    
+
     val qrBitmap = remember(user.userId, qrVersion) {
         generateQrCode("${user.userId}_$qrVersion", 1024)
     }
@@ -59,18 +62,22 @@ fun StudentScreen(user: User, navController: NavController) {
                 fontScale = fontScale,
                 onQrClick = { qrVersion++ }
             )
+
             1 -> StudentJournalScreen(
+                user = user,
                 getX = ::getX,
                 getY = ::getY,
                 fontScale = fontScale
             )
+
             2 -> StudentScheduleScreen(
+                userId = user.userId,
+                groupName = user.groupName,
                 getX = ::getX,
                 getY = ::getY,
                 fontScale = fontScale
             )
         }
-
         // НИЖНЕЕ МЕНЮ
         Row(
             modifier = Modifier
@@ -86,27 +93,29 @@ fun StudentScreen(user: User, navController: NavController) {
     }
 }
 
-@Composable
-fun NavButton(@DrawableRes iconRes: Int, isSelected: Boolean, onClick: () -> Unit) {
-    val shape = RoundedCornerShape(24.dp)
-    Box(
-        modifier = Modifier
-            .size(75.dp)
-            .clip(shape)
-            .background(Color.White.copy(alpha = 0.35f))
-            .border(
-                width = if (isSelected) 2.6.dp else 1.dp, 
-                color = if (isSelected) Color.Black.copy(alpha = 0.8f) else Color.Black.copy(alpha = 0.2f), 
-                shape = shape
+    @Composable
+    fun NavButton(@DrawableRes iconRes: Int, isSelected: Boolean, onClick: () -> Unit) {
+        val shape = RoundedCornerShape(24.dp)
+        Box(
+            modifier = Modifier
+                .size(75.dp)
+                .clip(shape)
+                .background(Color.White.copy(alpha = 0.35f))
+                .border(
+                    width = if (isSelected) 2.6.dp else 1.dp,
+                    color = if (isSelected) Color.Black.copy(alpha = 0.8f) else Color.Black.copy(
+                        alpha = 0.2f
+                    ),
+                    shape = shape
+                )
+                .clickable { onClick() },
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                painter = painterResource(id = iconRes),
+                contentDescription = null,
+                modifier = Modifier.size(38.dp),
+                tint = Color.Black
             )
-            .clickable { onClick() },
-        contentAlignment = Alignment.Center
-    ) {
-        Icon(
-            painter = painterResource(id = iconRes), 
-            contentDescription = null, 
-            modifier = Modifier.size(38.dp), 
-            tint = Color.Black
-        )
+        }
     }
-}

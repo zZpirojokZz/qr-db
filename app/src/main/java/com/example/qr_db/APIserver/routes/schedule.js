@@ -2,6 +2,11 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../db');
 
+
+
+
+
+
 router.get('/today', async (req, res) => {
     try {
         const result = await pool.query(`
@@ -22,5 +27,43 @@ router.get('/today', async (req, res) => {
         res.status(500).json({ error: 'Внутренняя ошибка сервера' });
     }
 });
+
+// Расписание студента на сегодня
+router.get('/student/:id', async (req, res) => {
+
+    const studentId = req.params.id;
+
+    try {
+
+        const result = await pool.query(`
+            SELECT
+                l.lesson_id,
+                l.lesson_type,
+                l.subject,
+                l.room,
+                l.start_time,
+                l.end_time,
+                u.full_name AS teacher_name,
+                g.group_name
+            FROM lessons l
+            JOIN users u ON l.teacher_id = u.user_id
+            JOIN groups g ON l.group_id = g.group_id
+            JOIN group_students gs ON l.group_id = gs.group_id
+            WHERE gs.student_id = $1
+            ORDER BY l.start_time ASC
+        `, [studentId]);
+
+        res.json(result.rows);
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Ошибка сервера' });
+    }
+});
+
+
+
+
+
 
 module.exports = router;

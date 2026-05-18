@@ -34,6 +34,17 @@ interface QrDbApi {
         @Path("id") teacherId: Int
     ): Response<Lesson>
 
+    @GET("schedule/student/{id}")
+    suspend fun getStudentSchedule(
+        @Path("id") studentId: Int
+    ): Response<List<StudentScheduleItem>>
+
+    @GET("grades/student-journal/{id}")
+    suspend fun getStudentJournal(
+        @Path("id") studentId: Int
+    ): Response<List<JournalItem>>
+
+
     @GET("admin/student/current-lesson/{id}")
     suspend fun getCurrentStudentLesson(
         @Path("id") studentId: Int

@@ -96,3 +96,39 @@ router.get('/status', async (req, res) => {
         res.status(500).json({ error: 'Ошибка сервера' });
     }
 });
+
+// Журнал студента
+router.get('/student-journal/:id', async (req, res) => {
+
+    const studentId = req.params.id;
+
+    try {
+
+        const result = await pool.query(`
+            SELECT
+                l.subject,
+                DATE(l.start_time) as lesson_date,
+                g.grade,
+                g.attendance,
+                l.lesson_type
+            FROM grades g
+
+            JOIN lessons l
+                ON g.lesson_id = l.lesson_id
+
+            WHERE g.student_id = $1
+
+            ORDER BY l.start_time ASC
+        `, [studentId]);
+
+        res.json(result.rows);
+
+    } catch (err) {
+
+        console.error(err);
+
+        res.status(500).json({
+            error: 'Ошибка сервера'
+        });
+    }
+});

@@ -5,9 +5,11 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -17,13 +19,26 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.qr_db.data.User
+import java.text.SimpleDateFormat
+import java.util.*
 
 @Composable
 fun StudentJournalScreen(
+    user: User,
+    viewModel: StudentViewModel = viewModel(),
     getX: (Float) -> androidx.compose.ui.unit.Dp,
     getY: (Float) -> androidx.compose.ui.unit.Dp,
     fontScale: Float
 ) {
+    val schedule by viewModel.schedule.collectAsState()
+    val currentDate = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(Date())
+
+    LaunchedEffect(user.userId) {
+        viewModel.loadSchedule(user.userId)
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -36,44 +51,49 @@ fun StudentJournalScreen(
         // ЗАГОЛОВКИ (как в iOS: .black и .heavy)
         VStack(spacing = 4.dp) {
             Text(
-                text = "дд.мм.гггг",
+                text = currentDate,
                 style = TextStyle(
                     fontSize = (28 * fontScale).sp,
-                    fontWeight = FontWeight.Black, // .black в iOS
+                    fontWeight = FontWeight.Black,
                     color = Color.Black
                 )
             )
             Text(
-                text = "ИС22-4Б",
+                text = user.groupName ?: "Группа не указана",
                 style = TextStyle(
                     fontSize = (20 * fontScale).sp,
-                    fontWeight = FontWeight.W900, // .heavy в iOS
+                    fontWeight = FontWeight.W900,
                     color = Color.Black
                 )
             )
         }
 
-        // СПИСОК ЗАНЯТИЙ (как в iOS ForEach)
+        // СПИСОК ЗАНЯТИЙ (динамический из ViewModel)
         VStack(spacing = 17.dp) {
-            val lessons = listOf(
-                "Предмет, преподаватель" to "104",
-                "Предмет, преподаватель" to "303",
-                "Предмет, преподаватель" to "400",
-                "Предмет, преподаватель" to "123"
-            )
-            lessons.forEach { (title, room) ->
-                LessonRow(title, room)
+            if (schedule.isEmpty()) {
+                Text(
+                    text = "Занятий на сегодня нет",
+                    style = TextStyle(
+                        fontSize = (18 * fontScale).sp,
+                        color = Color.Gray
+                    ),
+                    modifier = Modifier.padding(top = 20.dp)
+                )
+            } else {
+                schedule.forEach { lesson ->
+                    LessonRow(lesson.subject, lesson.room ?: "---")
+                }
             }
         }
 
-        // КНОПКА СКАЧАТЬ (как в iOS Button)
+        // КНОПКА СКАЧАТЬ
         Box(
             modifier = Modifier
-                .width(260.dp) // maxWidth: 260 в iOS
+                .width(260.dp)
                 .height(52.dp)
                 .clip(RoundedCornerShape(25.dp))
-                .background(Color.White.copy(alpha = 0.45f)) // ultraThinMaterial
-                .background(Color.White.copy(alpha = 0.9f))  // white.opacity(0.9)
+                .background(Color.White.copy(alpha = 0.45f))
+                .background(Color.White.copy(alpha = 0.9f))
                 .border(2.dp, Color.Black, RoundedCornerShape(25.dp))
                 .clickable { },
             contentAlignment = Alignment.Center
@@ -83,7 +103,7 @@ fun StudentJournalScreen(
                 style = TextStyle(
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Medium,
-                    color = Color(0xFF007AFF) // .blue в iOS
+                    color = Color(0xFF007AFF)
                 )
             )
         }
@@ -95,10 +115,10 @@ fun LessonRow(title: String, room: String) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(60.dp) // height: 60 в iOS
+            .height(60.dp)
             .clip(RoundedCornerShape(25.dp))
-            .background(Color.White.copy(alpha = 0.45f)) // ultraThinMaterial
-            .background(Color.White.copy(alpha = 0.7f))  // white.opacity(0.7)
+            .background(Color.White.copy(alpha = 0.45f))
+            .background(Color.White.copy(alpha = 0.7f))
             .border(2.dp, Color.Black, RoundedCornerShape(25.dp))
     ) {
         Row(
@@ -110,29 +130,36 @@ fun LessonRow(title: String, room: String) {
                 modifier = Modifier
                     .weight(1f)
                     .padding(horizontal = 16.dp),
-                style = TextStyle(fontSize = 16.sp, color = Color.Black),
+                style = TextStyle(
+                    fontSize = 16.sp, 
+                    color = Color.Black,
+                    fontWeight = FontWeight.Medium
+                ),
+                maxLines = 1,
                 textAlign = TextAlign.Left
             )
 
-            // РАЗДЕЛИТЕЛЬ (Divider)
             Box(
                 modifier = Modifier
                     .width(1.dp)
                     .fillMaxHeight()
-                    .background(Color.Gray.copy(alpha = 0.3f))
+                    .background(Color.Black.copy(alpha = 0.1f))
             )
 
             Text(
                 text = room,
-                modifier = Modifier.width(70.dp), // width: 70 в iOS
-                style = TextStyle(fontSize = 17.sp, fontWeight = FontWeight.Medium),
+                modifier = Modifier.width(70.dp),
+                style = TextStyle(
+                    fontSize = 17.sp, 
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
+                ),
                 textAlign = TextAlign.Center
             )
         }
     }
 }
 
-// Вспомогательный компонент для имитации SwiftUI VStack
 @Composable
 fun VStack(spacing: androidx.compose.ui.unit.Dp, content: @Composable () -> Unit) {
     Column(

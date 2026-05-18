@@ -102,11 +102,11 @@ fun ProfileStudentScreen(user: User, onBack: () -> Unit, onLogout: () -> Unit) {
                             textAlign = TextAlign.Center
                         )
                     )
-                    
+
                     Spacer(modifier = Modifier.weight(1f))
-                    
+
                     Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(Color.Black.copy(alpha = 0.1f)))
-                    
+
                     Box(
                         modifier = Modifier.fillMaxWidth().height(getY(140f)),
                         contentAlignment = Alignment.Center

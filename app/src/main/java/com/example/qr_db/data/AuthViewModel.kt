@@ -15,6 +15,7 @@ class AuthViewModel(private val sessionManager: SessionManager) : ViewModel() {
     private val _uiState = MutableStateFlow<AuthState>(AuthState.Idle)
     val uiState = _uiState.asStateFlow()
 
+
     private val logging = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY
     }
@@ -24,7 +25,7 @@ class AuthViewModel(private val sessionManager: SessionManager) : ViewModel() {
 
     private val api: QrDbApi = Retrofit.Builder()
         // ИСПОЛЬЗУЕМ ПОРТ 3000, КАК В SERVER.JS
-        .baseUrl("http://192.168.8.100:3000/")
+        .baseUrl("http://192.168.1.103:3000/")
         .client(client)
         .addConverterFactory(GsonConverterFactory.create())
         .build()
@@ -89,3 +90,34 @@ sealed class AuthState {
     data class Success(val user: User) : AuthState()
     data class Error(val message: String) : AuthState()
 }
+
+data class JournalItem(
+    val subject: String,
+    val lesson_date: String,
+    val grade: Int?,
+    val attendance: Boolean?,
+    val lesson_type: String?
+)
+
+data class StudentScheduleItem(
+
+    val lesson_id: Int,
+
+    val subject: String,
+
+    val room: String?,
+
+    val start_time: String,
+
+    val end_time: String,
+
+    val teacher_name: String?,
+
+    val group_name: String?,
+
+    val grade: Int?,
+
+    val attendance: Boolean?,
+
+    val lesson_type: String?
+)
