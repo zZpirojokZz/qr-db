@@ -12,12 +12,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.qr_db.admin.AdminScreen
 import com.example.qr_db.admin.ProfileAdminScreen
 import com.example.qr_db.data.SessionManager
-import com.example.qr_db.data.User
 import com.example.qr_db.student.ProfileStudentScreen
 import com.example.qr_db.student.StudentScreen
 import com.example.qr_db.teacher.ProfileTeacherScreen
+import com.example.qr_db.teacher.TeacherScreen
 import com.example.qr_db.ui.theme.QrdbTheme
 import kotlinx.coroutines.launch
 

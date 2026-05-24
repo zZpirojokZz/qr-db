@@ -1,11 +1,6 @@
-package com.example.qr_db
+package com.example.qr_db.teacher
 
 import androidx.annotation.DrawableRes
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -24,11 +19,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.qr_db.R
 import com.example.qr_db.data.User
-import com.example.qr_db.teacher.TeacherJournalScreen
-import com.example.qr_db.teacher.TeacherQrScreen
-import com.example.qr_db.teacher.TeacherScheduleScreen
-import com.example.qr_db.teacher.TeacherViewModel
 
 @Composable
 fun TeacherScreen(user: User, navController: NavController) {

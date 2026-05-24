@@ -1,4 +1,4 @@
-package com.example.qr_db
+package com.example.qr_db.admin
 
 import androidx.compose.runtime.getValue
 import androidx.annotation.DrawableRes
@@ -24,10 +24,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel // <-- Важно для подключения ViewModel
 import androidx.navigation.NavController
-import com.example.qr_db.admin.AdminJournalScreen
-import com.example.qr_db.admin.AdminQrScreen
-import com.example.qr_db.admin.AdminScheduleScreen
-import com.example.qr_db.admin.AdminViewModel // <-- Подключаем нашу логику
+import com.example.qr_db.R
 import com.example.qr_db.data.User
 
 @Composable
