@@ -64,7 +64,7 @@ fun TeacherScreen(user: User, navController: NavController) {
                     fontScale = fontScale
                 )
                 1 -> TeacherJournalScreen(
-                    currentDate = "07.05.2026",
+                    currentDate = "",
                     lessons = lessons,
                     getX = ::getX,
                     getY = ::getY,

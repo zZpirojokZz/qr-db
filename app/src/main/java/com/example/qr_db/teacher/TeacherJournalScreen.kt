@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.qr_db.data.Lesson
@@ -26,8 +27,8 @@ import java.util.*
 fun TeacherJournalScreen(
     currentDate: String,
     lessons: List<Lesson>,
-    getX: (Float) -> androidx.compose.ui.unit.Dp,
-    getY: (Float) -> androidx.compose.ui.unit.Dp,
+    getX: (Float) -> Dp,
+    getY: (Float) -> Dp,
     fontScale: Float
 ) {
     Column(
@@ -50,22 +51,30 @@ fun TeacherJournalScreen(
 
         Spacer(modifier = Modifier.height(25.dp))
 
-        // СПИСОК ЗАНЯТИЙ (LazyColumn для производительности)
+        // СПИСОК ЗАНЯТИЙ И КНОПКА СКАЧАТЬ
         if (lessons.isEmpty()) {
+            // ЕСЛИ ЗАНЯТИЙ НЕТ: Кнопка скачать поднимается ровно на середину экрана!
             Box(
                 modifier = Modifier.weight(1f),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = "Занятий на сегодня нет",
-                    style = TextStyle(
-                        fontSize = (18 * fontScale).sp,
-                        color = Color.Gray,
-                        textAlign = TextAlign.Center
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = "Занятий на сегодня нет",
+                        style = TextStyle(
+                            fontSize = (18 * fontScale).sp,
+                            color = Color.Gray,
+                            textAlign = TextAlign.Center
+                        )
                     )
-                )
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    // Кнопка скачать на середине экрана
+                    DownloadButton(fontScale)
+                }
             }
         } else {
+            // ЕСЛИ ЗАНЯТИЯ ЕСТЬ: Выводим список, а кнопка остается внизу экрана
             LazyColumn(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(15.dp),
@@ -75,29 +84,11 @@ fun TeacherJournalScreen(
                     TeacherLessonItem(lesson, fontScale)
                 }
             }
-        }
 
-        Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
-        // КНОПКА СКАЧАТЬ (Исправленные размеры и стиль)
-        Box(
-            modifier = Modifier
-                .width(260.dp)
-                .height(52.dp)
-                .clip(RoundedCornerShape(26.dp))
-                .background(Color.White.copy(alpha = 0.9f))
-                .border(2.dp, Color.Black, RoundedCornerShape(26.dp))
-                .clickable { /* Логика генерации PDF/Excel */ },
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "Скачать расписание",
-                style = TextStyle(
-                    fontSize = (16 * fontScale).sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF007AFF)
-                )
-            )
+            // Кнопка скачать внизу экрана
+            DownloadButton(fontScale)
         }
 
         Spacer(modifier = Modifier.height(110.dp)) // Отступ под нижнюю навигацию
@@ -180,6 +171,32 @@ fun TeacherLessonItem(lesson: Lesson, fontScale: Float) {
                 color = Color(0xFF007AFF)
             ),
             textAlign = TextAlign.End
+        )
+    }
+}
+
+/**
+ * Компонент кнопки "Скачать расписание"
+ */
+@Composable
+fun DownloadButton(fontScale: Float) {
+    Box(
+        modifier = Modifier
+            .width(260.dp)
+            .height(52.dp)
+            .clip(RoundedCornerShape(26.dp))
+            .background(Color.White.copy(alpha = 0.9f))
+            .border(2.dp, Color.Black, RoundedCornerShape(26.dp))
+            .clickable { /* Логика генерации PDF/Excel */ },
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = "Скачать расписание",
+            style = TextStyle(
+                fontSize = (16 * fontScale).sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF007AFF)
+            )
         )
     }
 }
