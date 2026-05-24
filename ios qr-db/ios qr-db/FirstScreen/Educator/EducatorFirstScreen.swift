@@ -150,15 +150,32 @@ struct NavButtonE: View {
 
 struct QRPageE: View {
     
+    @State private var scannedCode: String = "Сканируйте QR"
+    
     var body: some View {
         
-        VStack {
-            //После БД изменить
-            Image("qr-code")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 300, height: 300)
-                .padding(.bottom, 68)
+        VStack(spacing: 25) {
+            
+            ZStack {
+                
+                QRScannerView(scannedCode: $scannedCode)
+                    .frame(width: 320, height: 320)
+                    .clipShape(RoundedRectangle(cornerRadius: 30))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 30)
+                            .stroke(Color.white.opacity(0.7), lineWidth: 2)
+                    )
+                
+                RoundedRectangle(cornerRadius: 20)
+                    .stroke(Color.green, lineWidth: 3)
+                    .frame(width: 220, height: 220)
+            }
+            
+            Text(scannedCode)
+                .font(.headline)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal)
+                .foregroundColor(.white)
         }
     }
 }
