@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct EducatorThirdScreen1: View {
+struct AdministracionThirdScreen1: View {
     
     @Binding var selectedPage: Int
     @State private var groupName: String = ""
@@ -89,5 +89,5 @@ struct EducatorThirdScreen1: View {
 
 
 #Preview {
-    EducatorThirdScreen1(selectedPage: .constant(0))
+    AdministracionThirdScreen1(selectedPage: .constant(0))
 }

@@ -24,7 +24,7 @@ struct EducatorFirstScreen: View {
                             VStack(alignment: .leading) {
                                 //После БД изменить
                                 Text("Сейсекулова Сауле")
-                                    .font(.title2)
+                                    .font(.title3)
                                     .fontWeight(.semibold)
                                 //После БД изменить
                                 Text("ИС22-4Б")
@@ -60,7 +60,7 @@ struct EducatorFirstScreen: View {
                         case 4:
                             EducatorThirdScreen3(selectedPage: $selectedPage)
                         case 5:
-                            EducatorThirdScreen4()
+                            EducatorThirdScreen4(selectedPage: $selectedPage)
                         default:
                             QRPageE()
                         }

@@ -1,6 +1,6 @@
 import SwiftUI
 //Третий экран, поменять данные на основе фигмы
-struct EducatorThirdScreen3: View {
+struct AdministracionThirdScreen3: View {
     //После БД изменить
     let days = ["9\nФев.", "10\nФев.", "11\nФев.", "12\nФев.", "13\nФев.", "14\nФев."]
     //После БД изменить
@@ -27,21 +27,21 @@ struct EducatorThirdScreen3: View {
                 VStack(spacing: 0) {
                     
                     HStack(spacing: 0) {
-                        TableCellE(text: "Предмет", isHeader: true, width: 100) //После БД изменить
+                        TableCellA(text: "Предмет", isHeader: true, width: 100) //После БД изменить
                         
                         ForEach(days, id: \.self) { day in
-                            TableCellE(text: day, isHeader: true)
+                            TableCellA(text: day, isHeader: true)
                         }
                         .multilineTextAlignment(.center)
                     }
                     
                     ForEach(visibleSubjects, id: \.self) { subject in
                         HStack(spacing: 0) {
-                            TableCellE(text: subject, width: 100)
+                            TableCellA(text: subject, width: 100)
                                 .multilineTextAlignment(.center)
                             
                             ForEach(days, id: \.self) { _ in
-                                TableCellE(text: "")
+                                TableCellA(text: "")
                             }
                         }
                     }
@@ -71,7 +71,7 @@ struct EducatorThirdScreen3: View {
                     }
                     .shadow(color: Color.black.opacity(0.15), radius: 6, x: 0, y: 4)
                     
-                    ImageButtonE(image: "down_button", width: 40) {
+                    ImageButtonA(image: "down_button", width: 40) {
                         if startIndex < subjects.count - 7 {
                             startIndex += 1
                         }
@@ -81,19 +81,19 @@ struct EducatorThirdScreen3: View {
                 
                 HStack(spacing: 25) {
                     
-                    ImageButtonE(image: "left_button") {}
+                    ImageButtonA(image: "left_button") {}
                         .shadow(color: Color.black.opacity(0.15), radius: 6, x: 0, y: 4)
                     
-                    ImageButtonE(image: "search_button", width: 106, height: 40) {}
+                    ImageButtonA(image: "search_button", width: 106, height: 40) {}
                         .shadow(color: Color.black.opacity(0.15), radius: 6, x: 0, y: 4)
                     
-                    ImageButtonE(image: "right_button") {}
+                    ImageButtonA(image: "right_button") {}
                         .shadow(color: Color.black.opacity(0.15), radius: 6, x: 0, y: 4)
                 }
             }
             .padding(.horizontal, 16)
             
-            ImageButtonE(image: "Arrow", width: 25, height: 45) {
+            ImageButtonA(image: "Arrow", width: 25, height: 45) {
                 selectedPage = 3
             }
             .padding(.top, 60)
@@ -101,7 +101,7 @@ struct EducatorThirdScreen3: View {
         }
     }
     
-    struct ImageButtonE: View {
+    struct ImageButtonA: View {
         
         let image: String
         var width: CGFloat = 70
@@ -131,7 +131,7 @@ struct EducatorThirdScreen3: View {
         }
     }
     
-    struct TableCellE: View {
+    struct TableCellA: View {
         
         let text: String
         var isHeader: Bool = false
@@ -151,5 +151,5 @@ struct EducatorThirdScreen3: View {
     }
 }
 #Preview {
-    EducatorThirdScreen3(selectedPage: .constant(0))
+    AdministracionThirdScreen3(selectedPage: .constant(0))
 }

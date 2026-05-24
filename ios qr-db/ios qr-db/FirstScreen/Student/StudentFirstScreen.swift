@@ -24,7 +24,7 @@ struct StudentFirstScreen: View {
                             VStack(alignment: .leading) {
                                 //После БД изменить
                                 Text("Пивнев Игорь")
-                                    .font(.title2)
+                                    .font(.title3)
                                     .fontWeight(.semibold)
                                 //После БД изменить
                                 Text("ИС22-4Б")

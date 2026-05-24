@@ -73,7 +73,7 @@ struct ProfileStudent: View {
                     Divider()
                     
                     VStack {
-                        Text("Молдыр Бекежановна")//После БД изменить
+                        Text("Джаманкузова Молдир")//После БД изменить
                             .font(.title2)
                             .fontWeight(.semibold)
                         Text("8(888)888-88-88")//После БД изменить

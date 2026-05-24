@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct ProfileEducator: View {
+struct ProfileAdministracion: View {
     
     @Environment(\.dismiss) var dismiss
     
@@ -25,7 +25,7 @@ struct ProfileEducator: View {
                         .shadow(radius: 0.5)
                         .padding(.vertical, 20)
                     //После БД изменить
-                    Text("Сейсекулова Сауле")
+                    Text("Джаманкузова Молдир")
                         .font(.title2)
                         .fontWeight(.semibold)
                         .padding(.bottom, 10)
@@ -142,5 +142,5 @@ struct ProfileEducator: View {
 }
 
 #Preview {
-    ProfileEducator()
+    ProfileAdministracion()
 }
