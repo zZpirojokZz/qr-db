@@ -3,15 +3,15 @@ package com.example.qr_db.student
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.qr_db.data.QrDbApi
-import com.example.qr_db.data.AttendanceStatusResponse
 import com.example.qr_db.data.Lesson
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import com.example.qr_db.data.StudentScheduleItem
-import com.example.qr_db.data.JournalItem
+import com.example.qr_db.admin.StudentScheduleItem
+import com.example.qr_db.admin.JournalItem
+import com.example.qr_db.data.StudentGroupInfo
 
 class StudentViewModel : ViewModel() {
 
@@ -24,10 +24,8 @@ class StudentViewModel : ViewModel() {
     private val _isMarked = MutableStateFlow(false)
     val isMarked: StateFlow<Boolean> = _isMarked
 
-
     private val _schedule =
         MutableStateFlow<List<StudentScheduleItem>>(emptyList())
-
     val schedule: StateFlow<List<StudentScheduleItem>> = _schedule
 
     private val _currentLesson = MutableStateFlow<Lesson?>(null)
@@ -35,8 +33,16 @@ class StudentViewModel : ViewModel() {
 
     private val _journal =
         MutableStateFlow<List<JournalItem>>(emptyList())
-
     val journal: StateFlow<List<JournalItem>> = _journal
+
+    // Предметы группы
+    private val _subjects = MutableStateFlow<List<String>>(emptyList())
+    val subjects: StateFlow<List<String>> = _subjects
+
+    // Группа студента
+    private val _groupInfo = MutableStateFlow<StudentGroupInfo?>(null)
+    val groupInfo: StateFlow<StudentGroupInfo?> = _groupInfo
+
     fun loadCurrentLesson(studentId: Int) {
         viewModelScope.launch {
             try {
@@ -71,49 +77,66 @@ class StudentViewModel : ViewModel() {
     }
 
     fun loadSchedule(studentId: Int) {
-
         viewModelScope.launch {
-
             try {
-
-                val response =
-                    api.getStudentSchedule(studentId)
-
+                val response = api.getStudentSchedule(studentId)
                 android.util.Log.d(
                     "SCHEDULE_DEBUG",
                     "schedule response = ${response.body()}"
                 )
-
                 if (response.isSuccessful) {
-
-                    _schedule.value =
-                        response.body() ?: emptyList()
+                    _schedule.value = response.body() ?: emptyList()
                 }
-
             } catch (e: Exception) {
-
                 e.printStackTrace()
             }
         }
     }
 
     fun loadJournal(studentId: Int) {
-
         viewModelScope.launch {
-
             try {
-
-                val response =
-                    api.getStudentJournal(studentId)
-
+                val response = api.getStudentJournal(studentId)
                 if (response.isSuccessful) {
-
-                    _journal.value =
-                        response.body() ?: emptyList()
+                    _journal.value = response.body() ?: emptyList()
                 }
-
             } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
 
+    fun loadStudentGroup(studentId: Int) {
+        viewModelScope.launch {
+            try {
+                val response = api.getStudentGroup(studentId)
+                android.util.Log.d(
+                    "GROUP_DEBUG",
+                    "code=${response.code()} body=${response.body()}"
+                )
+                if (response.isSuccessful) {
+                    _groupInfo.value = response.body()
+                    // как только узнали группу — грузим её предметы
+                    response.body()?.group_id?.let { loadGroupSubjects(it) }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    fun loadGroupSubjects(groupId: Int) {
+        viewModelScope.launch {
+            try {
+                val response = api.getGroupSubjects(groupId)
+                android.util.Log.d(
+                    "SUBJECTS_DEBUG",
+                    "code=${response.code()} body=${response.body()}"
+                )
+                if (response.isSuccessful) {
+                    _subjects.value = response.body() ?: emptyList()
+                }
+            } catch (e: Exception) {
                 e.printStackTrace()
             }
         }

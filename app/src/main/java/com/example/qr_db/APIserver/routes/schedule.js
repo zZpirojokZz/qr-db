@@ -63,6 +63,29 @@ router.get('/student/:id', async (req, res) => {
 
 
 
+// Уникальные предметы группы
+router.get('/group/:groupId/subjects', async (req, res) => {
+
+    const groupId = req.params.groupId;
+
+    try {
+
+        const result = await pool.query(`
+            SELECT DISTINCT l.subject
+            FROM lessons l
+            WHERE l.group_id = $1
+            ORDER BY l.subject ASC
+        `, [groupId]);
+
+        // Возвращаем просто массив строк
+        res.json(result.rows.map(r => r.subject));
+
+    } catch (err) {
+        console.error('Ошибка при получении предметов группы:', err);
+        res.status(500).json({ error: 'Ошибка сервера' });
+    }
+});
+
 
 
 

@@ -31,8 +31,10 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.qr_db.admin.AuthState
+import com.example.qr_db.admin.AuthViewModel
+import com.example.qr_db.admin.AuthViewModelFactory
 import com.example.qr_db.data.*
-import retrofit2.http.GET
 
 @Composable
 fun AuthScreen(onLoginSuccess: (User, String) -> Unit) {

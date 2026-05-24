@@ -1,8 +1,13 @@
-package com.example.qr_db.data
+package com.example.qr_db.admin
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.example.qr_db.data.LoginRequest
+import com.example.qr_db.data.QrDbApi
+import com.example.qr_db.data.RegisterRequest
+import com.example.qr_db.data.SessionManager
+import com.example.qr_db.data.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -24,7 +29,6 @@ class AuthViewModel(private val sessionManager: SessionManager) : ViewModel() {
         .build()
 
     private val api: QrDbApi = Retrofit.Builder()
-        // ИСПОЛЬЗУЕМ ПОРТ 3000, КАК В SERVER.JS
         .baseUrl("http://192.168.1.183:3000/")
         .client(client)
         .addConverterFactory(GsonConverterFactory.create())

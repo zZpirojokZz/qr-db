@@ -34,7 +34,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.qr_db.data.StudentScheduleItem
+import com.example.qr_db.admin.StudentScheduleItem
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -42,7 +42,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import kotlin.math.max
-import kotlin.math.min
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -78,7 +77,7 @@ fun StudentScheduleScreen(
         val fromDb = schedule.map { it.subject }.distinct()
         // Для теста добавим заглушки, чтобы было что листать
         if (fromDb.size < 15) {
-            fromDb + (1..15).map { "Предмет $it" }
+            fromDb + (1..15).map { "" }
         } else {
             fromDb
         }
