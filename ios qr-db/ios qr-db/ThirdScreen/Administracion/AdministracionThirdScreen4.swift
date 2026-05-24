@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct EducatorThirdScreen4: View {
+struct AdministracionThirdScreen4: View {
     
     @Binding var selectedPage: Int
     //После БД изменить
@@ -20,7 +20,7 @@ struct EducatorThirdScreen4: View {
                 
                 HStack(spacing: 12) {
                     
-                    ImageButtonE(image: "Arrow", width: 25, height: 25) {
+                    ImageButtonA1(image: "Arrow", width: 25, height: 25) {
                         selectedPage = 2
                     }
                     //После БД изменить
@@ -36,14 +36,14 @@ struct EducatorThirdScreen4: View {
                 VStack(spacing: 0) {
                     
                     HStack(spacing: 0) {
-                        TableCell4(text: "Предмет", isHeader: true) //После БД изменить
-                        TableCell4(text: "04.02.2026", isHeader: true) //После БД изменить
+                        TableCellA(text: "Предмет", isHeader: true) //После БД изменить
+                        TableCellA(text: "04.02.2026", isHeader: true) //После БД изменить
                     }
                     
                     ForEach(visibleStudents, id: \.self) { student in
                         HStack(spacing: 0) {
                             
-                            TableCell4(text: student)
+                            TableCellA(text: student)
                             
                             TextField(
                                 "",
@@ -86,13 +86,13 @@ struct EducatorThirdScreen4: View {
                 
                 HStack(spacing: 30) {
                     
-                    ImageButtonE(image: "up_button", width: 55) {
+                    ImageButtonA1(image: "up_button", width: 55) {
                         if startIndex > 0 {
                             startIndex -= 1
                         }
                     }
                     
-                    ImageButtonE(image: "down_button", width: 55) {
+                    ImageButtonA1(image: "down_button", width: 55) {
                         if startIndex < students.count - 7 {
                             startIndex += 1
                         }
@@ -107,7 +107,7 @@ struct EducatorThirdScreen4: View {
     }
 }
 
-struct ImageButtonE: View {
+struct ImageButtonA1: View {
     
     let image: String
     var width: CGFloat = 85
@@ -137,7 +137,7 @@ struct ImageButtonE: View {
     }
 }
 
-struct TableCell4: View {
+struct TableCellA: View {
     
     let text: String
     var isHeader: Bool = false
@@ -156,5 +156,5 @@ struct TableCell4: View {
 }
 
 #Preview {
-    EducatorThirdScreen4(selectedPage: .constant(0))
+    AdministracionThirdScreen4(selectedPage: .constant(0))
 }
