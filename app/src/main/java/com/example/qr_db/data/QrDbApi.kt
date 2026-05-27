@@ -4,14 +4,59 @@ import com.example.qr_db.admin.JournalItem
 import com.example.qr_db.admin.StudentScheduleItem
 import retrofit2.Response
 import retrofit2.http.*
+import com.example.qr_db.data.LessonAttendance
+import com.example.qr_db.data.FoundLesson
+import com.example.qr_db.data.GroupStudent
 
 interface QrDbApi {
+
+
+
+    @GET("grades/lesson/{lessonId}/attendance")
+    suspend fun getLessonAttendance(
+        @Path("lessonId") lessonId: Int
+    ): Response<List<LessonAttendance>>
 
     @POST("auth/login")
     suspend fun login(@Body loginRequest: LoginRequest): Response<User>
 
     @POST("auth/register")
     suspend fun register(@Body registerRequest: RegisterRequest): Response<User>
+
+    @GET("lessons/active")
+    suspend fun getActiveLesson(
+        @Query("groupName") groupName: String,
+        @Query("subject") subject: String
+    ): Response<FoundLesson?>
+
+    @GET("lessons/weekly-grades")
+    suspend fun getWeeklyGrades(
+        @Query("groupName") groupName: String,
+        @Query("subject") subject: String,
+        @Query("startDate") startDate: String
+    ): Response<List<WeeklyGradeItem>>
+
+    @POST("lessons/set-grade")
+    suspend fun setGrade(
+        @Body request: SetGradeRequest
+    ): Response<Unit>
+
+    @GET("lessons/group-subjects/{groupName}")
+    suspend fun getSubjectsByGroupName(
+        @Path("groupName") groupName: String
+    ): Response<List<String>>
+
+    @GET("lessons/find")
+    suspend fun findLesson(
+        @Query("groupName") groupName: String,
+        @Query("subject") subject: String,
+        @Query("date") date: String
+    ): Response<FoundLesson?>
+
+    @GET("lessons/group-students/{groupName}")
+    suspend fun getGroupStudents(
+        @Path("groupName") groupName: String
+    ): Response<List<GroupStudent>>
 
     @GET("lessons/teacher/{teacher_id}")
     suspend fun getTeacherLessons(

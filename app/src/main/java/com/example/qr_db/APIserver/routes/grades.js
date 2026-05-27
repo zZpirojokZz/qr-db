@@ -77,6 +77,42 @@ router.post('/mark', async (req, res) => {
 });
 
 
+// Список студентов группы + посещения по уроку
+router.get('/lesson/:lessonId/attendance', async (req, res) => {
+
+    const lessonId = req.params.lessonId;
+
+    try {
+
+        const result = await pool.query(`
+            SELECT
+                u.user_id,
+                u.full_name,
+                CASE
+                    WHEN g.attendance = TRUE THEN TRUE
+                    ELSE FALSE
+                END AS attendance
+            FROM lessons l
+            JOIN group_students gs ON gs.group_id = l.group_id
+            JOIN users u ON u.user_id = gs.student_id
+            LEFT JOIN grades g
+                ON g.student_id = u.user_id
+                AND g.lesson_id = l.lesson_id
+            WHERE l.lesson_id = $1
+            ORDER BY u.full_name ASC
+        `, [lessonId]);
+
+        res.json(result.rows);
+
+    } catch (err) {
+        console.error('Ошибка получения посещений:', err);
+        res.status(500).json({ error: 'Ошибка сервера' });
+    }
+});
+
+
+
+
 // Проверить, отмечен ли студент
 router.get('/status', async (req, res) => {
 

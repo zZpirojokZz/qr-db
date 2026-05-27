@@ -14,8 +14,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.sp
-import com.example.qr_db.student.VStack
+
 
 @Composable
 fun AdminJournalScreen(
@@ -105,4 +106,9 @@ fun AdminJournalScreen(
             )
         }
     }
+}
+
+@Composable
+fun VStack(spacing: Dp, content: @Composable () -> Unit) {
+    TODO("Not yet implemented")
 }

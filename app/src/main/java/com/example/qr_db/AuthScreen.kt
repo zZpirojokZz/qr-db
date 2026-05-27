@@ -16,7 +16,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -46,11 +45,10 @@ fun AuthScreen(onLoginSuccess: (User, String) -> Unit) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
-    // Наблюдаем за успехом входа
     LaunchedEffect(uiState) {
         if (uiState is AuthState.Success) {
             val user = (uiState as AuthState.Success).user
-            val roleName = when(user.roleId) {
+            val roleName = when (user.roleId) {
                 1 -> "Студент"
                 2 -> "Преподаватель"
                 3 -> "Админ"
@@ -60,14 +58,11 @@ fun AuthScreen(onLoginSuccess: (User, String) -> Unit) {
         }
     }
 
-
-
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
     ) {
-
         Image(
             painter = painterResource(id = R.drawable.wavy_background),
             contentDescription = null,
@@ -75,34 +70,48 @@ fun AuthScreen(onLoginSuccess: (User, String) -> Unit) {
             contentScale = ContentScale.FillBounds
         )
 
+        // СТЕКЛЯННЫЙ КОНТЕЙНЕР (как в Figma: 793×1013, скругление 80, белый 30%)
         Box(
             modifier = Modifier
                 .align(Alignment.Center)
-                .width(330.dp)
-                .height(460.dp)
-                .shadow(elevation = 20.dp, shape = RoundedCornerShape(30.dp))
-                .clip(RoundedCornerShape(30.dp))
-                .background(Color.White.copy(alpha = 0.45f))
+                .fillMaxWidth(0.85f)                                  // ~793 от 1080
+                .fillMaxHeight(0.55f)                                 // ~1013 от 2388 (примерно)
+                .clip(RoundedCornerShape(40.dp))
+                .background(Color.White.copy(alpha = 0.30f))          // ← FFFFFF 30% как в Figma
                 .border(
-                    width = 1.5.dp,
-                    brush = Brush.linearGradient(listOf(Color.White.copy(alpha = 0.7f), Color.White.copy(alpha = 0.1f))),
-                    shape = RoundedCornerShape(30.dp)
+                    width = 1.dp,
+                    brush = Brush.linearGradient(
+                        listOf(
+                            Color.White.copy(alpha = 1f),
+                            Color.Black.copy(alpha = 0.6f)
+                        )
+                    ),
+                    shape = RoundedCornerShape(40.dp)
                 )
-                .padding(horizontal = 40.dp, vertical = 50.dp)
+                .padding(horizontal = 32.dp, vertical = 50.dp)
         ) {
             Column(
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(30.dp)
+                verticalArrangement = Arrangement.spacedBy(28.dp)
             ) {
-                Text("Войдите в аккаунт", color = Color.Black.copy(alpha = 0.5f), fontSize = 20.sp, fontWeight = FontWeight.SemiBold, )
+                Text(
+                    "Войдите в аккаунт",
+                    color = Color.Black.copy(alpha = 0.9f),
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
 
                 AuthGlassField(
                     value = email,
                     onValueChange = { email = it },
                     placeholder = "Электронная почта...",
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email, imeAction = ImeAction.Next)
-
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Email,
+                        imeAction = ImeAction.Next
+                    )
                 )
 
                 AuthGlassField(
@@ -110,30 +119,51 @@ fun AuthScreen(onLoginSuccess: (User, String) -> Unit) {
                     onValueChange = { password = it },
                     placeholder = "Пароль...",
                     visualTransformation = PasswordVisualTransformation(),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done)
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Password,
+                        imeAction = ImeAction.Done
+                    )
                 )
 
                 if (uiState is AuthState.Error) {
-                    Text((uiState as AuthState.Error).message, color = Color.Red, fontSize = 12.sp)
+                    Text(
+                        (uiState as AuthState.Error).message,
+                        color = Color.Red,
+                        fontSize = 12.sp
+                    )
                 }
 
                 Spacer(modifier = Modifier.weight(1f))
 
+                // КНОПКА ВОЙТИ
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(56.dp)
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(Color(0xFFD9D9D9).copy(alpha = 0.85f))
+                        .height(64.dp)
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(Color(0xFFD9D9D9).copy(alpha = 0.9f))
+                        .border(                                          // ← ДОБАВЛЕНО
+                            width = 1.dp,
+                            color = Color.Black.copy(alpha = 0.3f),
+                            shape = RoundedCornerShape(20.dp)
+                        )
                         .clickable(enabled = uiState !is AuthState.Loading) {
                             viewModel.login(email, password)
                         },
                     contentAlignment = Alignment.Center
                 ) {
                     if (uiState is AuthState.Loading) {
-                        CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color.Black)
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            color = Color.Black
+                        )
                     } else {
-                        Text("Войти", color = Color.Black.copy(alpha = 0.5f), fontWeight = FontWeight.SemiBold, fontSize = 18.sp)
+                        Text(
+                            "Войти",
+                            color = Color.Black,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 20.sp
+                        )
                     }
                 }
             }
@@ -157,14 +187,20 @@ fun AuthGlassField(
         modifier = Modifier
             .fillMaxWidth()
             .height(56.dp)
-            .shadow(elevation = 6.dp, shape = RoundedCornerShape(16.dp), spotColor = Color.Black.copy(alpha = 0.1f))
             .clip(RoundedCornerShape(16.dp))
-            .background(Color(0xFFD9D9D9).copy(alpha = 0.85f))
-            .border(1.dp, Color.White.copy(alpha = 0.4f), RoundedCornerShape(16.dp)),
+            .background(Color(0xFFD9D9D9).copy(alpha = 0.9f))
+            .border(                                          // ← добавил рамку
+                width = 1.dp,
+                color = Color.Black.copy(alpha = 0.2f),
+                shape = RoundedCornerShape(16.dp)
+            ),
         visualTransformation = visualTransformation,
         singleLine = true,
         keyboardOptions = keyboardOptions,
-        textStyle = TextStyle(color = Color.Black.copy(alpha = 0.7f), fontSize = 16.sp),
+        textStyle = TextStyle(
+            color = Color.Black.copy(alpha = 0.85f),
+            fontSize = 16.sp
+        ),
         decorationBox = { innerTextField ->
             TextFieldDefaults.DecorationBox(
                 value = value,
@@ -173,12 +209,20 @@ fun AuthGlassField(
                 singleLine = true,
                 visualTransformation = visualTransformation,
                 interactionSource = interactionSource,
-                placeholder = { Text(placeholder, color = Color.Black.copy(alpha = 0.42f), fontSize = 16.sp) },
+                placeholder = {
+                    Text(
+                        placeholder,
+                        color = Color.Black.copy(alpha = 0.7f),
+                        fontSize = 16.sp
+                    )
+                },
                 container = {},
-                contentPadding = PaddingValues(horizontal = 16.dp),
+                contentPadding = PaddingValues(horizontal = 20.dp),
                 colors = TextFieldDefaults.colors(
                     focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent
+                    unfocusedIndicatorColor = Color.Transparent,
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent
                 )
             )
         }

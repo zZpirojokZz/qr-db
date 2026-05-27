@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
@@ -31,9 +32,10 @@ import com.example.qr_db.data.User
 fun TeacherQrScreen(
     user: User,
     navController: NavController,
-    getX: (Float) -> androidx.compose.ui.unit.Dp,
-    getY: (Float) -> androidx.compose.ui.unit.Dp,
-    fontScale: Float
+    getX: (Float) -> Dp,
+    getY: (Float) -> Dp,
+    fontScale: Float,
+    onScanSuccess: () -> Unit = {}            // ← НОВЫЙ ПАРАМЕТР
 ) {
     val context = LocalContext.current
     val viewModel: TeacherViewModel = viewModel()
@@ -47,7 +49,6 @@ fun TeacherQrScreen(
         }
     }
 
-
     var hasCameraPermission by remember {
         mutableStateOf(
             ContextCompat.checkSelfPermission(
@@ -58,20 +59,15 @@ fun TeacherQrScreen(
     }
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
-        onResult = { granted ->
-            hasCameraPermission = granted
-        }
+        onResult = { granted -> hasCameraPermission = granted }
     )
 
-
-
     Box(modifier = Modifier.fillMaxSize()) {
-        // ДАННЫЕ СКОПИРОВАНЫ ИЗ StudentQrScreen
         Text(
             text = user.fullName,
             style = TextStyle(
-                fontSize = (26 * fontScale).sp, 
-                fontWeight = FontWeight.Bold, 
+                fontSize = (26 * fontScale).sp,
+                fontWeight = FontWeight.Bold,
                 color = Color.Black
             ),
             modifier = Modifier
@@ -79,9 +75,9 @@ fun TeacherQrScreen(
                 .width(getX(800f))
         )
         Text(
-            text = currentLesson?.groupName ?: "Нет активной пары", // Можно заменить на user.role или оставить как в макете
+            text = currentLesson?.groupName ?: "Нет активной пары",
             style = TextStyle(
-                fontSize = (18 * fontScale).sp, 
+                fontSize = (18 * fontScale).sp,
                 color = Color.Black.copy(alpha = 0.8f)
             ),
             modifier = Modifier
@@ -89,7 +85,6 @@ fun TeacherQrScreen(
                 .width(getX(600f))
         )
 
-        // АВАТАР (как в StudentQrScreen)
         Surface(
             modifier = Modifier
                 .offset(x = getX(800f), y = getY(142f))
@@ -100,7 +95,6 @@ fun TeacherQrScreen(
             color = Color(0xFFD9D9D9).copy(alpha = 0.5f)
         ) {}
 
-        // ОКНО СКАНЕРА (Координаты из Figma: X 140, Y 670, W 800, H 800)
         Box(
             modifier = Modifier
                 .offset(x = getX(140f), y = getY(670f))
@@ -113,7 +107,10 @@ fun TeacherQrScreen(
                     viewModel.markAttendance(result)
                 }
             } else {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
                     Text("Нет разрешения на камеру", color = Color.White)
                 }
             }
@@ -122,23 +119,19 @@ fun TeacherQrScreen(
             val cornerSize = getX(90f)
             val thickness = 6.dp
             val innerOffset = getX(40f)
-            
-            // Левый верхний
+
             Box(modifier = Modifier.align(Alignment.TopStart).offset(x = innerOffset, y = innerOffset).size(cornerSize)) {
                 Box(modifier = Modifier.fillMaxWidth().height(thickness).clip(CircleShape).background(Color.White))
                 Box(modifier = Modifier.fillMaxHeight().width(thickness).clip(CircleShape).background(Color.White))
             }
-            // Правый верхний
             Box(modifier = Modifier.align(Alignment.TopEnd).offset(x = -innerOffset, y = innerOffset).size(cornerSize)) {
                 Box(modifier = Modifier.fillMaxWidth().height(thickness).clip(CircleShape).background(Color.White))
                 Box(modifier = Modifier.align(Alignment.TopEnd).fillMaxHeight().width(thickness).clip(CircleShape).background(Color.White))
             }
-            // Левый нижний
             Box(modifier = Modifier.align(Alignment.BottomStart).offset(x = innerOffset, y = -innerOffset).size(cornerSize)) {
                 Box(modifier = Modifier.align(Alignment.BottomStart).fillMaxWidth().height(thickness).clip(CircleShape).background(Color.White))
                 Box(modifier = Modifier.fillMaxHeight().width(thickness).clip(CircleShape).background(Color.White))
             }
-            // Правый нижний
             Box(modifier = Modifier.align(Alignment.BottomEnd).offset(x = -innerOffset, y = -innerOffset).size(cornerSize)) {
                 Box(modifier = Modifier.align(Alignment.BottomEnd).fillMaxWidth().height(thickness).clip(CircleShape).background(Color.White))
                 Box(modifier = Modifier.align(Alignment.BottomEnd).fillMaxHeight().width(thickness).clip(CircleShape).background(Color.White))
@@ -147,20 +140,52 @@ fun TeacherQrScreen(
             // Статусы сканирования
             when (scanState) {
                 is ScanState.Loading -> {
-                    Box(modifier = Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.3f)), contentAlignment = Alignment.Center) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Black.copy(alpha = 0.3f)),
+                        contentAlignment = Alignment.Center
+                    ) {
                         CircularProgressIndicator(color = Color.White)
                     }
                 }
                 is ScanState.Success -> {
-                    Box(modifier = Modifier.fillMaxSize().background(Color.Green.copy(alpha = 0.3f)), contentAlignment = Alignment.Center) {
-                        Text((scanState as ScanState.Success).message, color = Color.White, fontWeight = FontWeight.Bold)
-                        LaunchedEffect(Unit) { kotlinx.coroutines.delay(2000); viewModel.resetState() }
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Green.copy(alpha = 0.3f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            (scanState as ScanState.Success).message,
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold
+                        )
+                        LaunchedEffect(Unit) {
+                            kotlinx.coroutines.delay(1500)
+                            viewModel.resetState()
+                            onScanSuccess()                       // ← ОТКРЫВАЕМ ЭКРАН ПОСЕЩАЕМОСТИ
+                        }
                     }
                 }
                 is ScanState.Error -> {
-                    Box(modifier = Modifier.fillMaxSize().background(Color.Red.copy(alpha = 0.5f)), contentAlignment = Alignment.Center) {
-                        Text((scanState as ScanState.Error).message, color = Color.White, fontWeight = FontWeight.Bold, textAlign = androidx.compose.ui.text.style.TextAlign.Center, modifier = Modifier.padding(16.dp))
-                        LaunchedEffect(Unit) { kotlinx.coroutines.delay(3000); viewModel.resetState() }
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Red.copy(alpha = 0.5f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            (scanState as ScanState.Error).message,
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                        LaunchedEffect(Unit) {
+                            kotlinx.coroutines.delay(3000)
+                            viewModel.resetState()
+                        }
                     }
                 }
                 else -> {}

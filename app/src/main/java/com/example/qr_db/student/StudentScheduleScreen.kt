@@ -106,7 +106,7 @@ fun StudentScheduleScreen(
             ),
             modifier = Modifier
                 .fillMaxWidth()
-                .offset(y = getY(150f))
+                .offset(y = getY(300f))
         )
 
         // TABLE
@@ -150,7 +150,7 @@ fun StudentScheduleScreen(
             StudentControlButton(
                 icon = Icons.Default.PlayArrow,
                 rotate = 90f,
-                width = getX(135f),
+                width = getX(100f),
                 height = getY(200f),
                 //enabled = startIndex < maxStartIndex,
                 // Вниз
@@ -163,7 +163,7 @@ fun StudentScheduleScreen(
             StudentControlButton(
                 icon = Icons.Default.PlayArrow,
                 rotate = -90f,
-                width = getX(135f),
+                width = getX(100f),
                 height = getY(200f),
                 enabled = startIndex > 0,
                 // Вверх
@@ -181,38 +181,31 @@ fun StudentScheduleScreen(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // ◄ Назад на неделю
-            StudentControlButton(
-                icon = Icons.Default.PlayArrow,
-                rotate = 180f,
-                width = getX(180f),
+            // ◄ Назад
+            StudentArrowButton(
+                isForward = false,
+                width = getX(200f),
                 height = getY(100f),
-                onClick = {
-                    dayOffset -= 7
-                }
+                onClick = { dayOffset -= 7 }
             )
 
-            // 🔍 Поиск даты
+            // Поиск даты
             StudentSearchButton(
                 width = getX(350f),
                 height = getY(100f),
                 fontScale = fontScale,
-                onClick = {
-                    showDatePicker = true
-                }
+                onClick = { showDatePicker = true }
             )
 
-            // ► Вперёд на неделю
-            StudentControlButton(
-                icon = Icons.Default.PlayArrow,
-                rotate = 0f,
-                width = getX(180f),
+            // ► Вперёд
+            StudentArrowButton(
+                isForward = true,
+                width = getX(200f),
                 height = getY(100f),
-                onClick = {
-                    dayOffset += 7
-                }
+                onClick = { dayOffset += 7 }
             )
         }
+
 
         // DATE PICKER DIALOG
         if (showDatePicker) {
@@ -440,12 +433,7 @@ fun StudentControlButton(
             .scale(scale)
             .alpha(alphaValue)
             .clip(RoundedCornerShape(50.dp))
-            .background(Color.White.copy(alpha = 0.6f))
-            .border(
-                1.dp,
-                Color.Black.copy(alpha = 0.3f),
-                RoundedCornerShape(50.dp)
-            )
+            .background(Color(0xFFD9D9D9).copy(alpha = 0.8f))     // ← #D9D9D9 70%
             .clickable(
                 enabled = enabled,
                 interactionSource = interactionSource,
@@ -459,9 +447,9 @@ fun StudentControlButton(
             imageVector = icon,
             contentDescription = null,
             modifier = Modifier
-                .size(24.dp)
+                .size(32.dp)
                 .rotate(rotate),
-            tint = Color.Black
+            tint = Color(0xFFFFFEFE)                              // ← #FFFEFE 100%
         )
     }
 }
@@ -529,5 +517,77 @@ fun StudentSearchButton(
                 tint = Color.Black
             )
         }
+    }
+}
+
+
+
+@Composable
+fun StudentArrowButton(
+    isForward: Boolean,                   // true = ►  false = ◄
+    width: Dp,
+    height: Dp,
+    enabled: Boolean = true,
+    onClick: () -> Unit
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val pressed by interactionSource.collectIsPressedAsState()
+
+    val scale by animateFloatAsState(
+        targetValue = if (pressed && enabled) 0.92f else 1f,
+        label = "buttonScale"
+    )
+
+    val alphaValue by animateFloatAsState(
+        targetValue = when {
+            !enabled -> 0.45f
+            pressed -> 0.8f
+            else -> 1f
+        },
+        label = "buttonAlpha"
+    )
+
+    // Если "вперёд" (►) — круглый правый край
+    // Если "назад" (◄) — круглый левый край
+    val shape = if (isForward) {
+        RoundedCornerShape(
+            topStart = 8.dp,
+            bottomStart = 8.dp,
+            topEnd = 50.dp,
+            bottomEnd = 50.dp
+        )
+    } else {
+        RoundedCornerShape(
+            topStart = 50.dp,
+            bottomStart = 50.dp,
+            topEnd = 8.dp,
+            bottomEnd = 8.dp
+        )
+    }
+
+    Box(
+        modifier = Modifier
+            .size(width, height)
+            .scale(scale)
+            .alpha(alphaValue)
+            .clip(shape)
+            .background(Color(0xFFD9D9D9).copy(alpha = 0.7f))
+            .clickable(
+                enabled = enabled,
+                interactionSource = interactionSource,
+                indication = null
+            ) {
+                onClick()
+            },
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = Icons.Default.PlayArrow,
+            contentDescription = null,
+            modifier = Modifier
+                .size(32.dp)
+                .rotate(if (isForward) 0f else 180f),
+            tint = Color(0xFFFFFEFE)
+        )
     }
 }

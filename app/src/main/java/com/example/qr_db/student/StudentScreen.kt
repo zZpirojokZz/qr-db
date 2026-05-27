@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.Dp
 import androidx.navigation.NavController
 import com.example.qr_db.R
 import com.example.qr_db.data.User
@@ -85,36 +86,41 @@ fun StudentScreen(user: User, navController: NavController) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            NavButton(R.drawable.ic_scanner, isSelected = selectedTab == 0) { selectedTab = 0 }
-            NavButton(R.drawable.ic_journal, isSelected = selectedTab == 1) { selectedTab = 1 }
-            NavButton(R.drawable.ic_profile, isSelected = selectedTab == 2) { selectedTab = 2 }
+            StudentNavButton(R.drawable.ic_scanner, isSelected = selectedTab == 0, ::getX, ::getY) { selectedTab = 0 }
+            StudentNavButton(R.drawable.ic_journal, isSelected = selectedTab == 1, ::getX, ::getY) { selectedTab = 1 }
+            StudentNavButton(R.drawable.ic_profile, isSelected = selectedTab == 2, ::getX, ::getY) { selectedTab = 2 }
         }
     }
 }
 
-    @Composable
-    fun NavButton(@DrawableRes iconRes: Int, isSelected: Boolean, onClick: () -> Unit) {
-        val shape = RoundedCornerShape(24.dp)
-        Box(
-            modifier = Modifier
-                .size(75.dp)
-                .clip(shape)
-                .background(Color.White.copy(alpha = 0.35f))
-                .border(
-                    width = if (isSelected) 2.6.dp else 1.dp,
-                    color = if (isSelected) Color.Black.copy(alpha = 0.8f) else Color.Black.copy(
-                        alpha = 0.2f
-                    ),
-                    shape = shape
-                )
-                .clickable { onClick() },
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                painter = painterResource(id = iconRes),
-                contentDescription = null,
-                modifier = Modifier.size(38.dp),
-                tint = Color.Black
+@Composable
+fun StudentNavButton(
+    @DrawableRes iconRes: Int,
+    isSelected: Boolean,
+    getX: (Float) -> Dp,
+    getY: (Float) -> Dp,
+    onClick: () -> Unit
+) {
+    val shape = RoundedCornerShape(getX(80f))
+
+    Box(
+        modifier = Modifier
+            .size(width = getX(200f), height = getY(200f))
+            .clip(shape)
+            .background(Color.White.copy(alpha = 0.35f))
+            .border(
+                width = if (isSelected) 2.dp else 0.dp,
+                color = if (isSelected) Color.Black.copy(alpha = 0.8f) else Color.Transparent,
+                shape = shape
             )
-        }
+            .clickable { onClick() },
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            painter = painterResource(id = iconRes),
+            contentDescription = null,
+            modifier = Modifier.size(getX(100f)),
+            tint = Color.Black
+        )
     }
+}

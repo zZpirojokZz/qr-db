@@ -57,7 +57,7 @@ fun StudentQrScreen(
                 color = Color.Black
             ),
             modifier = Modifier
-                .offset(x = getX(121f), y = getY(142f))
+                .offset(x = getX(80f), y = getY(180f))
                 .width(getX(800f))
         )
 
@@ -69,14 +69,14 @@ fun StudentQrScreen(
                 color = Color.Black.copy(alpha = 0.8f)
             ),
             modifier = Modifier
-                .offset(x = getX(139f), y = getY(236f))
+                .offset(x = getX(139f), y = getY(280f))
                 .width(getX(600f))
         )
 
         // АВАТАР (переход в профиль)
         Surface(
             modifier = Modifier
-                .offset(x = getX(800f), y = getY(142f))
+                .offset(x = getX(800f), y = getY(180f))
                 .size(getX(150f))
                 .clip(CircleShape)
                 .clickable { navController.navigate("profile") },

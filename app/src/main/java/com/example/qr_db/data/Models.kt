@@ -63,3 +63,26 @@ data class ScheduleItem(
     val start_time: String?,
     val end_time: String?
 )
+
+
+
+data class GroupStudent(
+    @SerializedName("user_id") val userId: Int,
+    @SerializedName("full_name") val fullName: String
+)
+
+data class WeeklyGradeItem(
+    @SerializedName("user_id") val userId: Int,
+    @SerializedName("full_name") val fullName: String,
+    @SerializedName("lesson_date") val lessonDate: String?,
+    @SerializedName("grade") val grade: Int?,
+    @SerializedName("attendance") val attendance: Boolean?,
+    @SerializedName("lesson_id") val lessonId: Int?
+)
+
+data class SetGradeRequest(
+    val lesson_id: Int,
+    val student_id: Int,
+    val grade: Int?,
+    val attendance: Boolean = true
+)

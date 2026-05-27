@@ -9,6 +9,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import com.example.qr_db.data.LessonAttendance
+import com.example.qr_db.data.FoundLesson
+import com.example.qr_db.data.WeeklyGradeItem
+import com.example.qr_db.data.SetGradeRequest
 
 sealed class ScanState {
     object Idle : ScanState()
@@ -24,6 +28,22 @@ class TeacherViewModel : ViewModel() {
     // ==========================================
     private val _scanState = MutableStateFlow<ScanState>(ScanState.Idle)
     val scanState = _scanState.asStateFlow()
+
+    private val _attendance = MutableStateFlow<List<LessonAttendance>>(emptyList())
+    val attendance: StateFlow<List<LessonAttendance>> = _attendance
+
+    private val _groupSubjects = MutableStateFlow<List<String>>(emptyList())
+    val groupSubjects: StateFlow<List<String>> = _groupSubjects
+
+    private val _activeLesson = MutableStateFlow<FoundLesson?>(null)
+    val activeLesson: StateFlow<FoundLesson?> = _activeLesson
+
+    private val _weeklyGrades = MutableStateFlow<List<WeeklyGradeItem>>(emptyList())
+    val weeklyGrades: StateFlow<List<WeeklyGradeItem>> = _weeklyGrades
+
+    private val _isCheckingSession = MutableStateFlow(true)
+    val isCheckingSession: StateFlow<Boolean> = _isCheckingSession
+
 
 
     // ==========================================
@@ -103,6 +123,113 @@ class TeacherViewModel : ViewModel() {
         }
     }
 
+    fun checkActiveSession(groupName: String, subject: String) {
+        viewModelScope.launch {
+            _isCheckingSession.value = true
+            try {
+                val response = api.getActiveLesson(groupName, subject)
+                android.util.Log.d(
+                    "ACTIVE_LESSON",
+                    "code=${response.code()} body=${response.body()}"
+                )
+                if (response.isSuccessful) {
+                    _activeLesson.value = response.body()
+                    response.body()?.lessonId?.let { loadAttendance(it) }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            } finally {
+                _isCheckingSession.value = false
+            }
+        }
+    }
+
+    fun loadWeeklyGrades(groupName: String, subject: String, startDate: String) {
+        viewModelScope.launch {
+            try {
+                val response = api.getWeeklyGrades(groupName, subject, startDate)
+                android.util.Log.d(
+                    "WEEKLY_GRADES",
+                    "code=${response.code()} body=${response.body()}"
+                )
+                if (response.isSuccessful) {
+                    _weeklyGrades.value = response.body() ?: emptyList()
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    fun setStudentGrade(lessonId: Int, studentId: Int, grade: Int?, attendance: Boolean = true) {
+        viewModelScope.launch {
+            try {
+                api.setGrade(SetGradeRequest(lessonId, studentId, grade, attendance))
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+
+    fun loadAttendance(lessonId: Int) {
+        viewModelScope.launch {
+            try {
+                val response = api.getLessonAttendance(lessonId)
+                android.util.Log.d(
+                    "ATTENDANCE_DEBUG",
+                    "code=${response.code()} body=${response.body()}"
+                )
+                if (response.isSuccessful) {
+                    _attendance.value = response.body() ?: emptyList()
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    fun loadSubjectsByGroup(groupName: String) {
+        viewModelScope.launch {
+            try {
+                val response = api.getSubjectsByGroupName(groupName)
+                android.util.Log.d(
+                    "GROUP_SUBJECTS",
+                    "code=${response.code()} body=${response.body()}"
+                )
+                if (response.isSuccessful) {
+                    _groupSubjects.value = response.body() ?: emptyList()
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    // Найденный урок
+    private val _foundLesson = MutableStateFlow<FoundLesson?>(null)
+    val foundLesson: StateFlow<FoundLesson?> = _foundLesson
+
+    fun findLessonAndLoadAttendance(groupName: String, subject: String, date: String) {
+        viewModelScope.launch {
+            try {
+                val response = api.findLesson(groupName, subject, date)
+                android.util.Log.d(
+                    "FIND_LESSON",
+                    "code=${response.code()} body=${response.body()}"
+                )
+                if (response.isSuccessful) {
+                    val lesson = response.body()
+                    _foundLesson.value = lesson
+                    lesson?.lessonId?.let { loadAttendance(it) }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+
     fun resetState() {
         _scanState.value = ScanState.Idle
     }
@@ -125,3 +252,4 @@ class TeacherViewModel : ViewModel() {
         }
     }
 }
+
