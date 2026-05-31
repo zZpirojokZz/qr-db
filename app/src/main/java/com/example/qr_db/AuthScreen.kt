@@ -74,10 +74,10 @@ fun AuthScreen(onLoginSuccess: (User, String) -> Unit) {
         Box(
             modifier = Modifier
                 .align(Alignment.Center)
-                .fillMaxWidth(0.85f)                                  // ~793 от 1080
-                .fillMaxHeight(0.55f)                                 // ~1013 от 2388 (примерно)
+                .fillMaxWidth(0.90f)                                  // ~793 от 1080
+                .fillMaxHeight(0.60f)                                 // ~1013 от 2388 (примерно)
                 .clip(RoundedCornerShape(40.dp))
-                .background(Color.White.copy(alpha = 0.30f))          // ← FFFFFF 30% как в Figma
+                .background(Color.White.copy(alpha = 0.40f))          // ← FFFFFF 30% как в Figma
                 .border(
                     width = 1.dp,
                     brush = Brush.linearGradient(
@@ -93,11 +93,11 @@ fun AuthScreen(onLoginSuccess: (User, String) -> Unit) {
             Column(
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(28.dp)
+                verticalArrangement = Arrangement.spacedBy(30.dp)
             ) {
                 Text(
                     "Войдите в аккаунт",
-                    color = Color.Black.copy(alpha = 0.9f),
+                    color = Color.Black.copy(alpha = 1f),
                     fontSize = 24.sp,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -141,7 +141,7 @@ fun AuthScreen(onLoginSuccess: (User, String) -> Unit) {
                         .fillMaxWidth()
                         .height(64.dp)
                         .clip(RoundedCornerShape(20.dp))
-                        .background(Color(0xFFD9D9D9).copy(alpha = 0.9f))
+                        .background(Color(0xFFD9D9D9).copy(alpha = 0.65f))
                         .border(                                          // ← ДОБАВЛЕНО
                             width = 1.dp,
                             color = Color.Black.copy(alpha = 0.3f),
@@ -188,10 +188,10 @@ fun AuthGlassField(
             .fillMaxWidth()
             .height(56.dp)
             .clip(RoundedCornerShape(16.dp))
-            .background(Color(0xFFD9D9D9).copy(alpha = 0.9f))
+            .background(Color(0xFFD9D9D9).copy(alpha = 0.65f))
             .border(                                          // ← добавил рамку
                 width = 1.dp,
-                color = Color.Black.copy(alpha = 0.2f),
+                color = Color.White.copy(alpha = 0.4f),
                 shape = RoundedCornerShape(16.dp)
             ),
         visualTransformation = visualTransformation,

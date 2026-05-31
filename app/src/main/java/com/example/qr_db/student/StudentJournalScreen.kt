@@ -74,7 +74,7 @@ fun StudentJournalScreen(
             modifier = Modifier
                 .offset(x = getX(140f), y = getY(665f))
                 .size(width = getX(800f), height = getY(800f)),
-            verticalArrangement = Arrangement.spacedBy(getY(35f))
+            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             if (schedule.isEmpty()) {
                 Box(
@@ -105,22 +105,24 @@ fun StudentJournalScreen(
         Box(
             modifier = Modifier
                 .align(Alignment.TopCenter)
-                .offset(y = getY(1550f))           // ← позиция кнопки
+                .offset(y = getY(1480f))
                 .width(getX(560f))
                 .height(getY(140f))
-                .clip(RoundedCornerShape(25.dp))
-                .background(Color.White.copy(alpha = 0.8f))
-                .border(2.dp, Color.Black, RoundedCornerShape(25.dp))
+                .clip(RoundedCornerShape(13.dp))
+                .background(Color.White.copy(alpha = 0.9f))
+                .border(
+                    2.dp,
+                    Color.Black,
+                    RoundedCornerShape(13.dp)
+                )
                 .clickable { },
             contentAlignment = Alignment.Center
         ) {
             Text(
                 text = "Скачать расписание",
-                style = TextStyle(
-                    fontSize = (16 * fontScale).sp,
-                    fontWeight = FontWeight.Medium,
-                    color = Color(0xFF007AFF)
-                )
+                fontSize = (16 * fontScale).sp,
+                fontWeight = FontWeight.Medium,
+                color = Color(0xFF007AFF)
             )
         }
     }
@@ -137,61 +139,47 @@ fun LessonRow(
         modifier = Modifier
             .fillMaxWidth()
             .height(height)
-            .clip(RoundedCornerShape(14.dp))
-            .background(Color.White.copy(alpha = 0.65f))           // ← #FFFFFF 65%
+            .clip(RoundedCornerShape(15.dp))
+            .background(Color.White.copy(alpha = 0.7f))
             .border(
-                width = 2.dp,                                       // ← толще (8px в Figma ≈ 3dp)
-                color = Color.Black.copy(alpha = 0.6f),             // ← #000000 80%
-                shape = RoundedCornerShape(14.dp)
+                width = 2.dp,
+                color = Color.Black,
+                shape = RoundedCornerShape(15.dp)
             )
     ) {
         Row(
             modifier = Modifier.fillMaxSize(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // НАЗВАНИЕ ПРЕДМЕТА
-            Box(
+
+            Text(
+                text = title,
                 modifier = Modifier
                     .weight(1f)
-                    .fillMaxHeight()
-                    .padding(horizontal = 20.dp),
-                contentAlignment = Alignment.CenterStart
-            ) {
-                Text(
-                    text = title,
-                    style = TextStyle(
-                        fontSize = (16 * fontScale).sp,
-                        color = Color.Black,
-                        fontWeight = FontWeight.Medium
-                    ),
-                    maxLines = 1,
-                    textAlign = TextAlign.Left
-                )
-            }
-
-            // РАЗДЕЛИТЕЛЬ (вертикальная чёрная линия)
-            Box(
-                modifier = Modifier
-                    .width(3.dp)                                    // ← толщина 8px ≈ 3dp
-                    .fillMaxHeight()
-                    .background(Color.Black.copy(alpha = 0.8f))
+                    .padding(horizontal = 16.dp),
+                fontSize = (16 * fontScale).sp,
+                color = Color.Black,
+                fontWeight = FontWeight.Normal,
+                textAlign = TextAlign.Start,
+                maxLines = 1
             )
 
-            // АУДИТОРИЯ
             Box(
                 modifier = Modifier
-                    .width(120.dp)                                  // ← ширина правой колонки
-                    .fillMaxHeight(),
+                    .width(1.dp)
+                    .fillMaxHeight()
+                    .background(Color.Black)
+            )
+
+            Box(
+                modifier = Modifier.width(70.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = room,
-                    style = TextStyle(
-                        fontSize = (20 * fontScale).sp,             // ← крупнее
-                        fontWeight = FontWeight.Bold,
-                        color = Color.Black
-                    ),
-                    textAlign = TextAlign.Center
+                    fontSize = (17 * fontScale).sp,
+                    fontWeight = FontWeight.Medium,
+                    color = Color.Black
                 )
             }
         }
