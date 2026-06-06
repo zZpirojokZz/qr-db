@@ -32,7 +32,7 @@ class AdminViewModel : ViewModel() {
         .build()
 
     private val api: QrDbApi = Retrofit.Builder()
-        .baseUrl("http://192.168.1.183/") // или твой актуальный IP
+        .baseUrl("http://192.168.1.184/") // или твой актуальный IP
         .client(client)
         .addConverterFactory(GsonConverterFactory.create())
         .build()

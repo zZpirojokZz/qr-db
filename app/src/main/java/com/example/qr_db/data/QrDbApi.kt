@@ -58,8 +58,13 @@ interface QrDbApi {
         @Path("groupName") groupName: String
     ): Response<List<GroupStudent>>
 
-    @GET("lessons/teacher/{teacher_id}")
+    @GET("lessons/{teacher_id}")
     suspend fun getTeacherLessons(
+        @Path("teacher_id") teacherId: Int
+    ): Response<List<Lesson>>
+
+    @GET("lessons/teacher-today/{teacher_id}")
+    suspend fun getTodayTeacherLessons(
         @Path("teacher_id") teacherId: Int
     ): Response<List<Lesson>>
 

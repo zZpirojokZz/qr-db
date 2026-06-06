@@ -48,17 +48,6 @@ fun ProfileStudentScreen(user: User, onBack: () -> Unit, onLogout: () -> Unit) {
 
         Box(modifier = Modifier.fillMaxSize()) {
 
-            // КРЕСТИК
-            Icon(
-                imageVector = Icons.Default.Close,
-                contentDescription = "Close",
-                modifier = Modifier
-                    .offset(x = getX(64f), y = getY(158f))
-                    .size(getX(75f))
-                    .clip(CircleShape)
-                    .clickable { onBack() },
-                tint = Color.Black
-            )
 
             // --- ПЕРВАЯ КАРТОЧКА ---
             Box(

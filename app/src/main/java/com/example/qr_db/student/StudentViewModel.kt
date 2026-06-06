@@ -12,11 +12,11 @@ import retrofit2.converter.gson.GsonConverterFactory
 import com.example.qr_db.admin.StudentScheduleItem
 import com.example.qr_db.admin.JournalItem
 import com.example.qr_db.data.StudentGroupInfo
-
+import com.example.qr_db.teacher.ScanState
 class StudentViewModel : ViewModel() {
 
     private val api: QrDbApi = Retrofit.Builder()
-        .baseUrl("http://192.168.1.183:3000/")
+        .baseUrl("http://192.168.1.184:3000/")
         .addConverterFactory(GsonConverterFactory.create())
         .build()
         .create(QrDbApi::class.java)
@@ -30,6 +30,9 @@ class StudentViewModel : ViewModel() {
 
     private val _currentLesson = MutableStateFlow<Lesson?>(null)
     val currentLesson: StateFlow<Lesson?> = _currentLesson
+
+    private val _scanState = MutableStateFlow<ScanState>(ScanState.Idle)
+    val scanState: StateFlow<ScanState> = _scanState
 
     private val _journal =
         MutableStateFlow<List<JournalItem>>(emptyList())
@@ -75,6 +78,26 @@ class StudentViewModel : ViewModel() {
             }
         }
     }
+
+
+    fun markAttendance(qrCodeData: String) {
+        viewModelScope.launch {
+            _scanState.value = ScanState.Loading
+            try {
+                // Ваша логика отправки запроса на сервер
+                // val result = repository.sendAttendance(userId, qrCodeData)
+                _scanState.value = ScanState.Success("Вы успешно отметились!")
+                _isMarked.value = true // ставим галочку
+            } catch (e: Exception) {
+                _scanState.value = ScanState.Error("Ошибка: ${e.message}")
+            }
+        }
+    }
+
+    fun resetState() {
+        _scanState.value = ScanState.Idle
+    }
+
 
     fun loadSchedule(studentId: Int) {
         viewModelScope.launch {

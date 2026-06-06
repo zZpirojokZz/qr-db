@@ -71,7 +71,7 @@ fun AdminQrScreen(
                 style = TextStyle(fontSize = (26 * fontScale).sp, fontWeight = FontWeight.Bold, color = Color.White)
             )
             Text(
-                text = "Администратор",
+                text = "Администрация",
                 style = TextStyle(fontSize = (18 * fontScale).sp, color = Color.White.copy(alpha = 0.8f))
             )
         }

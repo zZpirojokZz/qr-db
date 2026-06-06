@@ -99,7 +99,7 @@ func main() {
 </div>
 
 <script>
-    const API = 'http://192.168.1.183:3000';
+    const API = 'http://192.168.1.184:3000';
 
     function openTab(tabId, btn) {
        var tabs = document.querySelectorAll('.tab-content');

@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.qr_db.data.Lesson
+import com.example.qr_db.student.LessonRow
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -31,147 +32,119 @@ fun TeacherJournalScreen(
     getY: (Float) -> Dp,
     fontScale: Float
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Spacer(modifier = Modifier.height(60.dp))
 
-        // ЗАГОЛОВОК С ДАТОЙ
-        Text(
-            text = currentDate,
-            style = TextStyle(
-                fontSize = (28 * fontScale).sp,
-                fontWeight = FontWeight.Black,
-                color = Color.Black
-            )
-        )
+    Box(modifier = Modifier.fillMaxSize()) {
 
-        Spacer(modifier = Modifier.height(25.dp))
+        // === СПИСОК ЗАНЯТИЙ ===
+        LazyColumn(
+            modifier = Modifier
+                .offset(x = getX(140f), y = getY(665f))
+                .size(
+                    width = getX(800f),
+                    height = getY(800f)   // фиксированная высота контейнера
+                ),
+            verticalArrangement = Arrangement.spacedBy(getY(25f))
+        ) {
 
-        // СПИСОК ЗАНЯТИЙ И КНОПКА СКАЧАТЬ
-        if (lessons.isEmpty()) {
-            // ЕСЛИ ЗАНЯТИЙ НЕТ: Кнопка скачать поднимается ровно на середину экрана!
-            Box(
-                modifier = Modifier.weight(1f),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = "Занятий на сегодня нет",
-                        style = TextStyle(
+            if (lessons.isEmpty()) {
+                item {
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Занятий на сегодня нет",
                             fontSize = (18 * fontScale).sp,
-                            color = Color.Gray,
-                            textAlign = TextAlign.Center
+                            color = Color.Gray
                         )
-                    )
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    // Кнопка скачать на середине экрана
-                    DownloadButton(fontScale)
+                    }
                 }
-            }
-        } else {
-            // ЕСЛИ ЗАНЯТИЯ ЕСТЬ: Выводим список, а кнопка остается внизу экрана
-            LazyColumn(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(15.dp),
-                contentPadding = PaddingValues(bottom = 20.dp)
-            ) {
+            } else {
                 items(lessons) { lesson ->
-                    TeacherLessonItem(lesson, fontScale)
+                    TeacherLessonItem(
+                        lesson = lesson,
+                        fontScale = fontScale
+                    )
                 }
             }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            // Кнопка скачать внизу экрана
-            DownloadButton(fontScale)
         }
 
-        Spacer(modifier = Modifier.height(110.dp)) // Отступ под нижнюю навигацию
+        // === КНОПКА СКАЧАТЬ ===
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .offset(y = getY(1480f))
+                .width(getX(560f))
+                .height(getY(140f))
+                .clip(RoundedCornerShape(13.dp))
+                .background(Color.White.copy(alpha = 0.9f))
+                .border(
+                    2.dp,
+                    Color.Black,
+                    RoundedCornerShape(13.dp)
+                )
+                .clickable { },
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "Скачать расписание",
+                fontSize = (16 * fontScale).sp,
+                fontWeight = FontWeight.Medium,
+                color = Color(0xFF007AFF)
+            )
+        }
     }
 }
 
-@Composable
-fun TeacherLessonItem(lesson: Lesson, fontScale: Float) {
-    val startTime = formatIsoTime(lesson.startTime)
-    val endTime = formatIsoTime(lesson.endTime)
 
+@Composable
+fun TeacherLessonItem(
+    lesson: Lesson,
+    fontScale: Float
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(80.dp)
-            .clip(RoundedCornerShape(22.dp))
-            .background(Color.White.copy(alpha = 0.85f))
-            .border(1.dp, Color.Black.copy(alpha = 0.1f), RoundedCornerShape(22.dp))
-            .padding(horizontal = 18.dp),
+            .height(60.dp)
+            .clip(RoundedCornerShape(15.dp))
+            .background(Color.White.copy(alpha = 0.7f))
+            .border(
+                width = 2.dp,
+                color = Color.Black,
+                shape = RoundedCornerShape(15.dp)
+            ),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // БЛОК ВРЕМЕНИ
-        Column(modifier = Modifier.width(70.dp)) {
-            Text(
-                text = startTime,
-                style = TextStyle(
-                    fontSize = (17 * fontScale).sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black
-                )
-            )
-            Text(
-                text = endTime,
-                style = TextStyle(
-                    fontSize = (13 * fontScale).sp,
-                    fontWeight = FontWeight.Normal,
-                    color = Color.Gray
-                )
-            )
-        }
 
-        // Вертикальный разделитель
+        Text(
+            text = lesson.groupName ?: "Группа не указана",
+            modifier = Modifier
+                .weight(1f)
+                .padding(horizontal = 16.dp),
+            fontSize = (16 * fontScale).sp,
+            fontWeight = FontWeight.Normal,
+            color = Color.Black,
+            maxLines = 1
+        )
+
         Box(
             modifier = Modifier
                 .width(1.dp)
-                .fillMaxHeight(0.5f)
-                .background(Color.Black.copy(alpha = 0.1f))
+                .fillMaxHeight()
+                .background(Color.Black)
         )
 
-        Spacer(modifier = Modifier.width(16.dp))
-
-        // ИНФОРМАЦИЯ О ГРУППЕ И ПРЕДМЕТЕ
-        Column(modifier = Modifier.weight(1f)) {
+        Box(
+            modifier = Modifier.width(70.dp),
+            contentAlignment = Alignment.Center
+        ) {
             Text(
-                text = lesson.groupName ?: "Группа не указана",
-                style = TextStyle(
-                    fontSize = (16 * fontScale).sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = Color.Black
-                ),
-                maxLines = 1
-            )
-            Text(
-                text = lesson.subject,
-                style = TextStyle(
-                    fontSize = (14 * fontScale).sp,
-                    fontWeight = FontWeight.Normal,
-                    color = Color.DarkGray
-                ),
-                maxLines = 1
+                text = lesson.room ?: "---",
+                fontSize = (17 * fontScale).sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.Black
             )
         }
-
-        // КАБИНЕТ
-        Text(
-            text = "каб. ${lesson.room ?: "--"}",
-            style = TextStyle(
-                fontSize = (15 * fontScale).sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF007AFF)
-            ),
-            textAlign = TextAlign.End
-        )
     }
 }
 
@@ -182,21 +155,23 @@ fun TeacherLessonItem(lesson: Lesson, fontScale: Float) {
 fun DownloadButton(fontScale: Float) {
     Box(
         modifier = Modifier
-            .width(260.dp)
-            .height(52.dp)
-            .clip(RoundedCornerShape(26.dp))
+            .width(210.dp)
+            .height(48.dp)
+            .clip(RoundedCornerShape(13.dp))
             .background(Color.White.copy(alpha = 0.9f))
-            .border(2.dp, Color.Black, RoundedCornerShape(26.dp))
-            .clickable { /* Логика генерации PDF/Excel */ },
+            .border(
+                2.dp,
+                Color.Black,
+                RoundedCornerShape(13.dp)
+            )
+            .clickable { },
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = "Скачать расписание",
-            style = TextStyle(
-                fontSize = (16 * fontScale).sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF007AFF)
-            )
+            fontSize = (16 * fontScale).sp,
+            fontWeight = FontWeight.Medium,
+            color = Color(0xFF007AFF)
         )
     }
 }

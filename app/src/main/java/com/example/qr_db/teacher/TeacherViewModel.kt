@@ -44,7 +44,11 @@ class TeacherViewModel : ViewModel() {
     private val _isCheckingSession = MutableStateFlow(true)
     val isCheckingSession: StateFlow<Boolean> = _isCheckingSession
 
+    private val _qrBitmap = MutableStateFlow<android.graphics.Bitmap?>(null)
+    val qrBitmap: StateFlow<android.graphics.Bitmap?> = _qrBitmap
 
+    private val _todayLessons = MutableStateFlow<List<Lesson>>(emptyList())
+    val todayLessons: StateFlow<List<Lesson>> = _todayLessons
 
     // ==========================================
     // 2. СОСТОЯНИЯ ДЛЯ ЖУРНАЛА
@@ -59,7 +63,7 @@ class TeacherViewModel : ViewModel() {
     // НАСТРОЙКА API
     // ==========================================
     private val api: QrDbApi = Retrofit.Builder()
-        .baseUrl("http://192.168.1.183:3000/")
+        .baseUrl("http://192.168.1.184:3000/")
         .addConverterFactory(GsonConverterFactory.create())
         .build()
         .create(QrDbApi::class.java)
@@ -86,6 +90,12 @@ class TeacherViewModel : ViewModel() {
                 _currentLessonState.value = null
             }
         }
+    }
+
+    fun generateQrForLesson(userId: String) {
+        // Здесь ваша логика генерации QR-кода
+        // Например, через библиотеку ZXing
+        // _qrBitmap.value = QrGenerator.generate("some_data")
     }
 
     fun markAttendance(studentIdStr: String) {
@@ -230,6 +240,26 @@ class TeacherViewModel : ViewModel() {
     }
 
 
+    fun loadTodayLessons(teacherId: Int) {
+        viewModelScope.launch {
+            try {
+                val response = api.getTodayTeacherLessons(teacherId)
+
+                android.util.Log.d(
+                    "TODAY_LESSONS",
+                    "code=${response.code()} body=${response.body()}"
+                )
+
+                if (response.isSuccessful) {
+                    _todayLessons.value = response.body() ?: emptyList()
+                }
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
     fun resetState() {
         _scanState.value = ScanState.Idle
     }
@@ -245,7 +275,10 @@ class TeacherViewModel : ViewModel() {
                     _lessonsState.value = response.body() ?: emptyList()
 
                 }
-
+                android.util.Log.d(
+                    "LESSONS_DEBUG",
+                    "code=${response.code()} body=${response.body()}"
+                )
             } catch (e: Exception) {
                 e.printStackTrace()
             }

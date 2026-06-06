@@ -33,8 +33,10 @@ fun TeacherScreen(user: User, navController: NavController) {
     var showAttendanceScreen by remember { mutableStateOf(false) }
 
     LaunchedEffect(user.userId) {
-        viewModel.loadLessons(user.userId)
-        viewModel.loadCurrentLesson(user.userId)
+        while (true) {
+            viewModel.loadTodayLessons(user.userId)
+            kotlinx.coroutines.delay(5000)   // обновление каждые 5 секунд
+        }
     }
 
     // Получаем размер экрана через LocalConfiguration
@@ -81,7 +83,6 @@ fun TeacherScreen(user: User, navController: NavController) {
                         getX = ::getX,
                         getY = ::getY,
                         fontScale = fontScale,
-                        onScanSuccess = { showAttendanceScreen = true }
                     )
                     1 -> TeacherJournalScreen(
                         currentDate = "",
@@ -91,6 +92,7 @@ fun TeacherScreen(user: User, navController: NavController) {
                         fontScale = fontScale
                     )
                     2 -> TeacherScheduleScreen(
+                        user = user,
                         getX = ::getX,
                         getY = ::getY,
                         fontScale = fontScale
@@ -103,7 +105,7 @@ fun TeacherScreen(user: User, navController: NavController) {
         if (!showAttendanceScreen) {
             Row(
                 modifier = Modifier
-                    .offset(x = getX(140f), y = getY(2030f))
+                    .offset(x = getX(140f), y = getY(2150f))
                     .size(width = getX(800f), height = getY(200f)),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically

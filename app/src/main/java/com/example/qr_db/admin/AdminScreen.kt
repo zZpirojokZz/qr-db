@@ -28,6 +28,9 @@ import androidx.navigation.NavController
 import com.example.qr_db.R
 import com.example.qr_db.data.User
 
+import com.example.qr_db.data.Lesson
+
+@Suppress("UnusedContentLambdaTargetStateParameter")
 @Composable
 fun AdminScreen(user: User, navController: NavController) {
     var selectedTab by remember { mutableIntStateOf(0) }
@@ -38,7 +41,20 @@ fun AdminScreen(user: User, navController: NavController) {
     // 2. "Слушаем" список уроков из базы.
     // Как только в базе что-то изменится, экран перерисуется сам.
     val currentSchedule by adminViewModel.scheduleState.collectAsState()
-
+    val lessons = remember(currentSchedule) {
+        currentSchedule.mapIndexed { index, (subject, time) ->
+            Lesson(
+                lessonId = index,
+                teacherId = 0,
+                groupId = 0,
+                subject = subject,
+                startTime = time,
+                endTime = "",
+                room = null,
+                groupName = null
+            )
+        }
+    }
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
@@ -47,8 +63,8 @@ fun AdminScreen(user: User, navController: NavController) {
         val screenWidth = maxWidth
         val screenHeight = maxHeight
 
-        fun getX(px: Float) = screenWidth * (px / 1080f)
-        fun getY(px: Float) = screenHeight * (px / 2388f)
+        val getX: (Float) -> Dp = { px -> screenWidth * (px / 1080f) }
+        val getY: (Float) -> Dp = { px -> screenHeight * (px / 2388f) }
         val fontScale = (screenWidth.value / 360f).coerceIn(0.85f, 1.15f)
 
         Image(
@@ -67,18 +83,19 @@ fun AdminScreen(user: User, navController: NavController) {
                 label = "TabAnimation"
             ) { targetTab ->
                 when (targetTab) {
-                    0 -> AdminQrScreen(user, navController, ::getX, ::getY, fontScale)
-                    1 -> {
-                        // 3. ПЕРЕДАЕМ РЕАЛЬНЫЕ ДАННЫЕ вместо заглушки
-                        AdminJournalScreen(
-                            currentDate = "03.05.2026",
-                            lessonsList = currentSchedule, // <--- ТЕПЕРЬ ТУТ ДАННЫЕ ИЗ БД
-                            getX = ::getX,
-                            getY = ::getY,
-                            fontScale = fontScale
-                        )
-                    }
-                    2 -> AdminScheduleScreen(::getX, ::getY, fontScale)
+                    0 -> AdminQrScreen(user, navController, getX, getY, fontScale)
+                    1 -> AdminJournalScreen(
+                        lessons = lessons,
+                        getX = getX,
+                        getY = getY,
+                        fontScale = fontScale
+                    )
+                    2 -> AdminScheduleScreen(
+                        user = user,
+                        getX = getX,
+                        getY = getY,
+                        fontScale = fontScale
+                    )
                 }
             }
         }
@@ -92,13 +109,14 @@ fun AdminScreen(user: User, navController: NavController) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            AdminNavButton(R.drawable.ic_scanner, isSelected = selectedTab == 0, ::getX, ::getY) { selectedTab = 0 }
-            AdminNavButton(R.drawable.ic_journal, isSelected = selectedTab == 1, ::getX, ::getY) { selectedTab = 1 }
-            AdminNavButton(R.drawable.ic_profile, isSelected = selectedTab == 2, ::getX, ::getY) { selectedTab = 2 }
+            AdminNavButton(R.drawable.ic_scanner, isSelected = selectedTab == 0, getX, getY) { selectedTab = 0 }
+            AdminNavButton(R.drawable.ic_journal, isSelected = selectedTab == 1, getX, getY) { selectedTab = 1 }
+            AdminNavButton(R.drawable.ic_profile, isSelected = selectedTab == 2, getX, getY) { selectedTab = 2 }
         }
     }
 }
 
+@Suppress("ComposableLambdaParameterPosition")
 @Composable
 fun AdminNavButton(
     @DrawableRes iconRes: Int,

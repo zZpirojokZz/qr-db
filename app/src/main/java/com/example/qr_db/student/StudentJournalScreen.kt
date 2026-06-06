@@ -13,7 +13,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -25,7 +24,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.qr_db.data.User
 import java.text.SimpleDateFormat
 import java.util.*
-
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 @Composable
 fun StudentJournalScreen(
     user: User,
@@ -70,27 +70,33 @@ fun StudentJournalScreen(
         }
 
         // СПИСОК ЗАНЯТИЙ (X=140, Y=665, width=800)
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .offset(x = getX(140f), y = getY(665f))
                 .size(width = getX(800f), height = getY(800f)),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             if (schedule.isEmpty()) {
-                Box(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "Занятий на сегодня нет",
-                        style = TextStyle(
-                            fontSize = (18 * fontScale).sp,
-                            color = Color.Gray
+                // item используется для отрисовки одиночных элементов
+                item {
+                    Box(
+                        // fillParentMaxSize() растянет Box на все 800f высоты и ширины,
+                        // чтобы надпись была ровно по центру всего блока
+                        modifier = Modifier.fillParentMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Занятий на сегодня нет",
+                            style = TextStyle(
+                                fontSize = (18 * fontScale).sp,
+                                color = Color.Gray
+                            )
                         )
-                    )
+                    }
                 }
             } else {
-                schedule.forEach { lesson ->
+                // items заменяет стандартный forEach для списков
+                items(schedule) { lesson ->
                     LessonRow(
                         title = lesson.subject,
                         room = lesson.room ?: "---",

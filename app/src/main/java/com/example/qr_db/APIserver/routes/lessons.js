@@ -211,4 +211,43 @@ router.get('/group-subjects/:groupName', async (req, res) => {
 });
 
 
+
+// Сегодняшние пары преподавателя
+router.get('/teacher-today/:teacher_id', async (req, res) => {
+
+    const teacherId = req.params.teacher_id;
+
+    try {
+        const result = await pool.query(`
+            SELECT l.lesson_id, l.subject, l.start_time, l.end_time,
+                   g.group_id, g.group_name, l.room
+            FROM lessons l
+            JOIN groups g ON l.group_id = g.group_id
+            WHERE l.teacher_id = $1
+              AND DATE(l.start_time) = CURRENT_DATE
+            ORDER BY l.start_time ASC
+        `, [teacherId]);
+
+        res.json(result.rows);
+
+    } catch (err) {
+        console.error('Ошибка /teacher-today:', err);
+        res.status(500).json({ error: 'Ошибка сервера' });
+    }
+});
+
+
+router.get("/:teacher_id", async (req, res) => {
+    try {
+        const result = await pool.query(
+            "SELECT * FROM lessons WHERE teacher_id=$1",
+            [req.params.teacher_id]
+        );
+        res.json(result.rows);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Ошибка сервера' });
+    }
+});
+
 module.exports = router;

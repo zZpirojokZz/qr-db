@@ -55,12 +55,10 @@ fun StudentScreen(user: User, navController: NavController) {
         when (selectedTab) {
             0 -> StudentQrScreen(
                 user = user,
-                qrBitmap = qrBitmap,
                 navController = navController,
                 getX = ::getX,
                 getY = ::getY,
-                fontScale = fontScale,
-                onQrClick = { qrVersion++ }
+                fontScale = fontScale
             )
 
             1 -> StudentJournalScreen(
