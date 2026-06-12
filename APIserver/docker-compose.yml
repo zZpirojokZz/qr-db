@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  # Сервис базы данных PostgreSQL
+  postgres-db:
+    image: postgres:15-alpine
+    container_name: smartcheck-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-secret_password}
+      POSTGRES_DB: ${DB_NAME:-smartcheck}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # Сервис Node.js API
+  node-api:
+    build: .
+    container_name: smartcheck-api
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-secret_password}
+      DB_HOST: postgres-db
+      DB_NAME: ${DB_NAME:-smartcheck}
+      DB_PORT: 5432
+      JWT_SECRET: ${JWT_SECRET:-smartcheck_secret}
+    depends_on:
+      - postgres-db
+
+volumes:
+  postgres_data:
