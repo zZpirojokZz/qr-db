@@ -1,16 +1,15 @@
-*.iml
-.gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
+# Node
+node_modules/
+
+# Environment
+.env
+
+# Uploads / temporary files
+uploads/
+
+# Logs
+*.log
+
+# OS files
 .DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
-local.properties
-/.kotlin/errors
+Thumbs.db
