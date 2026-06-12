@@ -63,7 +63,7 @@ class TeacherViewModel : ViewModel() {
     // НАСТРОЙКА API
     // ==========================================
     private val api: QrDbApi = Retrofit.Builder()
-        .baseUrl("http://192.168.1.184:3000/")
+        .baseUrl("http://10.75.4.121:3000/")
         .addConverterFactory(GsonConverterFactory.create())
         .build()
         .create(QrDbApi::class.java)
@@ -77,6 +77,12 @@ class TeacherViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val response = api.getCurrentTeacherLesson(teacherId)
+
+                android.util.Log.d(
+                    "CURRENT_LESSON",
+                    "📥 code=${response.code()} body=${response.body()}"
+                )
+
                 if (response.isSuccessful) {
                     currentLesson = response.body()
                     _currentLessonState.value = response.body()
@@ -137,17 +143,21 @@ class TeacherViewModel : ViewModel() {
         viewModelScope.launch {
             _isCheckingSession.value = true
             try {
+                android.util.Log.d("ACTIVE_LESSON", "🔍 Запрос: groupName='$groupName', subject='$subject'")
+
                 val response = api.getActiveLesson(groupName, subject)
+
                 android.util.Log.d(
                     "ACTIVE_LESSON",
-                    "code=${response.code()} body=${response.body()}"
+                    "📥 Ответ: code=${response.code()} body=${response.body()} raw=${response.raw()}"
                 )
+
                 if (response.isSuccessful) {
                     _activeLesson.value = response.body()
                     response.body()?.lessonId?.let { loadAttendance(it) }
                 }
             } catch (e: Exception) {
-                e.printStackTrace()
+                android.util.Log.e("ACTIVE_LESSON", "❌ Ошибка: ${e.message}")
             } finally {
                 _isCheckingSession.value = false
             }
@@ -185,10 +195,13 @@ class TeacherViewModel : ViewModel() {
     fun loadAttendance(lessonId: Int) {
         viewModelScope.launch {
             try {
+                android.util.Log.d("LOAD_ATTENDANCE", "🔍 Запрос lessonId=$lessonId")
+
                 val response = api.getLessonAttendance(lessonId)
+
                 android.util.Log.d(
                     "ATTENDANCE_DEBUG",
-                    "code=${response.code()} body=${response.body()}"
+                    "lessonId=$lessonId code=${response.code()} body=${response.body()}"
                 )
                 if (response.isSuccessful) {
                     _attendance.value = response.body() ?: emptyList()

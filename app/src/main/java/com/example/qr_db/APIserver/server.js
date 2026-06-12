@@ -15,7 +15,7 @@ app.use('/grades', gradeRoutes);
 
 const scheduleRoutes = require('./routes/schedule');
 app.use('/schedule', scheduleRoutes);
-const lessonsRoutes = require('./routes/lessons');     // ← ДОБАВЬ
+const lessonsRoutes = require('./routes/lessons');
 app.use('/lessons', lessonsRoutes);
 
 

@@ -29,7 +29,7 @@ class AuthViewModel(private val sessionManager: SessionManager) : ViewModel() {
         .build()
 
     private val api: QrDbApi = Retrofit.Builder()
-        .baseUrl("http://192.168.1.184:3000/")
+        .baseUrl("http://10.75.4.121:3000/")
         .client(client)
         .addConverterFactory(GsonConverterFactory.create())
         .build()

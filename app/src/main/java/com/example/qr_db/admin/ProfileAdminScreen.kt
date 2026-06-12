@@ -129,7 +129,7 @@ fun ProfileAdminScreen(
                     .border(1.dp, Color.White.copy(alpha = 0.4f), RoundedCornerShape(30.dp))
                     .clickable {
                         // Замените на реальный IP вашего сервера или домен
-                        uriHandler.openUri("http://192.168.1.184:8080/admin")
+                        uriHandler.openUri("http://10.75.4.121:8080/admin")
                     },
                 contentAlignment = Alignment.Center
             ) {

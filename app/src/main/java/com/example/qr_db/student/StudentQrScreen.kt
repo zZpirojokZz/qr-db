@@ -113,7 +113,7 @@ fun StudentQrScreen(
         ) {
             if (hasCameraPermission && !isMarked) {
                 CameraPreview { result ->
-                    viewModel.markAttendance(result)
+                    viewModel.markAttendance(result, user.userId)   // ← добавили studentId
                 }
             } else if (!hasCameraPermission) {
                 Box(

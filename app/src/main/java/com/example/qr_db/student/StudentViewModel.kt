@@ -16,7 +16,7 @@ import com.example.qr_db.teacher.ScanState
 class StudentViewModel : ViewModel() {
 
     private val api: QrDbApi = Retrofit.Builder()
-        .baseUrl("http://192.168.1.184:3000/")
+        .baseUrl("http://10.75.4.121:3000/")
         .addConverterFactory(GsonConverterFactory.create())
         .build()
         .create(QrDbApi::class.java)
@@ -80,16 +80,44 @@ class StudentViewModel : ViewModel() {
     }
 
 
-    fun markAttendance(qrCodeData: String) {
+    fun markAttendance(qrCodeData: String, studentId: Int) {
+        // QR содержит: "lessonId_teacherId_qrVersion"
+        val lessonId = qrCodeData.split("_").firstOrNull()?.toIntOrNull()
+
+        android.util.Log.d("STUDENT_MARK", "🟢 Скан QR: '$qrCodeData', lessonId=$lessonId, studentId=$studentId")
+
+        if (lessonId == null) {
+            _scanState.value = ScanState.Error("Неверный формат QR")
+            return
+        }
+
         viewModelScope.launch {
             _scanState.value = ScanState.Loading
             try {
-                // Ваша логика отправки запроса на сервер
-                // val result = repository.sendAttendance(userId, qrCodeData)
-                _scanState.value = ScanState.Success("Вы успешно отметились!")
-                _isMarked.value = true // ставим галочку
+                val response = api.markAttendance(
+                    com.example.qr_db.data.MarkAttendanceRequest(lessonId, studentId)
+                )
+
+                android.util.Log.d(
+                    "STUDENT_MARK",
+                    "📥 Ответ: code=${response.code()} body=${response.body()}"
+                )
+
+                if (response.isSuccessful) {
+                    _scanState.value = ScanState.Success("Вы успешно отметились!")
+                    _isMarked.value = true
+                } else {
+                    val errorMsg = when (response.code()) {
+                        400 -> "Ошибка: Вне времени пары"
+                        409 -> "Вы уже отмечены"
+                        404 -> "Урок не найден"
+                        else -> "Ошибка сервера: ${response.code()}"
+                    }
+                    _scanState.value = ScanState.Error(errorMsg)
+                }
             } catch (e: Exception) {
-                _scanState.value = ScanState.Error("Ошибка: ${e.message}")
+                android.util.Log.e("STUDENT_MARK", "❌ Ошибка сети: ${e.message}")
+                _scanState.value = ScanState.Error("Ошибка сети: ${e.message}")
             }
         }
     }
