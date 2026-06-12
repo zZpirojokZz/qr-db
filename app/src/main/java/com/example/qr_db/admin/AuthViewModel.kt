@@ -1,8 +1,13 @@
-package com.example.qr_db.data
+package com.example.qr_db.admin
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.example.qr_db.data.LoginRequest
+import com.example.qr_db.data.QrDbApi
+import com.example.qr_db.data.RegisterRequest
+import com.example.qr_db.data.SessionManager
+import com.example.qr_db.data.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -15,6 +20,7 @@ class AuthViewModel(private val sessionManager: SessionManager) : ViewModel() {
     private val _uiState = MutableStateFlow<AuthState>(AuthState.Idle)
     val uiState = _uiState.asStateFlow()
 
+
     private val logging = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY
     }
@@ -23,8 +29,7 @@ class AuthViewModel(private val sessionManager: SessionManager) : ViewModel() {
         .build()
 
     private val api: QrDbApi = Retrofit.Builder()
-        // ИСПОЛЬЗУЕМ ПОРТ 3000, КАК В SERVER.JS
-        .baseUrl("http://192.168.188.173:3000/")
+        .baseUrl("http://10.75.4.121:3000/")
         .client(client)
         .addConverterFactory(GsonConverterFactory.create())
         .build()
@@ -89,3 +94,34 @@ sealed class AuthState {
     data class Success(val user: User) : AuthState()
     data class Error(val message: String) : AuthState()
 }
+
+data class JournalItem(
+    val subject: String,
+    val lesson_date: String,
+    val grade: Int?,
+    val attendance: Boolean?,
+    val lesson_type: String?
+)
+
+data class StudentScheduleItem(
+
+    val lesson_id: Int,
+
+    val subject: String,
+
+    val room: String?,
+
+    val start_time: String,
+
+    val end_time: String,
+
+    val teacher_name: String?,
+
+    val group_name: String?,
+
+    val grade: Int?,
+
+    val attendance: Boolean?,
+
+    val lesson_type: String?
+)

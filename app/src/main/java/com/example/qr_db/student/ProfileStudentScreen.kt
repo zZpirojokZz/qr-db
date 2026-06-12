@@ -48,17 +48,6 @@ fun ProfileStudentScreen(user: User, onBack: () -> Unit, onLogout: () -> Unit) {
 
         Box(modifier = Modifier.fillMaxSize()) {
 
-            // КРЕСТИК
-            Icon(
-                imageVector = Icons.Default.Close,
-                contentDescription = "Close",
-                modifier = Modifier
-                    .offset(x = getX(64f), y = getY(158f))
-                    .size(getX(75f))
-                    .clip(CircleShape)
-                    .clickable { onBack() },
-                tint = Color.Black
-            )
 
             // --- ПЕРВАЯ КАРТОЧКА ---
             Box(
@@ -102,17 +91,17 @@ fun ProfileStudentScreen(user: User, onBack: () -> Unit, onLogout: () -> Unit) {
                             textAlign = TextAlign.Center
                         )
                     )
-                    
+
                     Spacer(modifier = Modifier.weight(1f))
-                    
+
                     Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(Color.Black.copy(alpha = 0.1f)))
-                    
+
                     Box(
                         modifier = Modifier.fillMaxWidth().height(getY(140f)),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "ИС22-4Б",
+                            text = user.groupName ?: "Группа не указана",
                             style = TextStyle(fontSize = getSp(54f), fontWeight = FontWeight.Medium, color = Color.Black)
                         )
                     }

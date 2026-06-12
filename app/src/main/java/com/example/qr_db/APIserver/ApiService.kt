@@ -13,6 +13,9 @@ interface ApiService {
 }
 
 
+
+
+
 data class ScheduleEntry(
     val subject: String,  // Соответствует колонке 'subject'
     val room: String,     // Соответствует колонке 'room'

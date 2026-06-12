@@ -14,7 +14,9 @@ data class User(
     @SerializedName("full_name") val fullName: String,
     @SerializedName("email") val email: String?,
     @SerializedName("role_id") val roleId: Int,
-    @SerializedName("created_at") val createdAt: String? = null
+    @SerializedName("created_at") val createdAt: String? = null,
+
+    @SerializedName("group_name") val groupName: String? = null // ✅ ДОБАВИТЬ
 )
 
 // 3. Группы (Groups)
@@ -29,9 +31,11 @@ data class Lesson(
     @SerializedName("lesson_id") val lessonId: Int,
     @SerializedName("teacher_id") val teacherId: Int,
     @SerializedName("group_id") val groupId: Int,
-    @SerializedName("subject") val subject: String, // В SQL это character varying(100)
+    @SerializedName("subject") val subject: String,
     @SerializedName("start_time") val startTime: String, // ISO timestamp
-    @SerializedName("end_time") val endTime: String     // ISO timestamp
+    @SerializedName("end_time") val endTime: String,     // ISO timestamp
+    @SerializedName("room") val room: String?,           // Добавили кабинет
+    @SerializedName("group_name") val groupName: String? // Добавили имя группы (для Join)
 )
 
 // 5. Оценки и Посещаемость (Grades)
@@ -58,4 +62,27 @@ data class ScheduleItem(
     val room: String?,
     val start_time: String?,
     val end_time: String?
+)
+
+
+
+data class GroupStudent(
+    @SerializedName("user_id") val userId: Int,
+    @SerializedName("full_name") val fullName: String
+)
+
+data class WeeklyGradeItem(
+    @SerializedName("user_id") val userId: Int,
+    @SerializedName("full_name") val fullName: String,
+    @SerializedName("lesson_date") val lessonDate: String?,
+    @SerializedName("grade") val grade: Int?,
+    @SerializedName("attendance") val attendance: Boolean?,
+    @SerializedName("lesson_id") val lessonId: Int?
+)
+
+data class SetGradeRequest(
+    val lesson_id: Int,
+    val student_id: Int,
+    val grade: Int?,
+    val attendance: Boolean = true
 )

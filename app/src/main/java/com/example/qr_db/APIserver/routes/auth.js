@@ -13,7 +13,13 @@ router.post('/login', async (req, res) => {
     console.log("Ввод пароля:", finalPassword);
 
     try {
-        const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+        const result = await pool.query(`
+            SELECT u.*, g.group_name
+            FROM users u
+            LEFT JOIN group_students gs ON u.user_id = gs.student_id
+            LEFT JOIN groups g ON gs.group_id = g.group_id
+            WHERE u.email = $1
+        `, [email]);
 
         if (result.rows.length === 0) {
             console.log("Ошибка: Пользователь не найден");
@@ -26,11 +32,13 @@ router.post('/login', async (req, res) => {
         // ПРЯМОЕ СРАВНЕНИЕ ТЕКСТА (БЕЗ BCRYPT)
         if (finalPassword.trim() === user.password_hash.trim()) {
             console.log("УСПЕХ: Пароли совпали!");
+            console.log("LOGIN RESULT:", user);
             return res.json({
                 user_id: user.user_id,
                 full_name: user.full_name,
                 email: user.email,
-                role_id: user.role_id
+                role_id: user.role_id,
+                group_name: user.group_name
             });
         } else {
             console.log("ОШИБКА: Пароли РАЗНЫЕ");
@@ -42,5 +50,8 @@ router.post('/login', async (req, res) => {
         res.status(500).send('Ошибка сервера');
     }
 });
+
+
+
 
 module.exports = router;

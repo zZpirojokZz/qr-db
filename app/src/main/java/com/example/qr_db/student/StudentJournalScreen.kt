@@ -5,9 +5,11 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Divider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -15,130 +17,177 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.qr_db.data.User
+import java.text.SimpleDateFormat
+import java.util.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 @Composable
 fun StudentJournalScreen(
-    getX: (Float) -> androidx.compose.ui.unit.Dp,
-    getY: (Float) -> androidx.compose.ui.unit.Dp,
+    user: User,
+    viewModel: StudentViewModel = viewModel(),
+    getX: (Float) -> Dp,
+    getY: (Float) -> Dp,
     fontScale: Float
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(25.dp)
-    ) {
-        Spacer(modifier = Modifier.height(60.dp))
+    val schedule by viewModel.schedule.collectAsState()
+    val currentDate = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(Date())
 
-        // ЗАГОЛОВКИ (как в iOS: .black и .heavy)
-        VStack(spacing = 4.dp) {
+    LaunchedEffect(user.userId) {
+        viewModel.loadSchedule(user.userId)
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+
+        // ЗАГОЛОВОК — Дата + Группа
+        Column(
+            modifier = Modifier
+                .offset(y = getY(400f))            // ← сдвиг сверху
+                .fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
             Text(
-                text = "дд.мм.гггг",
+                text = currentDate,
                 style = TextStyle(
                     fontSize = (28 * fontScale).sp,
-                    fontWeight = FontWeight.Black, // .black в iOS
+                    fontWeight = FontWeight.Black,
                     color = Color.Black
                 )
             )
             Text(
-                text = "ИС22-4Б",
+                text = user.groupName ?: "Группа не указана",
                 style = TextStyle(
                     fontSize = (20 * fontScale).sp,
-                    fontWeight = FontWeight.W900, // .heavy в iOS
+                    fontWeight = FontWeight.W900,
                     color = Color.Black
                 )
             )
         }
 
-        // СПИСОК ЗАНЯТИЙ (как в iOS ForEach)
-        VStack(spacing = 17.dp) {
-            val lessons = listOf(
-                "Предмет, преподаватель" to "104",
-                "Предмет, преподаватель" to "303",
-                "Предмет, преподаватель" to "400",
-                "Предмет, преподаватель" to "123"
-            )
-            lessons.forEach { (title, room) ->
-                LessonRow(title, room)
+        // СПИСОК ЗАНЯТИЙ (X=140, Y=665, width=800)
+        LazyColumn(
+            modifier = Modifier
+                .offset(x = getX(140f), y = getY(665f))
+                .size(width = getX(800f), height = getY(800f)),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            if (schedule.isEmpty()) {
+                // item используется для отрисовки одиночных элементов
+                item {
+                    Box(
+                        // fillParentMaxSize() растянет Box на все 800f высоты и ширины,
+                        // чтобы надпись была ровно по центру всего блока
+                        modifier = Modifier.fillParentMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Занятий на сегодня нет",
+                            style = TextStyle(
+                                fontSize = (18 * fontScale).sp,
+                                color = Color.Gray
+                            )
+                        )
+                    }
+                }
+            } else {
+                // items заменяет стандартный forEach для списков
+                items(schedule) { lesson ->
+                    LessonRow(
+                        title = lesson.subject,
+                        room = lesson.room ?: "---",
+                        height = getY(150f),
+                        fontScale = fontScale
+                    )
+                }
             }
         }
 
-        // КНОПКА СКАЧАТЬ (как в iOS Button)
+        // КНОПКА СКАЧАТЬ (по центру внизу)
         Box(
             modifier = Modifier
-                .width(260.dp) // maxWidth: 260 в iOS
-                .height(52.dp)
-                .clip(RoundedCornerShape(25.dp))
-                .background(Color.White.copy(alpha = 0.45f)) // ultraThinMaterial
-                .background(Color.White.copy(alpha = 0.9f))  // white.opacity(0.9)
-                .border(2.dp, Color.Black, RoundedCornerShape(25.dp))
+                .align(Alignment.TopCenter)
+                .offset(y = getY(1480f))
+                .width(getX(560f))
+                .height(getY(140f))
+                .clip(RoundedCornerShape(13.dp))
+                .background(Color.White.copy(alpha = 0.9f))
+                .border(
+                    2.dp,
+                    Color.Black,
+                    RoundedCornerShape(13.dp)
+                )
                 .clickable { },
             contentAlignment = Alignment.Center
         ) {
             Text(
                 text = "Скачать расписание",
-                style = TextStyle(
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = Color(0xFF007AFF) // .blue в iOS
-                )
+                fontSize = (16 * fontScale).sp,
+                fontWeight = FontWeight.Medium,
+                color = Color(0xFF007AFF)
             )
         }
     }
 }
 
 @Composable
-fun LessonRow(title: String, room: String) {
+fun LessonRow(
+    title: String,
+    room: String,
+    height: Dp,
+    fontScale: Float
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(60.dp) // height: 60 в iOS
-            .clip(RoundedCornerShape(25.dp))
-            .background(Color.White.copy(alpha = 0.45f)) // ultraThinMaterial
-            .background(Color.White.copy(alpha = 0.7f))  // white.opacity(0.7)
-            .border(2.dp, Color.Black, RoundedCornerShape(25.dp))
+            .height(height)
+            .clip(RoundedCornerShape(15.dp))
+            .background(Color.White.copy(alpha = 0.7f))
+            .border(
+                width = 2.dp,
+                color = Color.Black,
+                shape = RoundedCornerShape(15.dp)
+            )
     ) {
         Row(
             modifier = Modifier.fillMaxSize(),
             verticalAlignment = Alignment.CenterVertically
         ) {
+
             Text(
                 text = title,
                 modifier = Modifier
                     .weight(1f)
                     .padding(horizontal = 16.dp),
-                style = TextStyle(fontSize = 16.sp, color = Color.Black),
-                textAlign = TextAlign.Left
+                fontSize = (16 * fontScale).sp,
+                color = Color.Black,
+                fontWeight = FontWeight.Normal,
+                textAlign = TextAlign.Start,
+                maxLines = 1
             )
 
-            // РАЗДЕЛИТЕЛЬ (Divider)
             Box(
                 modifier = Modifier
                     .width(1.dp)
                     .fillMaxHeight()
-                    .background(Color.Gray.copy(alpha = 0.3f))
+                    .background(Color.Black)
             )
 
-            Text(
-                text = room,
-                modifier = Modifier.width(70.dp), // width: 70 в iOS
-                style = TextStyle(fontSize = 17.sp, fontWeight = FontWeight.Medium),
-                textAlign = TextAlign.Center
-            )
+            Box(
+                modifier = Modifier.width(70.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = room,
+                    fontSize = (17 * fontScale).sp,
+                    fontWeight = FontWeight.Medium,
+                    color = Color.Black
+                )
+            }
         }
-    }
-}
-
-// Вспомогательный компонент для имитации SwiftUI VStack
-@Composable
-fun VStack(spacing: androidx.compose.ui.unit.Dp, content: @Composable () -> Unit) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(spacing),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        content()
     }
 }

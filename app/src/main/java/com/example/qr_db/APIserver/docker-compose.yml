@@ -12,10 +12,10 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql   # ← ВАЖНО
+      - ./APIserver/init.sql:/docker-entrypoint-initdb.d/init.sql
 
   app:
-    build: .
+    build: ./APIserver
     container_name: smartcheck_api
     ports:
       - "3000:3000"
@@ -26,6 +26,14 @@ services:
       DB_NAME: SmartCheck
     depends_on:
       - db
+
+  admin:
+    build: ./AdminPanel
+    container_name: smartcheck_admin
+    ports:
+      - "8080:8080"
+    depends_on:
+      - app
 
 volumes:
   postgres_data:

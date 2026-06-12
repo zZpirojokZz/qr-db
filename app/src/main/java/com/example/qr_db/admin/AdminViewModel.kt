@@ -32,7 +32,7 @@ class AdminViewModel : ViewModel() {
         .build()
 
     private val api: QrDbApi = Retrofit.Builder()
-        .baseUrl("http://192.168.188.173:3000/") // Твой локальный IP
+        .baseUrl("http://10.75.4.121/") // или твой актуальный IP
         .client(client)
         .addConverterFactory(GsonConverterFactory.create())
         .build()
@@ -46,17 +46,23 @@ class AdminViewModel : ViewModel() {
     private fun loadSchedule() {
         viewModelScope.launch {
             try {
-                val response = api.getTodaySchedule()
+                val response = api.getTodaySchedule() // Response<List<ScheduleEntry>>
 
-                val mappedList = response.map {
-                    Pair(
-                        it.groupName ?: "Без группы",
-                        it.room ?: "-"
-                    )
+                if (response.isSuccessful) {
+                    val body = response.body() // List<ScheduleEntry>?
+
+                    // Маппим элементы списка, если body не равен null
+                    val mappedList = body?.map {
+                        Pair(
+                            it.groupName ?: "Без группы",
+                            it.room ?: "-"
+                        )
+                    } ?: emptyList()
+
+                    _scheduleState.value = mappedList
+                } else {
+                    Log.e("AdminViewModel", "Ошибка расписания: Код ${response.code()}")
                 }
-
-                _scheduleState.value = mappedList
-
             } catch (e: Exception) {
                 Log.e("AdminViewModel", "Ошибка расписания: ${e.message}", e)
             }
@@ -67,16 +73,26 @@ class AdminViewModel : ViewModel() {
     fun loadProfile(userId: Int) {
         viewModelScope.launch {
             try {
-                // Используем "api", который мы создали выше
-                val profile = api.getUserProfile(userId)
-                _userProfile.value = profile
-                Log.d("AdminViewModel", "Профиль загружен: ${profile.fullName}")
+                // 1. Получаем объект ответа сервера (Response<User>)
+                val response = api.getUserProfile(userId)
+
+                // 2. Проверяем, что запрос успешный
+                if (response.isSuccessful) {
+                    // 3. Вытаскиваем чистого пользователя (User) через .body()
+                    val profile = response.body()
+
+                    // 4. Записываем его в приватный стейт _userProfile (с подчеркиванием!)
+                    _userProfile.value = profile
+
+                    // 5. Безопасно выводим имя через ?.
+                    Log.d("AdminViewModel", "Профиль загружен: ${profile?.fullName}")
+                } else {
+                    Log.e("AdminViewModel", "Ошибка загрузки профиля: Код ${response.code()}")
+                }
             } catch (e: Exception) {
-                Log.e("AdminViewModel", "Ошибка загрузки профиля: ${e.message}")
+                Log.e("AdminViewModel", "Ошибка загрузки профиля: ${e.message}", e)
             }
         }
-    }
-}
 
         data class ScheduleEntry(
             val groupName: String?,
@@ -84,3 +100,5 @@ class AdminViewModel : ViewModel() {
             val start_time: String?,
             val end_time: String?
         )
+    }
+}
