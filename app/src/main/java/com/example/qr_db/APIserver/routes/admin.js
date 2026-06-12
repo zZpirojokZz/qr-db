@@ -215,7 +215,7 @@ router.get('/teacher/current-lesson/:id', async (req, res) => {
                    g.group_id, g.group_name
             FROM lessons l
             JOIN groups g ON l.group_id = g.group_id
-            WHERE l.teacher_id = $1
+            WHERE l.teacher_id = $1 AND l.start_time <= $2 AND l.end_time >= $2
               AND l.start_time <= $2
               AND l.end_time >= $2
             LIMIT 1

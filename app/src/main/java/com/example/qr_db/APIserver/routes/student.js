@@ -8,8 +8,9 @@ router.get('/student/:id/group', async (req, res) => {
         const result = await pool.query(`
             SELECT g.group_id, g.group_name
             FROM group_students gs
-            JOIN groups g ON gs.group_id = g.group_id
-            WHERE gs.student_id = $1
+            JOIN groups g ON l.group_id = g.group_id
+              AND l.start_time <= $2          ← условие JOIN, а не WHERE!
+              AND l.end_time >= $2
             LIMIT 1
         `, [studentId]);
 
