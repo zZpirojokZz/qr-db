@@ -26,6 +26,9 @@ app.get("/health", (req, res) => {
 const authRoutes = require('./routes/auth');
 app.use('/auth', authRoutes);
 
+const usersRoutes = require('./routes/users.js');
+app.use('/users', usersRoutes); 
+
 const gradeRoutes = require('./routes/grades');
 app.use('/grades', gradeRoutes);
 
@@ -41,7 +44,6 @@ app.use('/administration', administrationRoutes);
 const statisticsRoutes = require('./routes/statistics');
 app.use('/statistics', statisticsRoutes);
 
-// Роут для импорта расписания из Excel
 const importRoutes = require('./routes/import');
 app.use('/import', importRoutes); 
 
