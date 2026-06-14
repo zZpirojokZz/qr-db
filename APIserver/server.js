@@ -8,7 +8,7 @@ const app = express();
 app.use(express.json());
 // CORS для защиты всех роуты
 app.use(cors({
-  origin: ['https://smartcheck.aspc.kz'],
+  origin: ['http://smartcheck.aspc.kz'],
   credentials: true
 }));
 
