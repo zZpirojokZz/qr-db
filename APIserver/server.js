@@ -4,6 +4,10 @@ const cors = require('cors');
 const pool = require('./db');
 const app = express();
 
+pool.query('SELECT 1')
+  .then(() => console.log('✅ DB connected'))
+  .catch(err => console.error('❌ DB error:', err));
+
 // Middleware
 app.use(express.json());
 app.use(cors({
