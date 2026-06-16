@@ -26,7 +26,7 @@ router.post('/login', async (req, res) => {
 
         // Создаем токен
         const token = jwt.sign(
-            { user_id: user.rows[0].user_id }, // Можно добавить role_id если нужно
+            { user_id: user.rows[0].user_id },
             'smartcheck_secret',
             { expiresIn: '12h' }
         );
@@ -34,7 +34,7 @@ router.post('/login', async (req, res) => {
         // Возвращает сообщение, токен и роль пользователя
         res.json({
             message: 'Успешный вход',
-            token: token
+            token: token,
             role_id: user.rows[0].role_id
         });
 
