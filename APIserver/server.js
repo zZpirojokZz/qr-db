@@ -26,7 +26,7 @@ app.get("/health", (req, res) => {
 
 // Main page
 app.get('/', (req, res) => {
-    res.send('API works');
+    res.send('API работает');
 });
 
 // Routes

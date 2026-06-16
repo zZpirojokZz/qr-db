@@ -31,10 +31,11 @@ router.post('/login', async (req, res) => {
             { expiresIn: '12h' }
         );
 
-        // Возвращаем ТОЛЬКО сообщение и токен
+        // Возвращает сообщение, токен и роль пользователя
         res.json({
             message: 'Успешный вход',
             token: token
+            role_id: user.rows[0].role_id
         });
 
     } catch (err) {
