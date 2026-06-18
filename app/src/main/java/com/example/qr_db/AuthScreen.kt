@@ -30,9 +30,6 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.qr_db.admin.AuthState
-import com.example.qr_db.admin.AuthViewModel
-import com.example.qr_db.admin.AuthViewModelFactory
 import com.example.qr_db.data.*
 
 @Composable
@@ -52,6 +49,7 @@ fun AuthScreen(onLoginSuccess: (User, String) -> Unit) {
                 1 -> "Студент"
                 2 -> "Преподаватель"
                 3 -> "Админ"
+                4 -> "Администрация"
                 else -> "Пользователь"
             }
             onLoginSuccess(user, roleName)

@@ -1,12 +1,9 @@
 package com.example.qr_db.data
 
-import com.example.qr_db.admin.JournalItem
-import com.example.qr_db.admin.StudentScheduleItem
+import com.example.qr_db.JournalItem
+import com.example.qr_db.StudentScheduleItem
 import retrofit2.Response
 import retrofit2.http.*
-import com.example.qr_db.data.LessonAttendance
-import com.example.qr_db.data.FoundLesson
-import com.example.qr_db.data.GroupStudent
 
 interface QrDbApi {
 
@@ -18,10 +15,17 @@ interface QrDbApi {
     ): Response<List<LessonAttendance>>
 
     @POST("auth/login")
-    suspend fun login(@Body loginRequest: LoginRequest): Response<User>
+    suspend fun login(@Body loginRequest: LoginRequest): Response<User> // ← Response<User> как было// ← было Response<User>
 
-    @POST("auth/register")
-    suspend fun register(@Body registerRequest: RegisterRequest): Response<User>
+    @GET("teacher/profile/{id}")
+    suspend fun getTeacherProfile(
+        @Path("id") teacherId: Int
+    ): Response<TeacherProfileResponse>
+
+    @GET("student/profile/{id}")
+    suspend fun getStudentProfile(
+        @Path("id") studentId: Int
+    ): Response<StudentProfileResponse>
 
     @GET("lessons/active")
     suspend fun getActiveLesson(
@@ -46,6 +50,8 @@ interface QrDbApi {
         @Path("groupName") groupName: String
     ): Response<List<String>>
 
+
+
     @GET("lessons/find")
     suspend fun findLesson(
         @Query("groupName") groupName: String,
@@ -58,7 +64,7 @@ interface QrDbApi {
         @Path("groupName") groupName: String
     ): Response<List<GroupStudent>>
 
-    @GET("lessons/{teacher_id}")
+    @GET("lessons/by-teacher/{teacher_id}")
     suspend fun getTeacherLessons(
         @Path("teacher_id") teacherId: Int
     ): Response<List<Lesson>>
@@ -129,15 +135,20 @@ data class ScheduleEntry(
     val end_time: String?
 )
 
+
+data class LoginResponse(
+    val message: String?,
+    val token: String?
+)
 data class LoginRequest(
     val email: String,
-    val password_hash: String
+    val password: String
 )
 
 data class RegisterRequest(
     val full_name: String,
     val email: String,
-    val password_hash: String,
+    val password: String,
     val role_id: Int
 )
 

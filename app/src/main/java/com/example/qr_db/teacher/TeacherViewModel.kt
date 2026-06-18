@@ -63,7 +63,7 @@ class TeacherViewModel : ViewModel() {
     // НАСТРОЙКА API
     // ==========================================
     private val api: QrDbApi = Retrofit.Builder()
-        .baseUrl("http://10.75.4.121:3000/")
+        .baseUrl("http://smartcheck.aspc.kz/")
         .addConverterFactory(GsonConverterFactory.create())
         .build()
         .create(QrDbApi::class.java)

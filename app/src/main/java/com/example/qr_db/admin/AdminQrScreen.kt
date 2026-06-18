@@ -23,6 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.qr_db.data.User
 
@@ -35,6 +36,19 @@ fun AdminQrScreen(
     fontScale: Float
 ) {
     val context = LocalContext.current
+
+    // === НОВОЕ: подключаем ViewModel и загружаем профиль ===
+    val adminViewModel: AdminViewModel = viewModel()
+    val userProfile by adminViewModel.userProfile.collectAsState()
+
+    LaunchedEffect(user.userId) {
+        adminViewModel.loadProfile(user.userId)
+    }
+
+    // Если профиль загружен — берём его, иначе используем user из сессии
+    val displayUser = userProfile ?: user
+    // ======================================================
+
     var hasCameraPermission by remember {
         mutableStateOf(
             ContextCompat.checkSelfPermission(
@@ -43,6 +57,7 @@ fun AdminQrScreen(
             ) == PackageManager.PERMISSION_GRANTED
         )
     }
+
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
         onResult = { granted -> hasCameraPermission = granted }
@@ -56,7 +71,6 @@ fun AdminQrScreen(
 
     Box(modifier = Modifier.fillMaxSize()) {
         // 1. ФОН
-        // Убедись, что картинка background_waves есть в папке res/drawable
         androidx.compose.foundation.Image(
             painter = androidx.compose.ui.res.painterResource(id = com.example.qr_db.R.drawable.wavy_background),
             contentDescription = null,
@@ -65,14 +79,38 @@ fun AdminQrScreen(
         )
 
         // 2. ИМЯ И РОЛЬ
-        Column(modifier = Modifier.offset(x = getX(121f), y = getY(142f))) {
+        Column(modifier = Modifier.offset(x = getX(60f), y = getY(142f))) {
             Text(
-                text = user.fullName,
-                style = TextStyle(fontSize = (26 * fontScale).sp, fontWeight = FontWeight.Bold, color = Color.White)
+                text = displayUser.fullName,
+                style = TextStyle(
+                    fontSize = (22 * fontScale).sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
             )
+
+            // === Подроль или роль ===
+            val roleText = when {
+                // Если есть subRole (например "Заведующая отделения") — показываем её
+                !displayUser.subRole.isNullOrBlank() -> {
+                    if (!displayUser.department.isNullOrBlank()) {
+                        "${displayUser.subRole} ${displayUser.department}"
+                    } else {
+                        displayUser.subRole!!
+                    }
+                }
+                // Иначе обычная роль
+                displayUser.roleId == 3 -> "Админ"
+                displayUser.roleId == 4 -> "Администрация"
+                else -> "Пользователь"
+            }
+
             Text(
-                text = "Администрация",
-                style = TextStyle(fontSize = (18 * fontScale).sp, color = Color.White.copy(alpha = 0.8f))
+                text = roleText,
+                style = TextStyle(
+                    fontSize = (18 * fontScale).sp,
+                    color = Color.White.copy(alpha = 0.8f)
+                )
             )
         }
 
@@ -100,7 +138,6 @@ fun AdminQrScreen(
                     val studentId = result.split("_").firstOrNull()?.toIntOrNull()
                     if (studentId != null) {
                         android.util.Log.d("QR_SCAN", "Admin Scanned ID: $studentId")
-                        // viewModel.markAttendance(studentId)
                     }
                 }
             } else {

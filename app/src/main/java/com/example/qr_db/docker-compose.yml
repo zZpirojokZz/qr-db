@@ -18,7 +18,7 @@ services:
     build: ./APIserver
     container_name: smartcheck_api
     ports:
-      - "3000:3000"
+      - "3000:80"
     environment:
       DB_HOST: db
       DB_USER: postgres

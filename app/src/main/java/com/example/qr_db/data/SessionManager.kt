@@ -11,14 +11,19 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "user_session")
-private val GROUP_NAME = stringPreferencesKey("group_name")
+
 class SessionManager(private val context: Context) {
 
     companion object {
         private val USER_ID = intPreferencesKey("user_id")
         private val FULL_NAME = stringPreferencesKey("full_name")
-        private val ROLE_ID = intPreferencesKey("role_id")
         private val EMAIL = stringPreferencesKey("email")
+        private val ROLE_ID = intPreferencesKey("role_id")
+        private val GROUP_NAME = stringPreferencesKey("group_name")
+        private val TOKEN = stringPreferencesKey("token")
+        private val PHONE = stringPreferencesKey("phone")
+        private val SUB_ROLE = stringPreferencesKey("sub_role")
+        private val DEPARTMENT = stringPreferencesKey("department")
     }
 
     suspend fun saveSession(user: User) {
@@ -28,6 +33,10 @@ class SessionManager(private val context: Context) {
             preferences[ROLE_ID] = user.roleId
             preferences[EMAIL] = user.email ?: ""
             preferences[GROUP_NAME] = user.groupName ?: ""
+            preferences[TOKEN] = user.token ?: ""
+            preferences[PHONE] = user.phone ?: ""
+            preferences[SUB_ROLE] = user.subRole ?: ""
+            preferences[DEPARTMENT] = user.department ?: ""
         }
     }
 
@@ -39,7 +48,11 @@ class SessionManager(private val context: Context) {
                 fullName = preferences[FULL_NAME] ?: "",
                 email = preferences[EMAIL],
                 roleId = preferences[ROLE_ID] ?: 1,
-                groupName = preferences[GROUP_NAME]
+                token = preferences[TOKEN],
+                groupName = preferences[GROUP_NAME]?.takeIf { it.isNotBlank() },
+                phone = preferences[PHONE]?.takeIf { it.isNotBlank() },
+                subRole = preferences[SUB_ROLE]?.takeIf { it.isNotBlank() },
+                department = preferences[DEPARTMENT]?.takeIf { it.isNotBlank() }
             )
         } else null
     }

@@ -9,14 +9,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import com.example.qr_db.admin.StudentScheduleItem
-import com.example.qr_db.admin.JournalItem
+import com.example.qr_db.StudentScheduleItem
+import com.example.qr_db.JournalItem
 import com.example.qr_db.data.StudentGroupInfo
 import com.example.qr_db.teacher.ScanState
 class StudentViewModel : ViewModel() {
 
     private val api: QrDbApi = Retrofit.Builder()
-        .baseUrl("http://10.75.4.121:3000/")
+        .baseUrl("http://smartcheck.aspc.kz/")
         .addConverterFactory(GsonConverterFactory.create())
         .build()
         .create(QrDbApi::class.java)
@@ -107,10 +107,17 @@ class StudentViewModel : ViewModel() {
                     _scanState.value = ScanState.Success("Вы успешно отметились!")
                     _isMarked.value = true
                 } else {
-                    val errorMsg = when (response.code()) {
-                        400 -> "Ошибка: Вне времени пары"
-                        409 -> "Вы уже отмечены"
-                        404 -> "Урок не найден"
+                    val errorBody = response.errorBody()?.string()
+                    val serverMessage = try {
+                        org.json.JSONObject(errorBody ?: "").optString("error")
+                    } catch (e: Exception) { "" }
+
+                    val errorMsg = when {
+                        serverMessage.isNotBlank() -> serverMessage
+                        response.code() == 400 -> "Вне времени пары"
+                        response.code() == 403 -> "Это не ваша пара"
+                        response.code() == 409 -> "Вы уже отмечены"
+                        response.code() == 404 -> "Урок не найден"
                         else -> "Ошибка сервера: ${response.code()}"
                     }
                     _scanState.value = ScanState.Error(errorMsg)

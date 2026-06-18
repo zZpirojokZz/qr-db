@@ -32,7 +32,8 @@ class AdminViewModel : ViewModel() {
         .build()
 
     private val api: QrDbApi = Retrofit.Builder()
-        .baseUrl("http://10.75.4.121/") // или твой актуальный IP
+        .baseUrl("http://smartcheck.aspc.kz" +
+                "/")
         .client(client)
         .addConverterFactory(GsonConverterFactory.create())
         .build()
@@ -93,12 +94,5 @@ class AdminViewModel : ViewModel() {
                 Log.e("AdminViewModel", "Ошибка загрузки профиля: ${e.message}", e)
             }
         }
-
-        data class ScheduleEntry(
-            val groupName: String?,
-            val room: String?,
-            val start_time: String?,
-            val end_time: String?
-        )
     }
 }

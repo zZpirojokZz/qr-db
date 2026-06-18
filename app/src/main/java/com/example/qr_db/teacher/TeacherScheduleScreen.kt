@@ -13,7 +13,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -46,7 +45,10 @@ import com.example.qr_db.data.User
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
-
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.foundation.lazy.items
 
 // ============================================
 // СОСТОЯНИЯ ЭКРАНА (3 шага)
@@ -212,7 +214,12 @@ fun TeacherSubjectSelectionScreen(
     getY: (Float) -> Dp,
     fontScale: Float
 ) {
-    val subjects = listOf("Физика", "Химия", "Математика", "НВП", "Английский", "Казахский")
+    val viewModel: TeacherViewModel = viewModel()
+    val subjects by viewModel.groupSubjects.collectAsState()
+
+    LaunchedEffect(groupName) {
+        viewModel.loadSubjectsByGroup(groupName)
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
 
@@ -287,6 +294,7 @@ fun TeacherSubjectSelectionScreen(
 }
 
 
+
 // ============================================
 // ЭКРАН 3 — ЖУРНАЛ (с автопереключением!)
 // ============================================
@@ -302,7 +310,7 @@ fun TeacherJournalTableScreen(
     fontScale: Float
 ) {
     val viewModel: TeacherViewModel = viewModel()
-    val currentLesson by viewModel.currentLessonState.collectAsState()
+    val currentLesson by viewModel.activeLesson.collectAsState()
 
     // Какой режим показываем
     var showActiveMode by remember { mutableStateOf(false) }

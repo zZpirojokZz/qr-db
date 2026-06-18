@@ -21,7 +21,16 @@ import com.example.qr_db.teacher.ProfileTeacherScreen
 import com.example.qr_db.teacher.TeacherScreen
 import com.example.qr_db.ui.theme.QrdbTheme
 import kotlinx.coroutines.launch
-
+import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.ui.Alignment
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.qr_db.data.ProfileRepository
+import com.example.qr_db.data.TeacherProfileResponse
+import com.example.qr_db.teacher.TeacherProfileState
+import com.example.qr_db.data.RetrofitClient
+import com.example.qr_db.teacher.TeacherProfileViewModel
+import com.example.qr_db.teacher.TeacherProfileViewModelFactory
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,6 +61,7 @@ fun AppNavigation() {
                 1 -> "student"
                 2 -> "teacher"
                 3 -> "admin"
+                4 -> "admin"
                 else -> null
             }
             // Переходим только если мы еще на экране логина
@@ -71,6 +81,7 @@ fun AppNavigation() {
                         1 -> "student"
                         2 -> "teacher"
                         3 -> "admin"
+                        4 -> "admin"
                         else -> null
                     }
                     if (route != null) {
@@ -106,17 +117,61 @@ fun AppNavigation() {
         }
 
         composable(route = "profile_teacher") {
-            currentUser?.let {
-                ProfileTeacherScreen(
-                    user = it,
-                    onBack = { navController.popBackStack() },
-                    onLogout = {
-                        scope.launch {
-                            sessionManager.clearSession()
-                            navController.navigate("auth") { popUpTo(0) { inclusive = true } }
+            currentUser?.let { user ->
+                val api = remember { RetrofitClient.api }
+                val repository = remember { ProfileRepository(api) }
+                val viewModel: TeacherProfileViewModel = viewModel(
+                    factory = TeacherProfileViewModelFactory(repository)
+                )
+                val uiState by viewModel.uiState.collectAsState()
+
+                LaunchedEffect(user.userId) {
+                    viewModel.loadProfile(user.userId)
+                }
+
+                when (val state = uiState) {
+                    is TeacherProfileState.Loading,
+                    TeacherProfileState.Idle -> {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator()
                         }
                     }
-                )
+
+                    is TeacherProfileState.Success -> {
+                        ProfileTeacherScreen(
+                            profile = state.profile,
+                            onBack = { navController.popBackStack() },
+                            onLogout = {
+                                scope.launch {
+                                    sessionManager.clearSession()
+                                    navController.navigate("auth") { popUpTo(0) { inclusive = true } }
+                                }
+                            }
+                        )
+                    }
+
+                    is TeacherProfileState.Error -> {
+                        // Если сервер не готов — покажем профиль с пустыми данными
+                        ProfileTeacherScreen(
+                            profile = TeacherProfileResponse(
+                                teacher = user,
+                                curatedGroup = null,
+                                groupLeader = null,
+                                departmentHead = null
+                            ),
+                            onBack = { navController.popBackStack() },
+                            onLogout = {
+                                scope.launch {
+                                    sessionManager.clearSession()
+                                    navController.navigate("auth") { popUpTo(0) { inclusive = true } }
+                                }
+                            }
+                        )
+                    }
+                }
             }
         }
 

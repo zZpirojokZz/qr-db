@@ -1,11 +1,10 @@
-package com.example.qr_db.admin
+package com.example.qr_db
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.qr_db.data.LoginRequest
 import com.example.qr_db.data.QrDbApi
-import com.example.qr_db.data.RegisterRequest
 import com.example.qr_db.data.SessionManager
 import com.example.qr_db.data.User
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,48 +28,43 @@ class AuthViewModel(private val sessionManager: SessionManager) : ViewModel() {
         .build()
 
     private val api: QrDbApi = Retrofit.Builder()
-        .baseUrl("http://10.75.4.121:3000/")
+        .baseUrl("http://smartcheck.aspc.kz/")
         .client(client)
         .addConverterFactory(GsonConverterFactory.create())
         .build()
         .create(QrDbApi::class.java)
 
-    fun login(email: String, passwordHash: String) {
+    fun login(email: String, password: String) {
         viewModelScope.launch {
             _uiState.value = AuthState.Loading
             try {
-                val response = api.login(LoginRequest(email, passwordHash))
+                val response = api.login(LoginRequest(email, password))
                 if (response.isSuccessful) {
                     val user = response.body()
                     if (user != null) {
                         sessionManager.saveSession(user)
                         _uiState.value = AuthState.Success(user)
                     } else {
-                        _uiState.value = AuthState.Error("Сервер вернул пустые данные")
+                        _uiState.value = AuthState.Error("Пустой ответ сервера")
                     }
                 } else {
-                    _uiState.value = AuthState.Error("Ошибка ${response.code()}: Неверный логин или пароль")
+                    _uiState.value = AuthState.Error("Неверный логин или пароль")
                 }
             } catch (e: Exception) {
-                _uiState.value = AuthState.Error("Ошибка сети: ${e.localizedMessage}")
+                _uiState.value = AuthState.Error("Ошибка: ${e.localizedMessage}")
             }
         }
     }
 
-    fun register(fullName: String, email: String, password: String, roleId: Int) {
-        viewModelScope.launch {
-            _uiState.value = AuthState.Loading
-            try {
-                val response = api.register(RegisterRequest(fullName, email, password, roleId))
-                if (response.isSuccessful && response.body() != null) {
-                    sessionManager.saveSession(response.body()!!)
-                    _uiState.value = AuthState.Success(response.body()!!)
-                } else {
-                    _uiState.value = AuthState.Error("Ошибка регистрации: ${response.code()}")
-                }
-            } catch (e: Exception) {
-                _uiState.value = AuthState.Error("Ошибка сети: ${e.message}")
-            }
+    // Декодируем JWT токен и достаём user_id
+    private fun getUserIdFromToken(token: String): Int {
+        return try {
+            val payload = token.split(".")[1]
+            val decoded = String(android.util.Base64.decode(payload, android.util.Base64.URL_SAFE))
+            val json = org.json.JSONObject(decoded)
+            json.getInt("user_id")
+        } catch (e: Exception) {
+            -1
         }
     }
 }

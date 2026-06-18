@@ -107,7 +107,8 @@ fun ProfileAdminScreen(
                     Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(Color.Black.copy(alpha = 0.1f)))
                     Box(modifier = Modifier.fillMaxWidth().height(getY(140f)), contentAlignment = Alignment.Center) {
                         val roleText = when(displayUser.roleId) {
-                            3 -> "Администратор"
+                            3 -> "Админ"
+                            4 -> "Администрация"
                             2 -> "Преподаватель"
                             else -> "Студент"
                         }
@@ -119,25 +120,56 @@ fun ProfileAdminScreen(
                 }
             }
 
-            // --- НОВАЯ КНОПКА: АДМИН ПАНЕЛЬ ---
-            Box(
-                modifier = Modifier
-                    .offset(x = getX(155f), y = getY(860f)) // Позиция под карточкой
-                    .size(width = getX(770f), height = getY(200f))
-                    .clip(RoundedCornerShape(30.dp))
-                    .background(Color.White.copy(alpha = 0.6f))
-                    .border(1.dp, Color.White.copy(alpha = 0.4f), RoundedCornerShape(30.dp))
-                    .clickable {
-                        // Замените на реальный IP вашего сервера или домен
-                        uriHandler.openUri("http://10.75.4.121:8080/admin")
-                    },
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "Админ Панель",
-                    color = Color(0xFF2E7D32), // Зеленый цвет для админки
-                    style = TextStyle(fontSize = getSp(50f), fontWeight = FontWeight.Bold)
-                )
+            // --- БЛОК ПОД РОЛЬ ---
+            when (user.roleId) {
+                3 -> {
+                    // АДМИН — видит кнопку Админ Панели
+                    Box(
+                        modifier = Modifier
+                            .offset(x = getX(155f), y = getY(860f))
+                            .size(width = getX(770f), height = getY(200f))
+                            .clip(RoundedCornerShape(30.dp))
+                            .background(Color.White.copy(alpha = 0.6f))
+                            .border(1.dp, Color.White.copy(alpha = 0.4f), RoundedCornerShape(30.dp))
+                            .clickable {
+                                uriHandler.openUri("http://smartcheck.aspc.kz:8080/admin")
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Админ Панель",
+                            color = Color(0xFF2E7D32),
+                            style = TextStyle(fontSize = getSp(50f), fontWeight = FontWeight.Bold)
+                        )
+                    }
+                }
+
+                4 -> {
+                    // АДМИНИСТРАЦИЯ — видит информацию о должности
+                    Box(
+                        modifier = Modifier
+                            .offset(x = getX(155f), y = getY(860f))
+                            .size(width = getX(770f), height = getY(200f))
+                            .clip(RoundedCornerShape(30.dp))
+                            .background(Color.White.copy(alpha = 0.6f))
+                            .border(1.dp, Color.White.copy(alpha = 0.4f), RoundedCornerShape(30.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                text = "Заведующая отделения",
+                                color = Color.Black.copy(alpha = 0.7f),
+                                style = TextStyle(fontSize = getSp(35f))
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = "ИС",
+                                color = Color(0xFF1565C0),
+                                style = TextStyle(fontSize = getSp(55f), fontWeight = FontWeight.Bold)
+                            )
+                        }
+                    }
+                }
             }
 
             // --- КНОПКА ВЫХОДА (Смещена ниже) ---
