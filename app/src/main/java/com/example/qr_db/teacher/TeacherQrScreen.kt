@@ -1,9 +1,6 @@
 package com.example.qr_db.teacher
 
-import android.Manifest
-import android.content.pm.PackageManager
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -19,7 +16,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -27,7 +23,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat
+
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.qr_db.R
@@ -41,7 +37,7 @@ fun TeacherQrScreen(
     getY: (Float) -> Dp,
     fontScale: Float,     // ← НОВЫЙ ПАРАМЕТР
 ) {
-    val context = LocalContext.current
+
     val viewModel: TeacherViewModel = viewModel()
     val currentLesson by viewModel.currentLessonState.collectAsState()
     LaunchedEffect(user.userId) {
@@ -51,18 +47,7 @@ fun TeacherQrScreen(
         }
     }
 
-    var hasCameraPermission by remember {
-        mutableStateOf(
-            ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.CAMERA
-            ) == PackageManager.PERMISSION_GRANTED
-        )
-    }
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission(),
-        onResult = { granted -> hasCameraPermission = granted }
-    )
+
 
     Box(modifier = Modifier.fillMaxSize()) {
         Text(
@@ -107,6 +92,7 @@ fun TeacherQrScreen(
     }
 
     var qrVersion by remember { mutableStateOf(0) }
+
     // === КОНТЕЙНЕР QR ===
     Box(
         modifier = Modifier
