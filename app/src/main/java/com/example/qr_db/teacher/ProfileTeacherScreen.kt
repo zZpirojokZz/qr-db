@@ -25,9 +25,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import com.example.qr_db.data.ContactPerson
 import androidx.compose.ui.unit.sp
 import com.example.qr_db.R
-import com.example.qr_db.data.ContactPerson
 import com.example.qr_db.data.TeacherProfileResponse
 
 @Composable

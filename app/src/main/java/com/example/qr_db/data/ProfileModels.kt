@@ -1,5 +1,6 @@
 package com.example.qr_db.data
 
+
 import com.google.gson.annotations.SerializedName
 
 data class ContactPerson(

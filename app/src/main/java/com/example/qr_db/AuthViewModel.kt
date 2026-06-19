@@ -98,24 +98,14 @@ data class JournalItem(
 )
 
 data class StudentScheduleItem(
-
     val lesson_id: Int,
-
     val subject: String,
-
     val room: String?,
-
     val start_time: String,
-
     val end_time: String,
-
     val teacher_name: String?,
-
     val group_name: String?,
-
     val grade: Int?,
-
     val attendance: Boolean?,
-
     val lesson_type: String?
 )

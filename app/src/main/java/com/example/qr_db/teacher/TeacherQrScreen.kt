@@ -23,6 +23,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -76,13 +77,13 @@ fun TeacherQrScreen(
                 .width(getX(800f))
         )
         Text(
-            text = currentLesson?.groupName ?: "Нет активной пары",
+            text = currentLesson?.groupName ?: "У вас нет занятий сейчас",
             style = TextStyle(
                 fontSize = (18 * fontScale).sp,
                 color = Color.Black.copy(alpha = 0.8f)
             ),
             modifier = Modifier
-                .offset(x = getX(110f), y = getY(250f))
+                .offset(x = getX(70f), y = getY(250f))
                 .width(getX(600f))
         )
 
@@ -93,7 +94,14 @@ fun TeacherQrScreen(
                 .offset(x = getX(850f), y = getY(140f))
                 .size(getX(150f))
                 .clip(CircleShape)
-                .clickable { navController.navigate("profile_teacher") },
+                .clickable {
+                    val profileRoute = when (user.roleId) {
+                        2 -> "profile_teacher"
+                        3, 4 -> "profile_admin"
+                        else -> "profile_teacher"
+                    }
+                    navController.navigate(profileRoute)
+                },
             contentScale = ContentScale.Crop
         )
     }
@@ -126,10 +134,14 @@ fun TeacherQrScreen(
             }
         } else {
             Text(
-                text = "Нет активной пары",
-                color = Color.Black,
-                fontWeight = FontWeight.Bold
-            )
+                    text = "У вас нет занятий сейчас",
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black,
+                    modifier = Modifier
+                        .offset(x = getX(30f), y = getY(85f))
+                        .width(getX(400f)),
+                    textAlign = TextAlign.Center
+                )
         }
     }
 

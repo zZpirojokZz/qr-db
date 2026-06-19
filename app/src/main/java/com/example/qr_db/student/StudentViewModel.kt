@@ -13,6 +13,9 @@ import com.example.qr_db.StudentScheduleItem
 import com.example.qr_db.JournalItem
 import com.example.qr_db.data.StudentGroupInfo
 import com.example.qr_db.teacher.ScanState
+import com.example.qr_db.data.StudentWeeklyGradeItem
+import com.example.qr_db.data.MarkAttendanceRequest
+
 class StudentViewModel : ViewModel() {
 
     private val api: QrDbApi = Retrofit.Builder()
@@ -60,6 +63,40 @@ class StudentViewModel : ViewModel() {
                 }
             } catch (e: Exception) {
                 android.util.Log.e("STUDENT_DEBUG", "Error: ${e.message}")
+            }
+        }
+    }
+
+    private val _weeklyGrades = MutableStateFlow<List<StudentWeeklyGradeItem>>(emptyList())
+    val weeklyGrades: StateFlow<List<StudentWeeklyGradeItem>> = _weeklyGrades
+
+    fun loadWeeklyGrades(studentId: Int, startDate: String) {
+        viewModelScope.launch {
+            try {
+                val response = api.getStudentWeeklyGrades(studentId, startDate)
+                android.util.Log.d("STUDENT_WEEKLY", "code=${response.code()} body=${response.body()}")
+                if (response.isSuccessful) {
+                    _weeklyGrades.value = response.body() ?: emptyList()
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+
+    private val _groupSubjects = MutableStateFlow<List<String>>(emptyList())
+    val groupSubjects: StateFlow<List<String>> = _groupSubjects
+
+    fun loadSubjectsByGroup(groupName: String) {
+        viewModelScope.launch {
+            try {
+                val response = api.getSubjectsByGroupName(groupName)
+                if (response.isSuccessful) {
+                    _groupSubjects.value = response.body() ?: emptyList()
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
     }

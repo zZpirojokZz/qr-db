@@ -63,16 +63,7 @@ fun ProfileAdminScreen(
         )
 
         Box(modifier = Modifier.fillMaxSize()) {
-            Icon(
-                imageVector = Icons.Default.Close,
-                contentDescription = "Close",
-                modifier = Modifier
-                    .offset(x = getX(64f), y = getY(158f))
-                    .size(getX(75f))
-                    .clip(CircleShape)
-                    .clickable { onBack() },
-                tint = Color.Black
-            )
+
 
             // --- ОСНОВНАЯ КАРТОЧКА ПРОФИЛЯ ---
             Box(
@@ -88,11 +79,14 @@ fun ProfileAdminScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Spacer(modifier = Modifier.height(getY(56f)))
-                    Surface(
-                        modifier = Modifier.size(getX(253f)),
-                        shape = CircleShape,
-                        color = Color(0xFFD9D9D9)
-                    ) {}
+                    Image(
+                        painter = painterResource(id = R.drawable.avater),
+                        contentDescription = "Avatar",
+                        modifier = Modifier
+                            .size(getX(253f))
+                            .clip(CircleShape),
+                        contentScale = ContentScale.Crop
+                    )
                     Spacer(modifier = Modifier.height(getY(40f)))
                     Text(
                         text = displayUser.fullName,
@@ -132,7 +126,7 @@ fun ProfileAdminScreen(
                             .background(Color.White.copy(alpha = 0.6f))
                             .border(1.dp, Color.White.copy(alpha = 0.4f), RoundedCornerShape(30.dp))
                             .clickable {
-                                uriHandler.openUri("http://smartcheck.aspc.kz:8080/admin")
+                                uriHandler.openUri("http://smartcheck.aspc.kz/panel/")
                             },
                         contentAlignment = Alignment.Center
                     ) {
@@ -145,7 +139,6 @@ fun ProfileAdminScreen(
                 }
 
                 4 -> {
-                    // АДМИНИСТРАЦИЯ — видит информацию о должности
                     Box(
                         modifier = Modifier
                             .offset(x = getX(155f), y = getY(860f))
@@ -157,13 +150,13 @@ fun ProfileAdminScreen(
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
-                                text = "Заведующая отделения",
+                                text = displayUser.subRole ?: "Должность не указана",
                                 color = Color.Black.copy(alpha = 0.7f),
                                 style = TextStyle(fontSize = getSp(35f))
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = "ИС",
+                                text = displayUser.department ?: "—",
                                 color = Color(0xFF1565C0),
                                 style = TextStyle(fontSize = getSp(55f), fontWeight = FontWeight.Bold)
                             )
@@ -193,22 +186,24 @@ fun ProfileAdminScreen(
                 )
             }
 
-            // --- КНОПКА НАЗАД ---
-            Box(
-                modifier = Modifier
-                    .offset(x = getX(233f), y = getY(2080f))
-                    .size(width = getX(620f), height = getY(160f))
-                    .clip(RoundedCornerShape(30.dp))
-                    .background(Color(0xFFD9D9D9).copy(alpha = 0.5f))
-                    .border(1.dp, Color.White.copy(alpha = 0.2f), RoundedCornerShape(30.dp))
-                    .clickable { onBack() },
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "Назад",
-                    color = Color.Black,
-                    style = TextStyle(fontSize = getSp(50f), fontWeight = FontWeight.Bold)
-                )
+            // --- КНОПКА НАЗАД (только для администрации, не для админа) ---
+            if (user.roleId != 3) {
+                Box(
+                    modifier = Modifier
+                        .offset(x = getX(233f), y = getY(2080f))
+                        .size(width = getX(620f), height = getY(160f))
+                        .clip(RoundedCornerShape(30.dp))
+                        .background(Color(0xFFD9D9D9).copy(alpha = 0.5f))
+                        .border(1.dp, Color.White.copy(alpha = 0.2f), RoundedCornerShape(30.dp))
+                        .clickable { onBack() },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Назад",
+                        color = Color.Black,
+                        style = TextStyle(fontSize = getSp(50f), fontWeight = FontWeight.Bold)
+                    )
+                }
             }
         }
     }

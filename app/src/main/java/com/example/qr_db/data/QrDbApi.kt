@@ -4,10 +4,10 @@ import com.example.qr_db.JournalItem
 import com.example.qr_db.StudentScheduleItem
 import retrofit2.Response
 import retrofit2.http.*
+import com.google.gson.annotations.SerializedName
+
 
 interface QrDbApi {
-
-
 
     @GET("grades/lesson/{lessonId}/attendance")
     suspend fun getLessonAttendance(
@@ -15,7 +15,7 @@ interface QrDbApi {
     ): Response<List<LessonAttendance>>
 
     @POST("auth/login")
-    suspend fun login(@Body loginRequest: LoginRequest): Response<User> // ← Response<User> как было// ← было Response<User>
+    suspend fun login(@Body loginRequest: LoginRequest): Response<User>
 
     @GET("teacher/profile/{id}")
     suspend fun getTeacherProfile(
@@ -33,7 +33,7 @@ interface QrDbApi {
         @Query("subject") subject: String
     ): Response<FoundLesson?>
 
-    @GET("lessons/weekly-grades")
+    @GET("grades/weekly")
     suspend fun getWeeklyGrades(
         @Query("groupName") groupName: String,
         @Query("subject") subject: String,
@@ -42,6 +42,7 @@ interface QrDbApi {
 
     @POST("lessons/set-grade")
     suspend fun setGrade(
+        @Header("Authorization") token: String,
         @Body request: SetGradeRequest
     ): Response<Unit>
 
@@ -49,8 +50,6 @@ interface QrDbApi {
     suspend fun getSubjectsByGroupName(
         @Path("groupName") groupName: String
     ): Response<List<String>>
-
-
 
     @GET("lessons/find")
     suspend fun findLesson(
@@ -74,12 +73,16 @@ interface QrDbApi {
         @Path("teacher_id") teacherId: Int
     ): Response<List<Lesson>>
 
+    @GET("lessons/group-active/{groupName}")
+    suspend fun getGroupActiveLesson(
+        @Path("groupName") groupName: String
+    ): Response<FoundLesson?>
+
     @POST("grades/mark")
     suspend fun markAttendance(
         @Body markRequest: MarkAttendanceRequest
     ): Response<Unit>
 
-    // Теперь ScheduleEntry находится в этом же пакете, импорт не нужен!
     @GET("schedule/today")
     suspend fun getTodaySchedule(): Response<List<ScheduleEntry>>
 
@@ -121,13 +124,18 @@ interface QrDbApi {
     suspend fun getStudentGroup(
         @Path("studentId") studentId: Int
     ): Response<StudentGroupInfo>
+
+    @GET("grades/student-weekly")
+    suspend fun getStudentWeeklyGrades(
+        @Query("studentId") studentId: Int,
+        @Query("startDate") startDate: String
+    ): Response<List<StudentWeeklyGradeItem>>
 }
 
 // =======================
-// DATA CLASSES
+// DATA CLASSES (вынесены за пределы интерфейса!)
 // =======================
 
-// Перенесли сюда (в пакет com.example.qr_db.data)
 data class ScheduleEntry(
     val groupName: String?,
     val room: String?,
@@ -135,11 +143,11 @@ data class ScheduleEntry(
     val end_time: String?
 )
 
-
 data class LoginResponse(
     val message: String?,
     val token: String?
 )
+
 data class LoginRequest(
     val email: String,
     val password: String
@@ -160,4 +168,25 @@ data class MarkAttendanceRequest(
 
 data class AttendanceStatusResponse(
     val marked: Boolean
+)
+
+data class GroupStudent(
+    @SerializedName("user_id") val userId: Int,
+    @SerializedName("full_name") val fullName: String
+)
+
+data class WeeklyGradeItem(
+    @SerializedName("student_id") val studentId: Int,
+    @SerializedName("full_name") val fullName: String,
+    @SerializedName("grade") val grade: Int?,
+    @SerializedName("attendance") val attendance: Boolean?,
+    @SerializedName("lesson_date") val lessonDate: String,
+    @SerializedName("lesson_id") val lessonId: Int? = null
+)
+
+data class SetGradeRequest(
+    val lesson_id: Int,
+    val student_id: Int,
+    val grade: Int?,
+    val attendance: Boolean = true
 )

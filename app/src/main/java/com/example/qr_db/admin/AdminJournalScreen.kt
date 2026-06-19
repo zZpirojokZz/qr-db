@@ -3,29 +3,57 @@ package com.example.qr_db.admin
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.qr_db.data.Lesson
+import com.example.qr_db.data.User
+import com.example.qr_db.teacher.TeacherViewModel
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun AdminJournalScreen(
-    lessons: List<Lesson>,
+    user: User,
     getX: (Float) -> Dp,
     getY: (Float) -> Dp,
     fontScale: Float
 ) {
+    val viewModel: TeacherViewModel = viewModel()
+    val lessons by viewModel.todayLessons.collectAsState()
+
+    LaunchedEffect(user.userId) {
+        while (true) {
+            viewModel.loadTodayLessons(user.userId)
+            kotlinx.coroutines.delay(30000)
+        }
+    }
+
+    val currentDate = remember {
+        SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(Date())
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
 
         // === СПИСОК ЗАНЯТИЙ ===
@@ -34,7 +62,7 @@ fun AdminJournalScreen(
                 .offset(x = getX(140f), y = getY(665f))
                 .size(
                     width = getX(800f),
-                    height = getY(800f)   // фиксированная высота контейнера для скролла
+                    height = getY(800f)
                 ),
             verticalArrangement = Arrangement.spacedBy(getY(25f))
         ) {
@@ -45,9 +73,13 @@ fun AdminJournalScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "Занятий на сегодня нет",
-                            fontSize = (18 * fontScale).sp,
-                            color = Color.Gray
+                            text = "У вас нет занятий сейчас",
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black,
+                            modifier = Modifier
+                                .offset(x = getX(20f), y = getY(170f))
+                                .width(getX(400f)),
+                            textAlign = TextAlign.Center
                         )
                     }
                 }
@@ -65,7 +97,7 @@ fun AdminJournalScreen(
         Box(
             modifier = Modifier
                 .align(Alignment.TopCenter)
-                .offset(y = getY(1480f))
+                .offset(y = getY(1788f))
                 .width(getX(560f))
                 .height(getY(140f))
                 .clip(RoundedCornerShape(13.dp))
@@ -75,7 +107,7 @@ fun AdminJournalScreen(
                     color = Color.Black,
                     shape = RoundedCornerShape(13.dp)
                 )
-                .clickable { /* Действие при клике для скачивания расписания */ },
+                .clickable { },
             contentAlignment = Alignment.Center
         ) {
             Text(
@@ -106,19 +138,26 @@ fun AdminLessonItem(
             ),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Название группы
-        Text(
-            text = lesson.groupName ?: "Группа не указана",
+
+        // === ТЕКСТ С ГОРИЗОНТАЛЬНЫМ СКРОЛЛОМ ===
+        Box(
             modifier = Modifier
                 .weight(1f)
+                .fillMaxHeight()
+                .horizontalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp),
-            fontSize = (16 * fontScale).sp,
-            fontWeight = FontWeight.Normal,
-            color = Color.Black,
-            maxLines = 1
-        )
+            contentAlignment = Alignment.CenterStart
+        ) {
+            Text(
+                text = "${lesson.subject ?: "Предмет"}, ${lesson.groupName ?: "—"}",
+                fontSize = (16 * fontScale).sp,
+                fontWeight = FontWeight.Normal,
+                color = Color.Black,
+                maxLines = 1,
+                softWrap = false
+            )
+        }
 
-        // Вертикальная линия-разделитель
         Box(
             modifier = Modifier
                 .width(1.dp)
@@ -126,7 +165,6 @@ fun AdminLessonItem(
                 .background(Color.Black)
         )
 
-        // Аудитория
         Box(
             modifier = Modifier.width(70.dp),
             contentAlignment = Alignment.Center

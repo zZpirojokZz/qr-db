@@ -34,14 +34,22 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.qr_db.StudentScheduleItem
+import com.example.qr_db.data.StudentWeeklyGradeItem
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.basicMarquee
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import kotlin.math.max
+import com.example.qr_db.teacher.TeacherControlButton
+import com.example.qr_db.teacher.TeacherAsymmetricButton
+import com.example.qr_db.teacher.TeacherSearchButton
+import com.example.qr_db.teacher.gradeColor
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -53,44 +61,38 @@ fun StudentScheduleScreen(
     fontScale: Float
 ) {
     val viewModel: StudentViewModel = viewModel()
-    val schedule by viewModel.schedule.collectAsState()
+    val subjects by viewModel.groupSubjects.collectAsState()
+    val weeklyGrades by viewModel.weeklyGrades.collectAsState()
 
-    LaunchedEffect(userId) {
-        viewModel.loadSchedule(userId)
-    }
-
-    // Прокрутка предметов
-    var startIndex by remember { mutableStateOf(0) }
-
-    // Сдвиг по дням (для стрелок ◄ ►)
-    var dayOffset by remember { mutableStateOf(0) }
-
-    // Базовая дата (сегодня + сдвиг)
-    val baseDate = remember(dayOffset) {
-        LocalDate.now().plusDays(dayOffset.toLong())
-    }
-
-    // DatePicker
+    var startIndex by remember { mutableIntStateOf(0) }
+    var dayOffset by remember { mutableIntStateOf(0) }
     var showDatePicker by remember { mutableStateOf(false) }
 
-    val subjects = remember(schedule) {
-        val fromDb = schedule.map { it.subject }.distinct()
-        // Для теста добавим заглушки, чтобы было что листать
-        if (fromDb.size < 15) {
-            fromDb + (1..15).map { "" }
-        } else {
-            fromDb
+    val baseDate = remember(dayOffset) {
+        // Берём понедельник текущей недели + смещение по неделям
+        val today = LocalDate.now()
+        val monday = today.minusDays((today.dayOfWeek.value - 1).toLong())
+        monday.plusWeeks(dayOffset.toLong())
+    }
+
+    // Загружаем список предметов группы
+    LaunchedEffect(groupName) {
+        if (!groupName.isNullOrBlank()) {
+            viewModel.loadSubjectsByGroup(groupName)
         }
     }
 
-    val maxStartIndex = max(subjects.size - 7, 0)
-
-    LaunchedEffect(subjects.size) {
-        startIndex = startIndex.coerceIn(0, maxStartIndex)
+    // Загружаем оценки на текущую неделю
+    LaunchedEffect(userId, baseDate) {
+        viewModel.loadWeeklyGrades(userId, baseDate.toString())
     }
 
-    val visibleSubjects = remember(subjects, startIndex) {
-        subjects.drop(startIndex).take(7)
+    val maxStartIndex = max(subjects.size - 7, 0)
+    val visibleSubjects = subjects.drop(startIndex).take(7)
+
+    // Map для быстрого поиска оценки: "Предмет|2026-06-19" → WeeklyGradeItem
+    val gradesMap = remember(weeklyGrades) {
+        weeklyGrades.associateBy { "${it.subject}|${it.lessonDate.take(10)}" }
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -113,67 +115,37 @@ fun StudentScheduleScreen(
         Box(
             modifier = Modifier
                 .offset(x = getX(40f), y = getY(444f))
-                .size(
-                    width = getX(1010f),
-                    height = getY(1032f)
-                )
-                .shadow(
-                    elevation = 6.dp,
-                    shape = RoundedCornerShape(25.dp),
-                    clip = false
-                )
+                .size(width = getX(1010f), height = getY(1032f))
+                .shadow(elevation = 6.dp, shape = RoundedCornerShape(25.dp), clip = false)
                 .clip(RoundedCornerShape(25.dp))
                 .background(Color.White.copy(alpha = 0.7f))
-                .border(
-                    3.dp,
-                    Color.Black,
-                    RoundedCornerShape(25.dp)
-                )
+                .border(3.dp, Color.Black, RoundedCornerShape(25.dp))
         ) {
-            ScheduleTableComponent(
+            StudentScheduleTable(
                 height = getY(1032f),
                 fontScale = fontScale,
-                schedule = schedule,
                 visibleSubjects = visibleSubjects,
-                baseDate = baseDate
+                baseDate = baseDate,
+                gradesMap = gradesMap
             )
         }
 
-        // VERTICAL BUTTONS — вниз / вверх (прокрутка предметов)
+        // ВЕРТИКАЛЬНЫЕ КНОПКИ (как у учителя)
         Row(
             modifier = Modifier
-                .offset(x = getX(390f), y = getY(1564f))
-                .size(getX(300f), getY(200f)),
+                .offset(x = getX(400f), y = getY(1600f))
+                .size(getX(280f), getY(200f)),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            // Вниз
-            StudentControlButton(
-                icon = Icons.Default.PlayArrow,
-                rotate = 90f,
-                width = getX(100f),
-                height = getY(200f),
-                //enabled = startIndex < maxStartIndex,
-                // Вниз
-                onClick = {
-                    startIndex = (startIndex + 7).coerceAtMost(maxStartIndex)
-                }
-            )
-
-            // Вверх
-            StudentControlButton(
-                icon = Icons.Default.PlayArrow,
-                rotate = -90f,
-                width = getX(100f),
-                height = getY(200f),
-                enabled = startIndex > 0,
-                // Вверх
-                onClick = {
-                    startIndex = (startIndex - 7).coerceAtLeast(0)
-                }
-            )
+            TeacherControlButton(Icons.Default.PlayArrow, 90f, getX(110f), getY(200f)) {
+                startIndex = (startIndex + 7).coerceAtMost(maxStartIndex)
+            }
+            TeacherControlButton(Icons.Default.PlayArrow, -90f, getX(110f), getY(200f)) {
+                startIndex = (startIndex - 7).coerceAtLeast(0)
+            }
         }
 
-        // HORIZONTAL BUTTONS — даты
+        // КНОПКИ ◄ Поиск ► (как у учителя)
         Row(
             modifier = Modifier
                 .offset(x = getX(140f), y = getY(1852f))
@@ -181,33 +153,26 @@ fun StudentScheduleScreen(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // ◄ Назад
-            StudentArrowButton(
-                isForward = false,
-                width = getX(200f),
-                height = getY(100f),
-                onClick = { dayOffset -= 7 }
-            )
+            TeacherAsymmetricButton(
+                width = getX(190f),
+                height = getY(120f),
+                rotate = 180f,
+                roundRightSide = false
+            ) { dayOffset -= 7 }
 
-            // Поиск даты
-            StudentSearchButton(
-                width = getX(350f),
-                height = getY(100f),
-                fontScale = fontScale,
-                onClick = { showDatePicker = true }
-            )
+            TeacherSearchButton(getX(350f), getY(120f), fontScale) {
+                showDatePicker = true
+            }
 
-            // ► Вперёд
-            StudentArrowButton(
-                isForward = true,
-                width = getX(200f),
-                height = getY(100f),
-                onClick = { dayOffset += 7 }
-            )
+            TeacherAsymmetricButton(
+                width = getX(190f),
+                height = getY(120f),
+                rotate = 0f,
+                roundRightSide = true
+            ) { dayOffset += 7 }
         }
 
-
-        // DATE PICKER DIALOG
+        // DATE PICKER
         if (showDatePicker) {
             val datePickerState = rememberDatePickerState(
                 initialSelectedDateMillis = baseDate
@@ -224,13 +189,13 @@ fun StudentScheduleScreen(
                             val pickedDate = Instant.ofEpochMilli(millis)
                                 .atZone(ZoneId.systemDefault())
                                 .toLocalDate()
-                            // Вычисляем сдвиг от сегодня
-                            dayOffset = (pickedDate.toEpochDay() - LocalDate.now().toEpochDay()).toInt()
+                            val today = LocalDate.now()
+                            val currentMonday = today.minusDays((today.dayOfWeek.value - 1).toLong())
+                            val pickedMonday = pickedDate.minusDays((pickedDate.dayOfWeek.value - 1).toLong())
+                            dayOffset = ((pickedMonday.toEpochDay() - currentMonday.toEpochDay()) / 7).toInt()
                         }
                         showDatePicker = false
-                    }) {
-                        Text("OK", color = Color.Black)
-                    }
+                    }) { Text("OK", color = Color.Black) }
                 },
                 dismissButton = {
                     TextButton(onClick = { showDatePicker = false }) {
@@ -245,39 +210,26 @@ fun StudentScheduleScreen(
 }
 
 @Composable
-fun ScheduleTableComponent(
+fun StudentScheduleTable(
     height: Dp,
     fontScale: Float,
-    schedule: List<StudentScheduleItem>,
     visibleSubjects: List<String>,
-    baseDate: LocalDate          // ← новый параметр
+    baseDate: LocalDate,
+    gradesMap: Map<String, StudentWeeklyGradeItem>
 ) {
-    val days = remember(baseDate) {
-        (0..6).map { baseDate.plusDays(it.toLong()) }
-    }
+    val days = remember(baseDate) { (0..4).map { baseDate.plusDays(it.toLong()) } }
 
     val months = listOf(
-        "Янв", "Фев", "Мар", "Апр",
-        "Май", "Июн", "Июл", "Авг",
-        "Сен", "Окт", "Ноя", "Дек"
+        "Янв", "Фев", "Мар", "Апр", "Май", "Июн",
+        "Июл", "Авг", "Сен", "Окт", "Ноя", "Дек"
     )
 
-    val scheduleBySubject = remember(schedule) {
-        schedule.groupBy { it.subject }
-    }
-
-    val headerSubjectColor = Color(0xFFE8B5B5).copy(alpha = 0.30f)
-    val headerDayColor = Color.White.copy(alpha = 0.45f)
-    val subjectColumnColor = Color(0xFFBDBDBD).copy(alpha = 0.55f)
-    val highlightRowColor = Color(0xFFE8A0A0).copy(alpha = 0.55f)
-    val cellColor = Color.White.copy(alpha = 0.45f)
-
-    val subjectWeight = 1.8f
+    val subjectWeight = 1.5f
     val dayWeight = 1f
 
     Column(modifier = Modifier.fillMaxSize()) {
 
-        // HEADER
+        // ЗАГОЛОВОК
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -287,7 +239,6 @@ fun ScheduleTableComponent(
                 modifier = Modifier
                     .weight(subjectWeight)
                     .fillMaxHeight()
-                    .background(headerSubjectColor)
                     .border(1.dp, Color.Black),
                 contentAlignment = Alignment.Center
             ) {
@@ -295,7 +246,7 @@ fun ScheduleTableComponent(
                     text = "Предметы",
                     color = Color.Black,
                     fontSize = (10 * fontScale).sp,
-                    fontWeight = FontWeight.Medium,
+                    fontWeight = FontWeight.Bold,
                     maxLines = 2
                 )
             }
@@ -305,7 +256,6 @@ fun ScheduleTableComponent(
                     modifier = Modifier
                         .weight(dayWeight)
                         .fillMaxHeight()
-                        .background(headerDayColor)
                         .border(1.dp, Color.Black),
                     contentAlignment = Alignment.Center
                 ) {
@@ -322,73 +272,68 @@ fun ScheduleTableComponent(
             }
         }
 
-        // ROWS
+        // СТРОКИ ПРЕДМЕТОВ
         repeat(7) { rowIndex ->
-            val subject = visibleSubjects.getOrNull(rowIndex) ?: "Предмет"
-            val subjectItems = scheduleBySubject[subject].orEmpty()
-            val isHighlightRow = rowIndex == 0
+            val subject = visibleSubjects.getOrNull(rowIndex) ?: ""
 
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
             ) {
-                // SUBJECT CELL
+                // ЯЧЕЙКА С ПРЕДМЕТОМ
                 Box(
                     modifier = Modifier
                         .weight(subjectWeight)
                         .fillMaxHeight()
-                        .background(
-                            if (isHighlightRow) highlightRowColor
-                            else subjectColumnColor
-                        )
-                        .border(1.dp, Color.Black)
-                        .padding(horizontal = 8.dp),
+                        .border(1.dp, Color.Black),
                     contentAlignment = Alignment.CenterStart
                 ) {
-                    Text(
-                        text = subject,
-                        color = Color.Black,
-                        fontSize = (12 * fontScale).sp,
-                        maxLines = 1
-                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .horizontalScroll(rememberScrollState())
+                            .padding(horizontal = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = subject,
+                            color = Color.Black,
+                            fontSize = (12 * fontScale).sp,
+                            maxLines = 1,
+                            softWrap = false,
+                            modifier = Modifier.basicMarquee()
+                        )
+                    }
                 }
 
-                // 7 DAY CELLS
-                days.forEachIndexed { dayIndex, day ->
-                    // ВАЖНО: если у StudentScheduleItem есть поле date,
-                    // ищем по дате, а не по индексу
-                    val item = subjectItems.getOrNull(dayIndex)
-                    // Лучше: val item = subjectItems.find { it.date == day.toString() }
-
-                    val value = when {
-                        item?.grade != null -> item.grade.toString()
-                        item?.attendance == true -> "✅"
-                        else -> ""
-                    }
-
-                    val baseColor = if (isHighlightRow) highlightRowColor else cellColor
-
-                    val bgColor = when (item?.lesson_type) {
-                        "practice" -> Color(0xFFFFF59D).copy(alpha = 0.55f)
-                        "normal" -> Color(0xFFFFCDD2).copy(alpha = 0.55f)
-                        else -> baseColor
-                    }
+                // ЯЧЕЙКИ С ОЦЕНКАМИ ПО ДНЯМ
+                days.forEach { day ->
+                    val key = "$subject|$day"
+                    val gradeItem = gradesMap[key]
+                    val grade = gradeItem?.grade
 
                     Box(
                         modifier = Modifier
                             .weight(dayWeight)
                             .fillMaxHeight()
-                            .background(bgColor)
-                            .border(1.dp, Color.Black),
+                            .border(1.dp, Color.Black)
+                            .background(
+                                if (grade != null)
+                                    gradeColor(grade).copy(alpha = 0.7f)
+                                else
+                                    Color.Transparent
+                            ),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            text = value,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = (12 * fontScale).sp,
-                            color = Color.Black
-                        )
+                        if (grade != null) {
+                            Text(
+                                text = grade.toString(),
+                                fontWeight = FontWeight.Bold,
+                                fontSize = (12 * fontScale).sp,
+                                color = Color.Black
+                            )
+                        }
                     }
                 }
             }

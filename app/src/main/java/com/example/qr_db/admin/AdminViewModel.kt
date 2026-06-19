@@ -14,6 +14,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
+
 class AdminViewModel : ViewModel() {
 
     // 1. Состояния (State)
@@ -70,6 +71,41 @@ class AdminViewModel : ViewModel() {
         }
     }
 
+    // Информация о просканированном уроке
+    private val _scannedLesson = MutableStateFlow<com.example.qr_db.data.Lesson?>(null)
+    val scannedLesson = _scannedLesson.asStateFlow()
+
+    // Список присутствующих
+    private val _attendance = MutableStateFlow<List<com.example.qr_db.data.LessonAttendance>>(emptyList())
+    val attendance = _attendance.asStateFlow()
+
+    fun loadLessonInfo(lessonId: Int) {
+        viewModelScope.launch {
+            try {
+                // Берём уроки и фильтруем по lessonId
+                // Простой способ: используем endpoint /lessons/by-teacher или подобный
+                // Или сделаем отдельный запрос если есть
+                android.util.Log.d("ADMIN_LESSON_INFO", "Loading lesson $lessonId")
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    fun loadAttendance(lessonId: Int) {
+        viewModelScope.launch {
+            try {
+                val response = api.getLessonAttendance(lessonId)
+                android.util.Log.d("ADMIN_ATTENDANCE", "lessonId=$lessonId code=${response.code()} body=${response.body()}")
+                if (response.isSuccessful) {
+                    _attendance.value = response.body() ?: emptyList()
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
     // 4. Загрузка профиля (ТЕПЕРЬ ВНУТРИ КЛАССА)
     fun loadProfile(userId: Int) {
         viewModelScope.launch {
@@ -96,3 +132,5 @@ class AdminViewModel : ViewModel() {
         }
     }
 }
+
+

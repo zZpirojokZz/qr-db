@@ -35,6 +35,7 @@ class TeacherViewModel : ViewModel() {
     private val _groupSubjects = MutableStateFlow<List<String>>(emptyList())
     val groupSubjects: StateFlow<List<String>> = _groupSubjects
 
+
     private val _activeLesson = MutableStateFlow<FoundLesson?>(null)
     val activeLesson: StateFlow<FoundLesson?> = _activeLesson
 
@@ -181,15 +182,36 @@ class TeacherViewModel : ViewModel() {
         }
     }
 
-    fun setStudentGrade(lessonId: Int, studentId: Int, grade: Int?, attendance: Boolean = true) {
+    fun setStudentGrade(
+        lessonId: Int,
+        studentId: Int,
+        grade: Int?,
+        attendance: Boolean = true,
+        token: String,
+        onSuccess: (() -> Unit)? = null,
+        onError: ((String) -> Unit)? = null
+    ) {
         viewModelScope.launch {
             try {
-                api.setGrade(SetGradeRequest(lessonId, studentId, grade, attendance))
+                val response = api.setGrade(
+                    "Bearer $token",
+                    SetGradeRequest(lessonId, studentId, grade, attendance)
+                )
+                android.util.Log.d("SET_GRADE", "code=${response.code()}")
+                if (response.isSuccessful) {
+                    onSuccess?.invoke()
+                } else if (response.code() == 403) {
+                    onError?.invoke("Оценка уже выставлена. Изменение возможно только админом.")
+                } else {
+                    onError?.invoke("Ошибка сохранения (${response.code()})")
+                }
             } catch (e: Exception) {
                 e.printStackTrace()
+                onError?.invoke("Ошибка сети")
             }
         }
     }
+
 
 
     fun loadAttendance(lessonId: Int) {
@@ -211,6 +233,50 @@ class TeacherViewModel : ViewModel() {
             }
         }
     }
+
+
+    // Список студентов группы
+    private val _groupStudents = MutableStateFlow<List<GroupStudent>>(emptyList())
+    val groupStudents: StateFlow<List<GroupStudent>> = _groupStudents
+
+    fun loadGroupStudents(groupName: String) {
+        viewModelScope.launch {
+            try {
+                val response = api.getGroupStudents(groupName)
+                android.util.Log.d("GROUP_STUDENTS", "code=${response.code()} body=${response.body()}")
+                if (response.isSuccessful) {
+                    _groupStudents.value = response.body() ?: emptyList()
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+
+    // Активная пара группы (для экрана ввода)
+    private val _groupActiveLesson = MutableStateFlow<FoundLesson?>(null)
+    val groupActiveLesson: StateFlow<FoundLesson?> = _groupActiveLesson
+
+    fun checkGroupActiveLesson(groupName: String) {
+        if (groupName.isBlank()) {
+            _groupActiveLesson.value = null
+            return
+        }
+        viewModelScope.launch {
+            try {
+                val response = api.getGroupActiveLesson(groupName)
+                if (response.isSuccessful) {
+                    _groupActiveLesson.value = response.body()
+                } else {
+                    _groupActiveLesson.value = null
+                }
+            } catch (e: Exception) {
+                _groupActiveLesson.value = null
+            }
+        }
+    }
+
 
     fun loadSubjectsByGroup(groupName: String) {
         viewModelScope.launch {

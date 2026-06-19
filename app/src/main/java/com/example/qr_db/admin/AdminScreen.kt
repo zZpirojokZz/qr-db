@@ -27,19 +27,30 @@ import androidx.lifecycle.viewmodel.compose.viewModel // <-- Важно для �
 import androidx.navigation.NavController
 import com.example.qr_db.R
 import com.example.qr_db.data.User
-
+import androidx.compose.ui.platform.LocalConfiguration
 import com.example.qr_db.data.Lesson
 
 @Suppress("UnusedContentLambdaTargetStateParameter")
 @Composable
 fun AdminScreen(user: User, navController: NavController) {
+
+    // === АДМИН (id=3) — сразу профиль, без меню ===
+    if (user.roleId == 3) {
+        ProfileAdminScreen(
+            user = user,
+            onBack = { },
+            onLogout = {
+                navController.navigate("auth") {
+                    popUpTo(0) { inclusive = true }
+                }
+            }
+        )
+        return
+    }
+
+    // === АДМИНИСТРАЦИЯ (id=4) — полное меню ===
     var selectedTab by remember { mutableIntStateOf(0) }
-
-    // 1. Инициализируем ViewModel
     val adminViewModel: AdminViewModel = viewModel()
-
-    // 2. "Слушаем" список уроков из базы.
-    // Как только в базе что-то изменится, экран перерисуется сам.
     val currentSchedule by adminViewModel.scheduleState.collectAsState()
     val lessons = remember(currentSchedule) {
         currentSchedule.mapIndexed { index, (subject, time) ->
@@ -55,18 +66,21 @@ fun AdminScreen(user: User, navController: NavController) {
             )
         }
     }
-    BoxWithConstraints(
+
+    // Берём размеры экрана через configuration (как в TeacherScreen)
+    val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp.dp
+    val screenHeight = configuration.screenHeightDp.dp
+
+    fun getX(px: Float): Dp = screenWidth * (px / 1080f)
+    fun getY(px: Float): Dp = screenHeight * (px / 2388f)
+    val fontScale = (screenWidth.value / 360f).coerceIn(0.85f, 1.15f)
+
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFD0D0D0))
     ) {
-        val screenWidth = maxWidth
-        val screenHeight = maxHeight
-
-        val getX: (Float) -> Dp = { px -> screenWidth * (px / 1080f) }
-        val getY: (Float) -> Dp = { px -> screenHeight * (px / 2388f) }
-        val fontScale = (screenWidth.value / 360f).coerceIn(0.85f, 1.15f)
-
         Image(
             painter = painterResource(id = R.drawable.wavy_background),
             contentDescription = null,
@@ -83,24 +97,29 @@ fun AdminScreen(user: User, navController: NavController) {
                 label = "TabAnimation"
             ) { targetTab ->
                 when (targetTab) {
-                    0 -> AdminQrScreen(user, navController, getX, getY, fontScale)
+                    0 -> com.example.qr_db.teacher.TeacherQrScreen(
+                        user = user,
+                        navController = navController,
+                        getX = ::getX,
+                        getY = ::getY,
+                        fontScale = fontScale
+                    )
                     1 -> AdminJournalScreen(
-                        lessons = lessons,
-                        getX = getX,
-                        getY = getY,
+                        user = user,
+                        getX = ::getX,
+                        getY = ::getY,
                         fontScale = fontScale
                     )
                     2 -> AdminScheduleScreen(
                         user = user,
-                        getX = getX,
-                        getY = getY,
+                        getX = ::getX,
+                        getY = ::getY,
                         fontScale = fontScale
                     )
                 }
             }
         }
 
-        // НИЖНЕЕ МЕНЮ
         // НИЖНЕЕ МЕНЮ
         Row(
             modifier = Modifier
@@ -109,9 +128,9 @@ fun AdminScreen(user: User, navController: NavController) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            AdminNavButton(R.drawable.ic_scanner, isSelected = selectedTab == 0, getX, getY) { selectedTab = 0 }
-            AdminNavButton(R.drawable.ic_journal, isSelected = selectedTab == 1, getX, getY) { selectedTab = 1 }
-            AdminNavButton(R.drawable.ic_profile, isSelected = selectedTab == 2, getX, getY) { selectedTab = 2 }
+            AdminNavButton(R.drawable.ic_scanner, isSelected = selectedTab == 0, ::getX, ::getY) { selectedTab = 0 }
+            AdminNavButton(R.drawable.ic_journal, isSelected = selectedTab == 1, ::getX, ::getY) { selectedTab = 1 }
+            AdminNavButton(R.drawable.ic_profile, isSelected = selectedTab == 2, ::getX, ::getY) { selectedTab = 2 }
         }
     }
 }

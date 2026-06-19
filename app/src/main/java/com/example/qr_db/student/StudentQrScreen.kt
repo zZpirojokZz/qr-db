@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -30,6 +29,10 @@ import androidx.navigation.NavController
 import com.example.qr_db.data.User
 import com.example.qr_db.teacher.CameraPreview
 import com.example.qr_db.teacher.ScanState
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.layout.ContentScale
+import com.example.qr_db.R
 
 @Composable
 fun StudentQrScreen(
@@ -93,15 +96,16 @@ fun StudentQrScreen(
         )
 
         // Аватар / переход в профиль
-        Surface(
+        Image(
+            painter = painterResource(id = R.drawable.avater),
+            contentDescription = "Avatar",
             modifier = Modifier
                 .offset(x = getX(800f), y = getY(180f))
                 .size(getX(150f))
                 .clip(CircleShape)
                 .clickable { navController.navigate("profile") },
-            shape = CircleShape,
-            color = Color(0xFFD9D9D9).copy(alpha = 0.5f)
-        ) {}
+            contentScale = ContentScale.Crop
+        )
 
         // Окно сканера
         Box(

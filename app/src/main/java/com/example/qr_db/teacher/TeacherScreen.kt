@@ -27,7 +27,7 @@ import com.example.qr_db.data.User
 fun TeacherScreen(user: User, navController: NavController) {
     var selectedTab by remember { mutableIntStateOf(0) }
     val viewModel: TeacherViewModel = viewModel()
-    val lessons by viewModel.lessonsState.collectAsState()
+    val lessons by viewModel.todayLessons.collectAsState()
     val currentLesson by viewModel.currentLessonState.collectAsState()
 
     var showAttendanceScreen by remember { mutableStateOf(false) }

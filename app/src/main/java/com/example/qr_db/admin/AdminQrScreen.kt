@@ -133,11 +133,25 @@ fun AdminQrScreen(
                 .clip(RoundedCornerShape(4.dp))
                 .background(Color.Black)
         ) {
-            if (hasCameraPermission) {
+            // Состояние: какой урок открыли после сканирования
+            var scannedLessonId by remember { mutableStateOf<Int?>(null) }
+
+            if (scannedLessonId != null) {
+                // Показываем экран присутствующих
+                AdminAttendanceView(
+                    lessonId = scannedLessonId!!,
+                    onBack = { scannedLessonId = null },
+                    getX = getX,
+                    getY = getY,
+                    fontScale = fontScale
+                )
+            } else if (hasCameraPermission) {
                 CameraPreview { result ->
-                    val studentId = result.split("_").firstOrNull()?.toIntOrNull()
-                    if (studentId != null) {
-                        android.util.Log.d("QR_SCAN", "Admin Scanned ID: $studentId")
+                    // QR формат: "lessonId_teacherId_qrVersion"
+                    val lessonId = result.split("_").firstOrNull()?.toIntOrNull()
+                    android.util.Log.d("ADMIN_QR_SCAN", "Scanned: $result, lessonId=$lessonId")
+                    if (lessonId != null && scannedLessonId == null) {
+                        scannedLessonId = lessonId
                     }
                 }
             } else {

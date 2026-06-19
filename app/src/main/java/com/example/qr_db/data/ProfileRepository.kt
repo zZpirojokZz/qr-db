@@ -1,5 +1,8 @@
 package com.example.qr_db.data
 
+import com.example.qr_db.data.QrDbApi
+import com.example.qr_db.data.StudentProfileResponse
+import com.example.qr_db.data.TeacherProfileResponse
 import retrofit2.Response
 
 class ProfileRepository(private val api: QrDbApi) {

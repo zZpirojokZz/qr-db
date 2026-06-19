@@ -26,6 +26,9 @@ import java.text.SimpleDateFormat
 import java.util.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.runtime.remember
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 @Composable
 fun StudentJournalScreen(
     user: User,
@@ -35,7 +38,9 @@ fun StudentJournalScreen(
     fontScale: Float
 ) {
     val schedule by viewModel.schedule.collectAsState()
-    val currentDate = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(Date())
+    val currentDate = remember {
+        SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(Date())
+    }
 
     LaunchedEffect(user.userId) {
         viewModel.loadSchedule(user.userId)
@@ -98,9 +103,9 @@ fun StudentJournalScreen(
                 // items заменяет стандартный forEach для списков
                 items(schedule) { lesson ->
                     LessonRow(
-                        title = lesson.subject,
+                        subject = lesson.subject,
+                        teacherName = lesson.teacher_name,
                         room = lesson.room ?: "---",
-                        height = getY(150f),
                         fontScale = fontScale
                     )
                 }
@@ -111,7 +116,7 @@ fun StudentJournalScreen(
         Box(
             modifier = Modifier
                 .align(Alignment.TopCenter)
-                .offset(y = getY(1480f))
+                .offset(y = getY(1788f))
                 .width(getX(560f))
                 .height(getY(140f))
                 .clip(RoundedCornerShape(13.dp))
@@ -136,58 +141,61 @@ fun StudentJournalScreen(
 
 @Composable
 fun LessonRow(
-    title: String,
+    subject: String,
+    teacherName: String?,
     room: String,
-    height: Dp,
     fontScale: Float
 ) {
-    Box(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(height)
+            .height(60.dp)
             .clip(RoundedCornerShape(15.dp))
             .background(Color.White.copy(alpha = 0.7f))
             .border(
                 width = 2.dp,
                 color = Color.Black,
                 shape = RoundedCornerShape(15.dp)
-            )
+            ),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
-            modifier = Modifier.fillMaxSize(),
-            verticalAlignment = Alignment.CenterVertically
+
+        // === ТЕКСТ С ГОРИЗОНТАЛЬНЫМ СКРОЛЛОМ ===
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxHeight()
+                .horizontalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp),
+            contentAlignment = Alignment.CenterStart
         ) {
-
             Text(
-                text = title,
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(horizontal = 16.dp),
+                text = "$subject${if (!teacherName.isNullOrBlank()) ", $teacherName" else ""}",
                 fontSize = (16 * fontScale).sp,
-                color = Color.Black,
                 fontWeight = FontWeight.Normal,
-                textAlign = TextAlign.Start,
-                maxLines = 1
+                color = Color.Black,
+                maxLines = 1,
+                softWrap = false
             )
+        }
 
-            Box(
-                modifier = Modifier
-                    .width(1.dp)
-                    .fillMaxHeight()
-                    .background(Color.Black)
+        Box(
+            modifier = Modifier
+                .width(1.dp)
+                .fillMaxHeight()
+                .background(Color.Black)
+        )
+
+        Box(
+            modifier = Modifier.width(70.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = room,
+                fontSize = (17 * fontScale).sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.Black
             )
-
-            Box(
-                modifier = Modifier.width(70.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = room,
-                    fontSize = (17 * fontScale).sp,
-                    fontWeight = FontWeight.Medium,
-                    color = Color.Black
-                )
-            }
         }
     }
 }
