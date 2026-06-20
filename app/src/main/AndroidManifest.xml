@@ -15,7 +15,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:usesCleartextTraffic="true"
-        android:theme="@style/Theme.Qrdb">
+        android:theme="@style/Theme.Qrdb"
+        android:enableOnBackInvokedCallback="true"
+        tools:targetApi="35">
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -24,7 +26,6 @@
             android:theme="@style/Theme.Qrdb">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

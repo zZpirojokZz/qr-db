@@ -63,8 +63,6 @@ fun StudentScreen(user: User, navController: NavController) {
 
             1 -> StudentJournalScreen(
                 user = user,
-                getX = ::getX,
-                getY = ::getY,
                 fontScale = fontScale
             )
 

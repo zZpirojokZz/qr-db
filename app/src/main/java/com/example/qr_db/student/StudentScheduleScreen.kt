@@ -217,7 +217,7 @@ fun StudentScheduleTable(
     baseDate: LocalDate,
     gradesMap: Map<String, StudentWeeklyGradeItem>
 ) {
-    val days = remember(baseDate) { (0..4).map { baseDate.plusDays(it.toLong()) } }
+    val days = remember(baseDate) { (0..5).map { baseDate.plusDays(it.toLong()) } }
 
     val months = listOf(
         "Янв", "Фев", "Мар", "Апр", "Май", "Июн",

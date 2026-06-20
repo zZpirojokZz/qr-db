@@ -5,10 +5,26 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Icon
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -21,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.qr_db.R
+import com.example.qr_db.admin.AdminNavButton
 import com.example.qr_db.data.User
 
 @Composable
@@ -87,8 +104,6 @@ fun TeacherScreen(user: User, navController: NavController) {
                     1 -> TeacherJournalScreen(
                         currentDate = "",
                         lessons = lessons,
-                        getX = ::getX,
-                        getY = ::getY,
                         fontScale = fontScale
                     )
                     2 -> TeacherScheduleScreen(
@@ -102,17 +117,49 @@ fun TeacherScreen(user: User, navController: NavController) {
         }
 
         // НИЖНЕЕ МЕНЮ
-        if (!showAttendanceScreen) {
-            Row(
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.BottomCenter
+        ) {
+            Box(
                 modifier = Modifier
-                    .offset(x = getX(140f), y = getY(2150f))
-                    .size(width = getX(800f), height = getY(200f)),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                    .fillMaxSize()
+                    .systemBarsPadding(),
+                contentAlignment = Alignment.BottomCenter
             ) {
-                NavButton(R.drawable.ic_scanner, isSelected = selectedTab == 0, ::getX, ::getY) { selectedTab = 0 }
-                NavButton(R.drawable.ic_journal, isSelected = selectedTab == 1, ::getX, ::getY) { selectedTab = 1 }
-                NavButton(R.drawable.ic_profile, isSelected = selectedTab == 2, ::getX, ::getY) { selectedTab = 2 }
+                Box(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .fillMaxWidth()
+                            .padding(horizontal = 40.dp)
+                            .padding(bottom = 20.dp)
+                            .height(80.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        NavButton(
+                            R.drawable.ic_scanner,
+                            isSelected = selectedTab == 0,
+                            ::getX,
+                            ::getY
+                        ) { selectedTab = 0 }
+                        NavButton(
+                            R.drawable.ic_journal,
+                            isSelected = selectedTab == 1,
+                            ::getX,
+                            ::getY
+                        ) { selectedTab = 1 }
+                        NavButton(
+                            R.drawable.ic_profile,
+                            isSelected = selectedTab == 2,
+                            ::getX,
+                            ::getY
+                        ) { selectedTab = 2 }
+                    }
+                }
             }
         }
     }

@@ -29,6 +29,8 @@ import com.example.qr_db.R
 import com.example.qr_db.data.User
 import androidx.compose.ui.platform.LocalConfiguration
 import com.example.qr_db.data.Lesson
+import androidx.compose.foundation.layout.systemBarsPadding
+
 
 @Suppress("UnusedContentLambdaTargetStateParameter")
 @Composable
@@ -92,7 +94,11 @@ fun AdminScreen(user: User, navController: NavController) {
             AnimatedContent(
                 targetState = selectedTab,
                 transitionSpec = {
-                    fadeIn(animationSpec = tween(200)) togetherWith fadeOut(animationSpec = tween(200))
+                    fadeIn(animationSpec = tween(200)) togetherWith fadeOut(
+                        animationSpec = tween(
+                            200
+                        )
+                    )
                 },
                 label = "TabAnimation"
             ) { targetTab ->
@@ -104,12 +110,12 @@ fun AdminScreen(user: User, navController: NavController) {
                         getY = ::getY,
                         fontScale = fontScale
                     )
+
                     1 -> AdminJournalScreen(
                         user = user,
-                        getX = ::getX,
-                        getY = ::getY,
                         fontScale = fontScale
                     )
+
                     2 -> AdminScheduleScreen(
                         user = user,
                         getX = ::getX,
@@ -121,19 +127,54 @@ fun AdminScreen(user: User, navController: NavController) {
         }
 
         // НИЖНЕЕ МЕНЮ
-        Row(
-            modifier = Modifier
-                .offset(x = getX(140f), y = getY(2030f))
-                .size(width = getX(800f), height = getY(200f)),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.BottomCenter
         ) {
-            AdminNavButton(R.drawable.ic_scanner, isSelected = selectedTab == 0, ::getX, ::getY) { selectedTab = 0 }
-            AdminNavButton(R.drawable.ic_journal, isSelected = selectedTab == 1, ::getX, ::getY) { selectedTab = 1 }
-            AdminNavButton(R.drawable.ic_profile, isSelected = selectedTab == 2, ::getX, ::getY) { selectedTab = 2 }
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .systemBarsPadding(),
+                contentAlignment = Alignment.BottomCenter
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .fillMaxWidth()
+                            .padding(horizontal = 40.dp)
+                            .padding(bottom = 20.dp)
+                            .height(80.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        AdminNavButton(
+                            R.drawable.ic_scanner,
+                            isSelected = selectedTab == 0,
+                            ::getX,
+                            ::getY
+                        ) { selectedTab = 0 }
+                        AdminNavButton(
+                            R.drawable.ic_journal,
+                            isSelected = selectedTab == 1,
+                            ::getX,
+                            ::getY
+                        ) { selectedTab = 1 }
+                        AdminNavButton(
+                            R.drawable.ic_profile,
+                            isSelected = selectedTab == 2,
+                            ::getX,
+                            ::getY
+                        ) { selectedTab = 2 }
+                    }
+                }
+            }
         }
     }
 }
+
 
 @Suppress("ComposableLambdaParameterPosition")
 @Composable

@@ -17,24 +17,22 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.qr_db.data.User
 import java.text.SimpleDateFormat
 import java.util.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.remember
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Shadow
+
 @Composable
 fun StudentJournalScreen(
     user: User,
     viewModel: StudentViewModel = viewModel(),
-    getX: (Float) -> Dp,
-    getY: (Float) -> Dp,
     fontScale: Float
 ) {
     val schedule by viewModel.schedule.collectAsState()
@@ -46,62 +44,60 @@ fun StudentJournalScreen(
         viewModel.loadSchedule(user.userId)
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
 
-        // ЗАГОЛОВОК — Дата + Группа
-        Column(
-            modifier = Modifier
-                .offset(y = getY(400f))            // ← сдвиг сверху
-                .fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            Text(
-                text = currentDate,
-                style = TextStyle(
-                    fontSize = (28 * fontScale).sp,
-                    fontWeight = FontWeight.Black,
-                    color = Color.Black
+        // === ДАТА ===
+        Text(
+            text = currentDate,
+            style = TextStyle(
+                fontSize = (28 * fontScale).sp,
+                fontWeight = FontWeight.Black,
+                color = Color.White
+            )
+        )
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        // === ГРУППА ===
+        Text(
+            text = user.groupName ?: "Группа не указана",
+            style = TextStyle(
+                fontSize = (20 * fontScale).sp,
+                fontWeight = FontWeight.W900,
+                color = Color.White,
+                shadow = Shadow(
+                    color = Color.White.copy(alpha = 0.8f),
+                    offset = Offset(0f, 0f),
+                    blurRadius = 12f
                 )
             )
-            Text(
-                text = user.groupName ?: "Группа не указана",
-                style = TextStyle(
-                    fontSize = (20 * fontScale).sp,
-                    fontWeight = FontWeight.W900,
-                    color = Color.Black
-                )
-            )
-        }
+        )
 
-        // СПИСОК ЗАНЯТИЙ (X=140, Y=665, width=800)
-        LazyColumn(
-            modifier = Modifier
-                .offset(x = getX(140f), y = getY(665f))
-                .size(width = getX(800f), height = getY(800f)),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
-        ) {
-            if (schedule.isEmpty()) {
-                // item используется для отрисовки одиночных элементов
-                item {
-                    Box(
-                        // fillParentMaxSize() растянет Box на все 800f высоты и ширины,
-                        // чтобы надпись была ровно по центру всего блока
-                        modifier = Modifier.fillParentMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "Занятий на сегодня нет",
-                            style = TextStyle(
-                                fontSize = (18 * fontScale).sp,
-                                color = Color.Gray
-                            )
-                        )
-                    }
-                }
-            } else {
-                // items заменяет стандартный forEach для списков
-                items(schedule) { lesson ->
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // === СПИСОК ЗАНЯТИЙ ===
+        if (schedule.isEmpty()) {
+            Text(
+                text = "Занятий на сегодня нет",
+                style = TextStyle(
+                    fontSize = (18 * fontScale).sp,
+                    color = Color.Gray
+                ),
+                textAlign = TextAlign.Center
+            )
+        } else {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                schedule.forEach { lesson ->
                     LessonRow(
                         subject = lesson.subject,
                         teacherName = lesson.teacher_name,
@@ -112,33 +108,28 @@ fun StudentJournalScreen(
             }
         }
 
-        // КНОПКА СКАЧАТЬ (по центру внизу)
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // === КНОПКА СКАЧАТЬ ===
         Box(
             modifier = Modifier
-                .align(Alignment.TopCenter)
-                .offset(y = getY(1788f))
-                .width(getX(560f))
-                .height(getY(140f))
+                .fillMaxWidth(0.55f)
+                .height(44.dp)
                 .clip(RoundedCornerShape(13.dp))
                 .background(Color.White.copy(alpha = 0.9f))
-                .border(
-                    2.dp,
-                    Color.Black,
-                    RoundedCornerShape(13.dp)
-                )
+                .border(2.dp, Color.Black, RoundedCornerShape(13.dp))
                 .clickable { },
             contentAlignment = Alignment.Center
         ) {
             Text(
                 text = "Скачать расписание",
-                fontSize = (16 * fontScale).sp,
+                fontSize = (14 * fontScale).sp,
                 fontWeight = FontWeight.Medium,
                 color = Color(0xFF007AFF)
             )
         }
     }
 }
-
 @Composable
 fun LessonRow(
     subject: String,

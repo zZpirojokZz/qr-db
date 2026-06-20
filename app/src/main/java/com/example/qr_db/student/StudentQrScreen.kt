@@ -231,9 +231,10 @@ fun StudentQrScreen(
                 }
             }
 
-            // Состояния сканирования
-            when (scanState) {
-                is ScanState.Loading -> {
+            // === СОСТОЯНИЯ СКАНИРОВАНИЯ (только одно за раз) ===
+            when {
+                // Загрузка
+                scanState is ScanState.Loading -> {
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
@@ -244,24 +245,8 @@ fun StudentQrScreen(
                     }
                 }
 
-                is ScanState.Success -> {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.Green.copy(alpha = 0.35f)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = (scanState as ScanState.Success).message,
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(16.dp)
-                        )
-                    }
-                }
-
-                is ScanState.Error -> {
+                // Ошибка ("Вы уже отмечены", "Не ваша пара" и т.д.)
+                scanState is ScanState.Error -> {
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
@@ -273,29 +258,36 @@ fun StudentQrScreen(
                             color = Color.White,
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center,
+                            fontSize = 20.sp,
                             modifier = Modifier.padding(16.dp)
+                        )
+                    }
+
+                    // Через 10 секунд убираем ошибку
+                    LaunchedEffect(scanState) {
+                        kotlinx.coroutines.delay(10000)
+                        viewModel.resetState()
+                    }
+                }
+
+                // Успешно отмечен
+                isMarked -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Green.copy(alpha = 0.6f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "✅",
+                            fontSize = 28.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
                         )
                     }
                 }
 
                 else -> {}
-            }
-
-            // Если уже отмечен
-            if (isMarked) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.Green.copy(alpha = 0.6f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "✅ Вы отмечены",
-                        fontSize = 28.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
-                    )
-                }
             }
         }
     }

@@ -35,11 +35,11 @@ fun TeacherQrScreen(
     navController: NavController,
     getX: (Float) -> Dp,
     getY: (Float) -> Dp,
-    fontScale: Float,     // ← НОВЫЙ ПАРАМЕТР
+    fontScale: Float,
 ) {
-
     val viewModel: TeacherViewModel = viewModel()
     val currentLesson by viewModel.currentLessonState.collectAsState()
+
     LaunchedEffect(user.userId) {
         while (true) {
             viewModel.loadCurrentLesson(user.userId)
@@ -47,108 +47,124 @@ fun TeacherQrScreen(
         }
     }
 
-
-
-    Box(modifier = Modifier.fillMaxSize()) {
-        Text(
-            text = user.fullName,
-            style = TextStyle(
-                fontSize = (24 * fontScale).sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black
-            ),
-            modifier = Modifier
-                .offset(x = getX(60f), y = getY(140f))
-                .width(getX(800f))
-        )
-        Text(
-            text = currentLesson?.groupName ?: "У вас нет занятий сейчас",
-            style = TextStyle(
-                fontSize = (18 * fontScale).sp,
-                color = Color.Black.copy(alpha = 0.8f)
-            ),
-            modifier = Modifier
-                .offset(x = getX(70f), y = getY(250f))
-                .width(getX(600f))
-        )
-
-        Image(
-            painter = painterResource(id = R.drawable.avater),
-            contentDescription = "Avatar",
-            modifier = Modifier
-                .offset(x = getX(850f), y = getY(140f))
-                .size(getX(150f))
-                .clip(CircleShape)
-                .clickable {
-                    val profileRoute = when (user.roleId) {
-                        2 -> "profile_teacher"
-                        3, 4 -> "profile_admin"
-                        else -> "profile_teacher"
-                    }
-                    navController.navigate(profileRoute)
-                },
-            contentScale = ContentScale.Crop
-        )
-    }
-
     var qrVersion by remember { mutableStateOf(0) }
 
-    // === КОНТЕЙНЕР QR ===
-    Box(
+    Column(
         modifier = Modifier
-            .offset(x = getX(80f), y = getY(700f))
-            .size(getX(900f), getY(900f))
-            .background(Color.White.copy(alpha = 0f)),
-        contentAlignment = Alignment.Center
+            .fillMaxSize()
+            .padding(horizontal = 20.dp)
+            .padding(top = 48.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        if (currentLesson != null) {
-
-
-            val qrData = "${currentLesson!!.lessonId}_${user.userId}_$qrVersion"
-
-            val qrBitmap = remember(qrData) {
-                generateQrCode(qrData, 900)
-            }
-
-            qrBitmap?.let { bitmap ->
-                Image(
-                    bitmap = bitmap.asImageBitmap(),
-                    contentDescription = null,
-                    modifier = Modifier.size(getX(900f))
-                )
-            }
-        } else {
-            Text(
-                    text = "У вас нет занятий сейчас",
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black,
-                    modifier = Modifier
-                        .offset(x = getX(30f), y = getY(85f))
-                        .width(getX(400f)),
-                    textAlign = TextAlign.Center
-                )
-        }
-    }
-
-// === КНОПКА ПОД КОНТЕЙНЕРОМ ===
-    if (currentLesson != null) {
-
-        Box(
-            modifier = Modifier
-                .offset(x = getX(300f), y = getY(1800f))  // ← ниже контейнера
-                .clip(RoundedCornerShape(20.dp))
-                .background(Color(0xFFD9D9D9))
-                .clickable { qrVersion++ }
-                .padding(horizontal = getX(80f), vertical = getY(18f)),
-            contentAlignment = Alignment.Center
+        // === ВЕРХНЯЯ ЧАСТЬ: Имя + Аватар ===
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = "Обновить QR",
-                fontWeight = FontWeight.Bold,
-                color = Color.Black,
-                fontSize = (18 * fontScale).sp
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .heightIn(max = 80.dp)
+            ) {
+                Text(
+                    text = user.fullName,
+                    style = TextStyle(
+                        fontSize = (20 * fontScale).sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black
+                    ),
+                    maxLines = 1,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = currentLesson?.groupName ?: "У вас нет занятий сейчас",
+                    style = TextStyle(
+                        fontSize = (16 * fontScale).sp,
+                        color = Color.Black.copy(alpha = 0.8f)
+                    ),
+                    maxLines = 2,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                )
+            }
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            Image(
+                painter = painterResource(id = R.drawable.avater),
+                contentDescription = "Avatar",
+                modifier = Modifier
+                    .size(56.dp)
+                    .clip(CircleShape)
+                    .clickable {
+                        val profileRoute = when (user.roleId) {
+                            2 -> "profile_teacher"
+                            3, 4 -> "profile_admin"
+                            else -> "profile_teacher"
+                        }
+                        navController.navigate(profileRoute)
+                    },
+                contentScale = ContentScale.Crop
             )
         }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // === QR КОД ===
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f),
+            contentAlignment = Alignment.Center
+        ) {
+            if (currentLesson != null) {
+                val qrData = "${currentLesson!!.lessonId}_${user.userId}_$qrVersion"
+                val qrBitmap = remember(qrData) {
+                    generateQrCode(qrData, 900)
+                }
+
+                qrBitmap?.let { bitmap ->
+                    Image(
+                        bitmap = bitmap.asImageBitmap(),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .fillMaxWidth(0.85f)
+                            .aspectRatio(1f)
+                    )
+                }
+            } else {
+                Text(
+                    text = "У вас нет занятий\nсейчас",
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black,
+                    fontSize = (20 * fontScale).sp,
+                    textAlign = TextAlign.Center,
+                    lineHeight = (26 * fontScale).sp
+                )
+            }
+        }
+
+        // === КНОПКА ОБНОВИТЬ QR ===
+        if (currentLesson != null) {
+            Box(
+                modifier = Modifier
+                    .offset(y = (-28).dp)
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(Color(0xFFD9D9D9))
+                    .clickable { qrVersion++ }
+                    .padding(horizontal = 32.dp, vertical = 12.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "Обновить QR",
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black,
+                    fontSize = (18 * fontScale).sp
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(120.dp)) // место для нижнего меню
     }
 }

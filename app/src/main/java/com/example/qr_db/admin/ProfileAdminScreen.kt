@@ -7,8 +7,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -27,6 +25,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.qr_db.R
 import com.example.qr_db.data.User
 
+@Suppress("COMPOSE_APPLIER_CALL_MISMATCH")
 @Composable
 fun ProfileAdminScreen(
     user: User,
@@ -117,7 +116,7 @@ fun ProfileAdminScreen(
             // --- БЛОК ПОД РОЛЬ ---
             when (user.roleId) {
                 3 -> {
-                    // АДМИН — видит кнопку Админ Панели
+                    // АДМИН — кнопка Админ Панели
                     Box(
                         modifier = Modifier
                             .offset(x = getX(155f), y = getY(860f))
@@ -139,36 +138,69 @@ fun ProfileAdminScreen(
                 }
 
                 4 -> {
-                    Box(
+                    // АДМИНИСТРАЦИЯ — должность + кнопка Админ Панели
+                    Column(
                         modifier = Modifier
                             .offset(x = getX(155f), y = getY(860f))
-                            .size(width = getX(770f), height = getY(200f))
-                            .clip(RoundedCornerShape(30.dp))
-                            .background(Color.White.copy(alpha = 0.6f))
-                            .border(1.dp, Color.White.copy(alpha = 0.4f), RoundedCornerShape(30.dp)),
-                        contentAlignment = Alignment.Center
+                            .size(width = getX(770f), height = getY(420f)),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        // Должность и отделение
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(getY(200f))
+                                .clip(RoundedCornerShape(30.dp))
+                                .background(Color.White.copy(alpha = 0.6f))
+                                .border(1.dp, Color.White.copy(alpha = 0.4f), RoundedCornerShape(30.dp)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Text(
+                                    text = displayUser.subRole ?: "Должность не указана",
+                                    color = Color.Black.copy(alpha = 0.7f),
+                                    style = TextStyle(fontSize = getSp(35f))
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = displayUser.department ?: "—",
+                                    color = Color(0xFF1565C0),
+                                    style = TextStyle(fontSize = getSp(55f), fontWeight = FontWeight.Bold)
+                                )
+                            }
+                        }
+
+                        // Кнопка Админ Панели
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(getY(200f))
+                                .clip(RoundedCornerShape(30.dp))
+                                .background(Color.White.copy(alpha = 0.6f))
+                                .border(1.dp, Color.White.copy(alpha = 0.4f), RoundedCornerShape(30.dp))
+                                .clickable {
+                                    uriHandler.openUri("http://smartcheck.aspc.kz/panel/")
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
                             Text(
-                                text = displayUser.subRole ?: "Должность не указана",
-                                color = Color.Black.copy(alpha = 0.7f),
-                                style = TextStyle(fontSize = getSp(35f))
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = displayUser.department ?: "—",
-                                color = Color(0xFF1565C0),
-                                style = TextStyle(fontSize = getSp(55f), fontWeight = FontWeight.Bold)
+                                text = "Админ Панель",
+                                color = Color(0xFF2E7D32),
+                                style = TextStyle(fontSize = getSp(50f), fontWeight = FontWeight.Bold)
                             )
                         }
                     }
                 }
             }
 
-            // --- КНОПКА ВЫХОДА (Смещена ниже) ---
+            // --- КНОПКА ВЫХОДА ---
             Box(
                 modifier = Modifier
-                    .offset(x = getX(155f), y = getY(1080f)) // Было 931f, теперь 1080f
+                    .offset(
+                        x = getX(155f),
+                        y = if (user.roleId == 4) getY(1350f) else getY(1080f)
+                    )
                     .size(width = getX(770f), height = getY(250f))
                     .clip(RoundedCornerShape(30.dp))
                     .background(Color.White.copy(alpha = 0.42f))

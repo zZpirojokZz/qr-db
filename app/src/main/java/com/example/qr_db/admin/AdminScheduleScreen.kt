@@ -32,6 +32,7 @@ import com.example.qr_db.data.User
 import com.example.qr_db.teacher.TeacherJournalTableScreen
 import com.example.qr_db.teacher.TeacherSubjectSelectionScreen
 import com.example.qr_db.teacher.TeacherScheduleState
+import com.example.qr_db.teacher.TeacherScheduleState.*
 
 @Composable
 fun AdminScheduleScreen(
@@ -47,39 +48,41 @@ fun AdminScheduleScreen(
     Box(modifier = Modifier.fillMaxSize()) {
         when (currentScreen) {
 
-            TeacherScheduleState.GroupEntry -> {
+            GroupEntry -> {
                 AdminGroupEntryScreen(
                     groupName = groupName,
                     onGroupNameChange = { groupName = it },
                     onGoToSubjects = {
                         if (groupName.isNotBlank())
-                            currentScreen = TeacherScheduleState.SubjectSelection
+                            currentScreen = SubjectSelection
                     },
                     getX, getY, fontScale
                 )
             }
 
-            TeacherScheduleState.SubjectSelection -> {
+            SubjectSelection -> {
                 TeacherSubjectSelectionScreen(
                     groupName = groupName,
                     onSubjectClick = { subject ->
                         selectedSubject = subject
-                        currentScreen = TeacherScheduleState.JournalTable
+                        currentScreen = JournalTable
                     },
-                    onBackClick = { currentScreen = TeacherScheduleState.GroupEntry },
+                    onBackClick = { currentScreen = GroupEntry },
                     getX, getY, fontScale
                 )
             }
 
-            TeacherScheduleState.JournalTable -> {
+            JournalTable -> {
                 TeacherJournalTableScreen(
                     user = user,
                     groupName = groupName,
                     subject = selectedSubject,
-                    onBackClick = { currentScreen = TeacherScheduleState.GroupEntry },
+                    onBackClick = { currentScreen = GroupEntry },
                     getX, getY, fontScale
                 )
             }
+
+            ActivePair -> TODO()
         }
     }
 }

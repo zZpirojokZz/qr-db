@@ -58,7 +58,8 @@ import com.example.qr_db.data.GroupStudent
 enum class TeacherScheduleState {
     GroupEntry,
     SubjectSelection,
-    JournalTable
+    JournalTable,
+    ActivePair
 }
 
 
@@ -90,6 +91,29 @@ fun TeacherScheduleScreen(
     Box(modifier = Modifier.fillMaxSize()) {
         when (currentScreen) {
 
+
+
+            TeacherScheduleState.ActivePair -> {
+                val lesson = myActiveLesson
+                if (lesson != null) {
+                    val vm: TeacherViewModel = viewModel()
+                    ActiveSessionView(
+                        subject = lesson.subject ?: "",
+                        groupName = lesson.groupName ?: "",
+                        lessonId = lesson.lessonId,
+                        viewModel = vm,
+                        user = user,
+                        getX = getX,
+                        getY = getY,
+                        fontScale = fontScale,
+                        onBackToJournal = { currentScreen = TeacherScheduleState.GroupEntry }
+                    )
+                } else {
+                    // Нет активной пары — переходим к выбору предмета
+                    currentScreen = TeacherScheduleState.SubjectSelection
+                }
+            }
+
             TeacherScheduleState.GroupEntry -> {
                 TeacherGroupEntryScreen(
                     groupName = groupName,
@@ -100,10 +124,12 @@ fun TeacherScheduleScreen(
                             currentScreen = TeacherScheduleState.SubjectSelection
                     },
                     onGoToMyActivePair = {
-                        val lesson = myActiveLesson ?: return@TeacherGroupEntryScreen
-                        groupName = lesson.groupName ?: ""
-                        selectedSubject = lesson.subject ?: ""
-                        currentScreen = TeacherScheduleState.JournalTable
+                        val lesson = myActiveLesson
+                        if (lesson != null) {
+                            groupName = lesson.groupName ?: ""
+                            selectedSubject = lesson.subject ?: ""
+                            currentScreen = TeacherScheduleState.ActivePair
+                        }
                     },
                     getX, getY, fontScale
                 )
@@ -371,7 +397,7 @@ fun TeacherJournalTableScreen(
     val currentLesson by viewModel.activeLesson.collectAsState()
 
     // Какой режим показываем
-    var showActiveMode by remember { mutableStateOf(false) }
+    var showActiveMode by remember { mutableStateOf(false)}
 
     // Проверяем активную пару раз в 10 сек (без мерцания UI)
     LaunchedEffect(groupName, subject) {
@@ -395,6 +421,7 @@ fun TeacherJournalTableScreen(
                 groupName = groupName,
                 lessonId = currentLesson!!.lessonId,
                 viewModel = viewModel,
+                user = user,
                 getX = getX,
                 getY = getY,
                 fontScale = fontScale,
@@ -412,157 +439,10 @@ fun TeacherJournalTableScreen(
                 fontScale = fontScale,
                 onBackClick = onBackClick
             )
-
-            // Кнопка "Активная пара" — поверх журнала, если пара идёт
-            if (currentLesson != null) {
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.TopCenter)
-                        .offset(x = getX(400f), y = getY(350f))
-                        .size(getX(100f), getY(100f))
-                        .clip(RoundedCornerShape(20.dp))
-                        .background(Color(0xFF66BB6A))
-                        .border(2.dp, Color(0xFF2E7D32), RoundedCornerShape(20.dp))
-                        .clickable { showActiveMode = true }
-                        .padding(horizontal = 16.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                }
-            }
         }
     }
 }
 
-// ============================================
-// НОВОЕ: Таблица "Сегодня" (когда идёт пара)
-// ============================================
-@Composable
-fun ActiveSessionTable(
-    subject: String,
-    attendance: List<LessonAttendance>,
-    getX: (Float) -> Dp,
-    getY: (Float) -> Dp,
-    fontScale: Float
-) {
-    var startIndex by remember { mutableIntStateOf(0) }
-    val visibleStudents = attendance.drop(startIndex).take(7)
-    val maxStartIndex = kotlin.math.max(attendance.size - 7, 0)
-
-    val today = remember {
-        val now = LocalDate.now()
-        val months = listOf("Янв", "Фев", "Мар", "Апр", "Май", "Июн",
-            "Июл", "Авг", "Сен", "Окт", "Ноя", "Дек")
-        "${now.dayOfMonth} ${months[now.monthValue - 1]}"
-    }
-
-    Box(modifier = Modifier.fillMaxSize()) {
-
-        // --- ТАБЛИЦА ---
-        Box(
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .offset(y = getY(500f))
-                .size(getX(1000f), getY(1100f))
-                .clip(RoundedCornerShape(25.dp))
-                .background(Color.White.copy(alpha = 0.7f))
-                .border(2.dp, Color.Black, RoundedCornerShape(25.dp))
-        ) {
-            Column {
-                // Заголовок
-                Row(modifier = Modifier.fillMaxWidth().height(getY(1100f) / 9)) {
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxHeight()
-                            .background(Color(0xFFE8B5B5).copy(alpha = 0.3f))
-                            .border(1.dp, Color.Black),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text("Предмет", fontSize = (12 * fontScale).sp, fontWeight = FontWeight.Bold, color = Color.Black)
-                    }
-                    Box(
-                        modifier = Modifier
-                            .weight(1.5f)
-                            .fillMaxHeight()
-                            .border(1.dp, Color.Black),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(today, fontSize = (12 * fontScale).sp, fontWeight = FontWeight.Bold, color = Color.Black)
-                    }
-                }
-
-                // Строка предмета
-                Row(modifier = Modifier.fillMaxWidth().height(getY(1100f) / 14)) {
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxHeight()
-                            .background(Color(0xFFD9D9D9).copy(alpha = 0.4f))
-                            .border(1.dp, Color.Black)
-                            .padding(horizontal = 6.dp),
-                        contentAlignment = Alignment.CenterStart
-                    ) {
-                        Text(subject, fontSize = (11 * fontScale).sp, color = Color.Black, maxLines = 1)
-                    }
-                    Box(modifier = Modifier.weight(1.5f).fillMaxHeight().border(1.dp, Color.Black))
-                }
-
-                // Строки студентов (7 видимых)
-                repeat(7) { rowIndex ->
-                    val item = visibleStudents.getOrNull(rowIndex)
-                    Row(modifier = Modifier.fillMaxWidth().weight(1f)) {
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .fillMaxHeight()
-                                .background(Color(0xFFD9D9D9).copy(alpha = 0.3f))
-                                .border(1.dp, Color.Black)
-                                .padding(horizontal = 8.dp),
-                            contentAlignment = Alignment.CenterStart
-                        ) {
-                            Text(item?.fullName ?: "", fontSize = (12 * fontScale).sp, color = Color.Black, maxLines = 1)
-                        }
-                        Box(
-                            modifier = Modifier
-                                .weight(1.5f)
-                                .fillMaxHeight()
-                                .background(
-                                    if (item?.attendance == true)
-                                        Color(0xFF81C784).copy(alpha = 0.5f)
-                                    else
-                                        Color.White.copy(alpha = 0.4f)
-                                )
-                                .border(1.dp, Color.Black),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            if (item?.attendance == true) {
-                                Text("✅", fontSize = (24 * fontScale).sp)
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        // --- КНОПКИ ▲ ▼ (ВАШ СТИЛЬ) ---
-        Row(
-            modifier = Modifier
-                .offset(x = getX(400f), y = getY(1700f))
-                .size(getX(280f), getY(200f)),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            TeacherControlButton(Icons.Default.PlayArrow, 90f, getX(110f), getY(200f)) {
-                startIndex = (startIndex + 7).coerceAtMost(maxStartIndex)
-            }
-            TeacherControlButton(Icons.Default.PlayArrow, -90f, getX(110f), getY(200f)) {
-                startIndex = (startIndex - 7).coerceAtLeast(0)
-            }
-        }
-    }
-}
-
-
-// ============================================
 // ВАШ СТАРЫЙ ЖУРНАЛ С ОЦЕНКАМИ (вынесен в отдельную функцию)
 // ============================================
 @OptIn(ExperimentalMaterial3Api::class)
@@ -725,20 +605,14 @@ fun WeeklyJournalView(
                         }
 
                         // Ячейки оценок
-                        // Ячейки оценок
                         days.forEach { day ->
                             if (student != null) {
                                 val key = "${student.userId}|$day"
                                 val gradeItem = gradesMap[key]
                                 val grade = gradeItem?.grade
 
-                                val isToday = day == today
                                 val isAdmin = user.roleId == 3 || user.roleId == 4
-                                val canEdit = if (isAdmin) {
-                                    true
-                                } else {
-                                    isToday && activeLesson != null
-                                }
+                                val canEdit = isAdmin
 
                                 Box(
                                     modifier = Modifier
@@ -1130,6 +1004,7 @@ fun ActiveSessionView(
     groupName: String,
     lessonId: Int,
     viewModel: TeacherViewModel,
+    user: User,
     getX: (Float) -> Dp,
     getY: (Float) -> Dp,
     fontScale: Float,
@@ -1137,6 +1012,7 @@ fun ActiveSessionView(
 ) {
     val attendance by viewModel.attendance.collectAsState()
     var startIndex by remember { mutableIntStateOf(0) }
+    var editingAttendance by remember { mutableStateOf<LessonAttendance?>(null) }
 
     LaunchedEffect(lessonId) {
         while (true) {
@@ -1157,7 +1033,7 @@ fun ActiveSessionView(
 
     Box(modifier = Modifier.fillMaxSize()) {
 
-        // --- НЕВИДИМАЯ КНОПКА НАЗАД ---
+        // Кнопка назад
         Row(
             modifier = Modifier
                 .offset(x = getX(60f), y = getY(330f))
@@ -1165,22 +1041,14 @@ fun ActiveSessionView(
                 .padding(horizontal = 20.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                Icons.AutoMirrored.Filled.ArrowBack,
-                null,
-                tint = Color.Black,
-                modifier = Modifier.size(getX(60f))
-            )
+            Icon(Icons.AutoMirrored.Filled.ArrowBack, null,
+                tint = Color.Black, modifier = Modifier.size(getX(60f)))
             Spacer(modifier = Modifier.width(getX(20f)))
-            Text(
-                text = groupName,
-                fontWeight = FontWeight.Bold,
-                fontSize = (18 * fontScale).sp,
-                color = Color.Black
-            )
+            Text(text = groupName, fontWeight = FontWeight.Bold,
+                fontSize = (18 * fontScale).sp, color = Color.Black)
         }
 
-        // --- ОДНА ЦЕЛЬНАЯ ТАБЛИЦА ---
+        // Таблица
         Box(
             modifier = Modifier
                 .align(Alignment.TopCenter)
@@ -1188,62 +1056,41 @@ fun ActiveSessionView(
                 .size(getX(1000f), getY(1100f))
                 .clip(RoundedCornerShape(25.dp))
                 .background(Color.White.copy(alpha = 0.6f))
-                .border(3.dp, Color.Black, RoundedCornerShape(25.dp))   // ← толстая обводка
+                .border(3.dp, Color.Black, RoundedCornerShape(25.dp))
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
-
-                // --- СТРОКА ЗАГОЛОВКА (Предмет | Дата) ---
+                // Заголовок
                 Row(modifier = Modifier.fillMaxWidth().height(getY(1100f) / 8)) {
-                    // Левая ячейка "Предмет" — розовый фон
                     Box(
-                        modifier = Modifier
-                            .weight(1.5f)
-                            .fillMaxHeight()
-                            .background(Color(0xFFE8B5B5).copy(alpha = 0.5f))   // ← розовый
+                        modifier = Modifier.weight(1.5f).fillMaxHeight()
+                            .background(Color(0xFFE8B5B5).copy(alpha = 0.5f))
                             .border(1.dp, Color.Black),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            "Предмет",
-                            fontSize = (14 * fontScale).sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.Black
-                        )
+                        Text(subject, fontSize = (14 * fontScale).sp,
+                            fontWeight = FontWeight.Bold, color = Color.Black)
                     }
-                    // Правая ячейка с датой — белая/прозрачная
                     Box(
-                        modifier = Modifier
-                            .weight(2f)
-                            .fillMaxHeight()
-                            .border(1.dp, Color.Black),
+                        modifier = Modifier.weight(2f).fillMaxHeight().border(1.dp, Color.Black),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            today,
-                            fontSize = (14 * fontScale).sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.Black
-                        )
+                        Text(today, fontSize = (14 * fontScale).sp,
+                            fontWeight = FontWeight.Bold, color = Color.Black)
                     }
                 }
 
-                // --- СТРОКИ СТУДЕНТОВ (7 видимых) ---
+                // Строки студентов
                 repeat(7) { rowIndex ->
                     val item = visibleStudents.getOrNull(rowIndex)
                     Row(modifier = Modifier.fillMaxWidth().weight(1f)) {
-
-                        // Левая ячейка с фамилией — СЕРЫЙ фон
                         Box(
-                            modifier = Modifier
-                                .weight(1.5f)
-                                .fillMaxHeight()
-                                .background(Color(0xFFD9D9D9).copy(alpha = 0.7f))   // ← серый
+                            modifier = Modifier.weight(1.5f).fillMaxHeight()
+                                .background(Color(0xFFD9D9D9).copy(alpha = 0.7f))
                                 .border(1.dp, Color.Black),
                             contentAlignment = Alignment.CenterStart
                         ) {
                             Row(
-                                modifier = Modifier
-                                    .fillMaxSize()
+                                modifier = Modifier.fillMaxSize()
                                     .horizontalScroll(rememberScrollState())
                                     .padding(horizontal = 8.dp),
                                 verticalAlignment = Alignment.CenterVertically
@@ -1251,30 +1098,34 @@ fun ActiveSessionView(
                                 Text(
                                     text = item?.fullName ?: "",
                                     fontSize = (12 * fontScale).sp,
-                                    color = Color.Black,
-                                    maxLines = 1,
-                                    softWrap = false,
+                                    color = Color.Black, maxLines = 1, softWrap = false,
                                     modifier = Modifier.basicMarquee()
                                 )
                             }
                         }
 
-                        // Правая ячейка — отметка ✅ или пусто
                         Box(
-                            modifier = Modifier
-                                .weight(2f)
-                                .fillMaxHeight()
+                            modifier = Modifier.weight(2f).fillMaxHeight()
                                 .background(
-                                    if (item?.attendance == true)
-                                        Color(0xFF81C784).copy(alpha = 0.6f)
-                                    else
-                                        Color.Transparent
+                                    when {
+                                        item?.grade != null -> gradeColor(item.grade!!).copy(alpha = 0.6f)
+                                        item?.attendance == true -> Color(0xFF81C784).copy(alpha = 0.6f)
+                                        else -> Color.Transparent
+                                    }
                                 )
-                                .border(1.dp, Color.Black),
+                                .border(1.dp, Color.Black)
+                                .clickable(enabled = item?.attendance == true) {
+                                    if (item != null) editingAttendance = item
+                                },
                             contentAlignment = Alignment.Center
                         ) {
-                            if (item?.attendance == true) {
-                                Text("✅", fontSize = (22 * fontScale).sp)
+                            when {
+                                item?.grade != null -> Text(
+                                    text = item.grade.toString(),
+                                    fontSize = (18 * fontScale).sp,
+                                    fontWeight = FontWeight.Bold, color = Color.Black
+                                )
+                                item?.attendance == true -> Text("✅", fontSize = (22 * fontScale).sp)
                             }
                         }
                     }
@@ -1282,7 +1133,7 @@ fun ActiveSessionView(
             }
         }
 
-        // --- КНОПКИ ▼ ▲ ---
+        // Кнопки прокрутки
         Row(
             modifier = Modifier
                 .offset(x = getX(400f), y = getY(1700f))
@@ -1295,6 +1146,79 @@ fun ActiveSessionView(
             TeacherControlButton(Icons.Default.PlayArrow, -90f, getX(110f), getY(200f)) {
                 startIndex = (startIndex - 7).coerceAtLeast(0)
             }
+        }
+
+        // Диалог оценки (ОДИН раз, снаружи Box)
+        editingAttendance?.let { student ->
+            var inputGrade by remember(student.userId) {
+                mutableStateOf(student.grade?.toString() ?: "")
+            }
+
+            AlertDialog(
+                onDismissRequest = { editingAttendance = null },
+                title = {
+                    Text(
+                        text = if (student.grade != null) "Изменить оценку" else "Поставить оценку",
+                        color = Color.Black, fontWeight = FontWeight.Bold
+                    )
+                },
+                text = {
+                    Column {
+                        Text("Студент: ${student.fullName}", color = Color.Black)
+                        if (student.grade != null) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text("Текущая оценка: ${student.grade}",
+                                color = Color.Black.copy(alpha = 0.7f), fontSize = 14.sp)
+                        }
+                        Spacer(modifier = Modifier.height(16.dp))
+                        BasicTextField(
+                            value = inputGrade,
+                            onValueChange = {
+                                if (it.length <= 3 && it.all { c -> c.isDigit() }) inputGrade = it
+                            },
+                            singleLine = true,
+                            textStyle = TextStyle(
+                                fontSize = 24.sp, color = Color.Black,
+                                textAlign = TextAlign.Center, fontWeight = FontWeight.Bold
+                            ),
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.Number, imeAction = ImeAction.Done
+                            ),
+                            modifier = Modifier.fillMaxWidth().height(60.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(Color(0xFFEEEEEE))
+                                .border(1.dp, Color.Black.copy(alpha = 0.3f), RoundedCornerShape(12.dp))
+                                .padding(8.dp)
+                        )
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        val grade = inputGrade.toIntOrNull()
+                        if (grade != null && grade in 1..100) {
+                            viewModel.setStudentGrade(
+                                lessonId = lessonId,
+                                studentId = student.userId,
+                                grade = grade,
+                                attendance = true,
+                                token = user.token ?: "",
+                                onSuccess = { viewModel.loadAttendance(lessonId) }
+                            )
+                        }
+                        editingAttendance = null
+                    }) {
+                        Text(
+                            text = if (student.grade != null) "Изменить" else "Сохранить",
+                            color = Color.Black
+                        )
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { editingAttendance = null }) {
+                        Text("Отмена", color = Color.Black)
+                    }
+                }
+            )
         }
     }
 }

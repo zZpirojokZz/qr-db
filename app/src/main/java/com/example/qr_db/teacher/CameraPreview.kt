@@ -30,7 +30,7 @@ fun CameraPreview(onScan: (String) -> Unit) {
             cameraProviderFuture.addListener({
                 val cameraProvider = cameraProviderFuture.get()
                 val preview = Preview.Builder().build().also {
-                    it.surfaceProvider = previewView.surfaceProvider // Исправили "setter method"
+                    it.setSurfaceProvider(previewView.surfaceProvider)
                 }
 
                 val scanner = BarcodeScanning.getClient()
