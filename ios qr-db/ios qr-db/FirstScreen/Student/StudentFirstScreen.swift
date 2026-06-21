@@ -4,6 +4,7 @@ struct StudentFirstScreen: View {
     
     @State private var selectedPage: Int = 0
     @State private var goToProfile: Bool = false
+    @StateObject private var viewModel = StudentViewModel()
     
     var body: some View {
         
@@ -22,13 +23,21 @@ struct StudentFirstScreen: View {
                         HStack {
                             
                             VStack(alignment: .leading) {
-                                //После БД изменить
-                                Text("Пивнев Игорь")
-                                    .font(.title3)
-                                    .fontWeight(.semibold)
-                                //После БД изменить
-                                Text("ИС22-4Б")
-                                    .font(.subheadline)
+                                
+                                Text(
+                                    viewModel.profile?.student.full_name
+                                    ?? UserDefaults.standard.string(forKey: "fullName")
+                                    ?? "Загрузка..."
+                                )
+                                .font(.title3)
+                                .fontWeight(.semibold)
+                                
+                                Text(
+                                    viewModel.profile?.student.group_name
+                                    ?? UserDefaults.standard.string(forKey: "groupName")
+                                    ?? ""
+                                )
+                                .font(.subheadline)
                             }
                             
                             Spacer()
@@ -36,8 +45,7 @@ struct StudentFirstScreen: View {
                             Button {
                                 goToProfile = true
                             } label: {
-                                Circle()
-                                    .fill(Color.white)
+                                Image("iconprof45")
                                     .frame(width: 45, height: 45)
                             }
                         }
@@ -50,13 +58,21 @@ struct StudentFirstScreen: View {
                     Group {
                         switch selectedPage {
                         case 0:
-                            QRPageS()
+                            QRPageS(
+                                studentId: UserDefaults.standard.integer(
+                                    forKey: "userId"
+                                )
+                            )
                         case 1:
                             StudentSecondScreen()
                         case 2:
                             StudentThirdScreen()
                         default:
-                            QRPageS()
+                            QRPageS(
+                                studentId: UserDefaults.standard.integer(
+                                    forKey: "userId"
+                                )
+                            )
                         }
                     }
                     
@@ -67,9 +83,11 @@ struct StudentFirstScreen: View {
                 }
                 .animation(.easeInOut(duration: 0.2), value: selectedPage)
             }
-            
+            .onAppear {
+                viewModel.loadProfileIfNeeded()
+            }
             .navigationDestination(isPresented: $goToProfile) {
-                ProfileStudent()
+                ProfileStudent(viewModel: viewModel)
             }
         }
     }
@@ -82,11 +100,8 @@ struct BottomNavigationS: View {
     var body: some View {
         
         HStack(spacing: 40) {
-            
             NavButtonS(icon: "iconsb", index: 0, selectedPage: $selectedPage)
-            
             NavButtonS(icon: "iconsb1", index: 1, selectedPage: $selectedPage)
-            
             NavButtonS(icon: "iconsb2", index: 2, selectedPage: $selectedPage)
         }
     }
@@ -144,15 +159,68 @@ struct NavButtonS: View {
 
 struct QRPageS: View {
     
+    let studentId: Int
+    
+    @State private var scannedCode = ""
+    @State private var resultMessage = "Отсканируйте QR-код"
+    @State private var isProcessing = false
+    @State private var lastScannedAt: Date? = nil
+    
     var body: some View {
         
-        VStack {
-            //После БД изменить
-            Image("qr-code")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 300, height: 300)
-                .padding(.bottom, 68)
+        VStack(spacing: 25) {
+            
+            QRScannerView(scannedCode: $scannedCode)
+                .frame(width: 310, height: 310)
+                .clipShape(RoundedRectangle(cornerRadius: 30))
+            
+            Text(resultMessage)
+                .font(.headline)
+                .foregroundColor(.white)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 20)
+        }
+        .onChange(of: scannedCode) { _, newValue in
+            handleScan(code: newValue)
+        }
+    }
+    
+    private func handleScan(code: String) {
+        
+        guard !code.isEmpty else { return }
+        guard !isProcessing else { return }
+        
+        // Защита от повторного срабатывания на тот же QR в течение 3 сек
+        if let last = lastScannedAt,
+           Date().timeIntervalSince(last) < 3 {
+            return
+        }
+        lastScannedAt = Date()
+        
+        guard studentId > 0 else {
+            resultMessage = "Не найден ID студента"
+            return
+        }
+        
+        isProcessing = true
+        resultMessage = "Отправка..."
+        
+        APIService.shared.markAttendance(
+            qrCode: code,
+            studentId: studentId
+        ) { result in
+            
+            isProcessing = false
+            scannedCode = ""
+            
+            switch result {
+            case .success(let message):
+                resultMessage = message
+                UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                
+            case .failure(let error):
+                resultMessage = error.localizedDescription
+            }
         }
     }
 }

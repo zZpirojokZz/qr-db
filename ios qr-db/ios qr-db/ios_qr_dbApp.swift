@@ -4,7 +4,7 @@ import SwiftUI
 struct ios_qr_dbApp: App {
     var body: some Scene {
         WindowGroup {
-            EducatorFirstScreen()
+            Authotization()
         }
     }
 }
