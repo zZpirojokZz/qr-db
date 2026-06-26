@@ -158,7 +158,7 @@ fun StudentScheduleScreen(
                 height = getY(120f),
                 rotate = 180f,
                 roundRightSide = false
-            ) { dayOffset -= 7 }
+            ) { dayOffset -= 1 }
 
             TeacherSearchButton(getX(350f), getY(120f), fontScale) {
                 showDatePicker = true
@@ -169,7 +169,7 @@ fun StudentScheduleScreen(
                 height = getY(120f),
                 rotate = 0f,
                 roundRightSide = true
-            ) { dayOffset += 7 }
+            ) { dayOffset += 1 }
         }
 
         // DATE PICKER

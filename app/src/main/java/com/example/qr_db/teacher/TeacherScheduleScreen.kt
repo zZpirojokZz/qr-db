@@ -98,7 +98,7 @@ fun TeacherScheduleScreen(
                 if (lesson != null) {
                     val vm: TeacherViewModel = viewModel()
                     ActiveSessionView(
-                        subject = lesson.subject ?: "",
+                        subject = lesson.subject,
                         groupName = lesson.groupName ?: "",
                         lessonId = lesson.lessonId,
                         viewModel = vm,
@@ -127,7 +127,7 @@ fun TeacherScheduleScreen(
                         val lesson = myActiveLesson
                         if (lesson != null) {
                             groupName = lesson.groupName ?: ""
-                            selectedSubject = lesson.subject ?: ""
+                            selectedSubject = lesson.subject
                             currentScreen = TeacherScheduleState.ActivePair
                         }
                     },
@@ -271,7 +271,7 @@ fun TeacherGroupEntryScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    "Перейти к группе\n${myActiveLesson?.groupName ?: ""}",
+                    "Перейти к группе\n${myActiveLesson.groupName ?: ""}",
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
                     fontSize = (18 * fontScale).sp,
@@ -458,13 +458,11 @@ fun WeeklyJournalView(
     onBackClick: () -> Unit
 ) {
     // === ПОДПИСКИ НА VIEWMODEL ===
-    val attendance by viewModel.attendance.collectAsState()
     val students by viewModel.groupStudents.collectAsState()
     val weeklyGrades by viewModel.weeklyGrades.collectAsState()
-    val activeLesson by viewModel.activeLesson.collectAsState()
+
 
     // === СОСТОЯНИЯ UI ===
-    val today = remember { LocalDate.now() }
     var startIndex by remember { mutableIntStateOf(0) }
     var dayOffset by remember { mutableIntStateOf(0) }
     var showDatePicker by remember { mutableStateOf(false) }
@@ -477,9 +475,7 @@ fun WeeklyJournalView(
         "Июл", "Авг", "Сен", "Окт", "Ноя", "Дек")
 
     // === КАРТЫ ДЛЯ ПОИСКА ===
-    val todayAttendedIds = remember(attendance) {
-        attendance.filter { it.attendance }.map { it.userId }.toSet()
-    }
+
 
     val gradesMap = remember(weeklyGrades) {
         weeklyGrades.associateBy { "${it.studentId}|${it.lessonDate.take(10)}" }
@@ -535,7 +531,10 @@ fun WeeklyJournalView(
                 .border(2.dp, Color.Black, RoundedCornerShape(25.dp))
         ) {
 
-            val visibleStudents = students.drop(startIndex).take(6)
+            val sortedStudents = remember(students) {
+                students.sortedBy { it.fullName }
+            }
+            val visibleStudents = sortedStudents.drop(startIndex).take(7)
 
 
 
@@ -570,9 +569,9 @@ fun WeeklyJournalView(
                     }
                 }
 
+
                 // Строки
-                // Строки
-                repeat(6) { rowIndex ->
+                repeat(7) { rowIndex ->
                     val student = visibleStudents.getOrNull(rowIndex)
                     Row(modifier = Modifier.fillMaxWidth().weight(1f)) {
 
@@ -611,8 +610,7 @@ fun WeeklyJournalView(
                                 val gradeItem = gradesMap[key]
                                 val grade = gradeItem?.grade
 
-                                val isAdmin = user.roleId == 3 || user.roleId == 4
-                                val canEdit = isAdmin
+                                val canEdit = user.roleId == 3 || user.roleId == 4
 
                                 Box(
                                     modifier = Modifier
@@ -1021,8 +1019,11 @@ fun ActiveSessionView(
         }
     }
 
-    val visibleStudents = attendance.drop(startIndex).take(7)
-    val maxStartIndex = kotlin.math.max(attendance.size - 7, 0)
+    val sortedAttendance = remember(attendance) {
+        attendance.sortedBy { it.fullName }
+    }
+    val visibleStudents = sortedAttendance.drop(startIndex).take(7)
+    val maxStartIndex = kotlin.math.max(sortedAttendance.size - 7, 7)
 
     val today = remember {
         val now = LocalDate.now()
@@ -1108,7 +1109,7 @@ fun ActiveSessionView(
                             modifier = Modifier.weight(2f).fillMaxHeight()
                                 .background(
                                     when {
-                                        item?.grade != null -> gradeColor(item.grade!!).copy(alpha = 0.6f)
+                                        item?.grade != null -> gradeColor(item.grade).copy(alpha = 0.6f)
                                         item?.attendance == true -> Color(0xFF81C784).copy(alpha = 0.6f)
                                         else -> Color.Transparent
                                     }
@@ -1194,6 +1195,7 @@ fun ActiveSessionView(
                 },
                 confirmButton = {
                     TextButton(onClick = {
+                        android.util.Log.d("ACTIVE_GRADE", "Пытаюсь поставить: grade=$inputGrade, lessonId=$lessonId, studentId=${student.userId}, token=${user.token?.take(20)}")
                         val grade = inputGrade.toIntOrNull()
                         if (grade != null && grade in 1..100) {
                             viewModel.setStudentGrade(
