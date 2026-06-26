@@ -3,21 +3,20 @@ import SwiftUI
 struct EducatorThirdScreen2: View {
     
     @Binding var selectedPage: Int
-    //После БД изменить
-    let subjects: [String] = [
-        "Физика",
-        "Химия",
-        "Математика",
-        "НВП",
-        "Английский",
-        "Казахский",
-        "История",
-        "Информатика"
-    ]
+    @StateObject private var viewModel = TeacherViewModel()
     
     private let rowHeight: CGFloat = 64
     private let spacing: CGFloat = 16
     private let maxVisible: Int = 6
+    
+    private var listHeight: CGFloat {
+        CGFloat(maxVisible) * rowHeight
+        + CGFloat(maxVisible - 1) * spacing
+    }
+    
+    private var groupName: String {
+        UserDefaults.standard.string(forKey: "journalGroup") ?? ""
+    }
     
     var body: some View {
         
@@ -26,44 +25,34 @@ struct EducatorThirdScreen2: View {
             Spacer(minLength: 0)
             
             VStack(spacing: 20) {
-                //После БД изменить
-                Text("Группа ИС22-4Б,\nВыберите предмет:")
-                    .font(.title3)
+                
+                Text("Группа \(groupName), Выберите предмет:")
+                    .font(.system(size: 15))
                     .multilineTextAlignment(.center)
                 
-                Group {
-                    if subjects.count <= maxVisible {
-                        VStack(spacing: spacing) {
-                            subjectList
-                        }
-                    } else {
-                        ScrollView {
-                            VStack(spacing: spacing) {
-                                subjectList
+                ScrollView(showsIndicators: viewModel.groupSubjects.count > maxVisible) {
+                    VStack(spacing: spacing) {
+                        ForEach(viewModel.groupSubjects, id: \.self) { subject in
+                            Button {
+                                UserDefaults.standard.set(subject, forKey: "journalSubject")
+                                selectedPage = 4
+                            } label: {
+                                Text(subject)
+                                    .font(.system(size: 15, weight: .medium))
+                                    .foregroundColor(.black)
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: rowHeight)
+                                    .background(glassBg)
                             }
-                            .padding(.vertical, 4)
+                            .buttonStyle(.plain)
                         }
-                        .frame(
-                            height: CGFloat(maxVisible) * rowHeight +
-                                    CGFloat(maxVisible - 1) * spacing
-                        )
                     }
+                    .padding(.vertical, 4)
                 }
+                .frame(height: listHeight)
             }
             .padding(20)
-            .background(
-                ZStack {
-                    RoundedRectangle(cornerRadius: 25)
-                        .fill(.ultraThinMaterial)
-                        .opacity(0.35)
-                    
-                    RoundedRectangle(cornerRadius: 25)
-                        .fill(Color.white.opacity(0.4))
-                    
-                    RoundedRectangle(cornerRadius: 25)
-                        .stroke(Color.white.opacity(0.4), lineWidth: 1)
-                }
-            )
+            .background(glassBg)
             .padding(.horizontal, 20)
             
             ImageButton(image: "back_button") {
@@ -71,47 +60,32 @@ struct EducatorThirdScreen2: View {
             }
         }
         .padding(.top, 40)
+        .onAppear {
+            viewModel.loadGroupSubjects(groupName: groupName)
+        }
     }
     
-    private var subjectList: some View {
-        ForEach(subjects, id: \.self) { subject in
+    private var glassBg: some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 25)
+                .fill(.ultraThinMaterial)
+                .opacity(0.35)
             
-            Button {
-                selectedPage = 4
-            } label: {
-                Text(subject)
-                    .font(.system(size: 20, weight: .medium))
-                    .foregroundColor(.black)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: rowHeight)
-                    .background(
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 25)
-                                .fill(.ultraThinMaterial)
-                                .opacity(0.35)
-                            
-                            RoundedRectangle(cornerRadius: 25)
-                                .fill(Color.white.opacity(0.4))
-                            
-                            RoundedRectangle(cornerRadius: 25)
-                                .stroke(Color.white.opacity(0.4), lineWidth: 1)
-                        }
-                    )
-            }
-            .buttonStyle(.plain)
+            RoundedRectangle(cornerRadius: 25)
+                .fill(Color.white.opacity(0.4))
+            
+            RoundedRectangle(cornerRadius: 25)
+                .stroke(Color.white.opacity(0.4), lineWidth: 1)
         }
     }
 }
 
 struct ImageButton: View {
-    
     let image: String
     var action: () -> Void
-    
     @State private var pressed = false
     
     var body: some View {
-        
         Button {
             UIImpactFeedbackGenerator(style: .light).impactOccurred()
             action()
